@@ -2,19 +2,18 @@
 #include <memory>
 
 #include <meta/index.hpp>
-#include <metac/index.hpp>
 
 #include <argp.h>
 
 using namespace Meta;
 
-static std::unique_ptr<Compiler> s_Compiler;
+static std::unique_ptr<Context> s_Compiler;
 
 static int parse_opt(int key, char* arg, struct argp_state* state) {
   switch (key) {
 
     case 'o':
-      std::cout << arg << std::endl; //s_Compiler->setOutput(arg);
+      s_Compiler->setOutput(arg);
       break;
 
     case ARGP_KEY_ARG:
@@ -35,7 +34,7 @@ int main(int argc, char** argv) {
   try {
     initMetaApi();
 
-    s_Compiler = std::make_unique<Compiler>();
+    s_Compiler = std::make_unique<Context>();
 
     struct argp_option options[] = {
       { "output", 'o', "PATH", 0, "path to output executable [TEMPORARY]" },
