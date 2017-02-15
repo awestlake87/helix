@@ -1,10 +1,14 @@
 #include <iostream>
+#include <memory>
 
-#include <meta/err/index.hpp>
+#include <meta/index.hpp>
+#include <metac/index.hpp>
 
 #include <argp.h>
 
 using namespace Meta;
+
+static std::unique_ptr<Compiler> s_Compiler;
 
 static int parse_opt(int key, char* arg, struct argp_state* state) {
   switch (key) {
@@ -14,7 +18,7 @@ static int parse_opt(int key, char* arg, struct argp_state* state) {
       break;
 
     case ARGP_KEY_ARG:
-      //s_Compiler->setEntry(arg);
+      s_Compiler->addUnit(arg);
       break;
   }
 
@@ -29,11 +33,9 @@ int main(int argc, char** argv) {
   };
 
   try {
-    //llvm::InitializeAllTargetInfos();
-    //llvm::InitializeAllTargets();
-    //llvm::InitializeAllTargetMCs();
-    //llvm::InitializeAllAsmParsers();
-    //llvm::InitializeAllAsmPrinters();
+    initMetaApi();
+
+    s_Compiler = std::make_unique<Compiler>();
 
     struct argp_option options[] = {
       { "output", 'o', "PATH", 0, "path to output executable [TEMPORARY]" },
@@ -46,6 +48,8 @@ int main(int argc, char** argv) {
     if (result != 0) {
       throw InvalidCommandLineArgsError("invalid command line arguments");
     }
+
+    s_Compiler->compile();
 
     return result;
   }
