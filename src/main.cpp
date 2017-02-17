@@ -27,7 +27,7 @@ static int parse_opt(int key, char* arg, struct argp_state* state) {
 int main(int argc, char** argv) {
   auto _handleError = [](ErrorCode ec, const char* msg) -> int {
     int ec_int = static_cast<int>(ec);
-    std::cerr << '[' << ec_int << "]: " << msg << std::endl;
+    std::cerr << "error[" << ec_int << "]: " << msg << std::endl;
     return ec_int;
   };
 

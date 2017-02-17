@@ -1,8 +1,13 @@
 #!/bin/bash
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+$DIR/meta/test.sh
 
 echo -e "\033[0;34m---x[  SUPER FANCY TEST SUITE BEGIN  ]x---\033[0m"
 
 function meta_test {
+  local DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+  
   if [ "$1" == "" ]; then
     echo "no tests to run"
     return 0
@@ -16,7 +21,7 @@ function meta_test {
     echo -e "\033[0;32m[PASS]\033[0m $@"
   }
 
-  local output="tests/bin/$1.out"
+  local output="$DIR/tests/compile-unit/bin/$1.out"
   local output_dir=`dirname $output`
 
   mkdir -p $output_dir
@@ -46,4 +51,4 @@ function meta_test {
 }
 # run meta_test for *.meta recursively in ./test
 export -f meta_test
-find "./tests/" -name "*.meta" | xargs -n 1 bash -c 'meta_test "$@"' _
+find "$DIR/tests/compile-unit" -name "*.meta" | xargs -n 1 bash -c 'meta_test "$@"' _
