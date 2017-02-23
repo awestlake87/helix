@@ -1,7 +1,9 @@
 #include <iostream>
 #include <memory>
 
-#include <meta/index.hpp>
+#include <meta/context.hpp>
+#include <meta/err/exception.hpp>
+#include <meta/err/command-line-errors.hpp>
 
 #include <argp.h>
 
