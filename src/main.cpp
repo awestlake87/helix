@@ -9,7 +9,7 @@
 
 using namespace Meta;
 
-static std::unique_ptr<Context> s_Compiler;
+static std::unique_ptr<Ir::Context> s_Compiler;
 
 static int parse_opt(int key, char* arg, struct argp_state* state) {
   switch (key) {
@@ -48,7 +48,7 @@ int main(int argc, char** argv) {
   try {
     initMetaApi();
 
-    s_Compiler = std::make_unique<Context>();
+    s_Compiler = std::make_unique<Ir::Context>();
 
     struct argp_option options[] = {
       { "output", 'o', "PATH", 0, "path to output executable [TEMPORARY]" },
