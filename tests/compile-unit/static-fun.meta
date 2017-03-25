@@ -1,3 +1,6 @@
 
-static fun int main()
-  pass
+static fun int blargh()
+  return 0
+
+extern fun int main()
+  return 0
