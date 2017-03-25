@@ -16,7 +16,7 @@ function meta_test {
     echo -e "\033[0;32m[PASS]\033[0m $@"
   }
 
-  local output="$DIR/tests/compile-unit/bin/$1.out"
+  local output="$1.out"
   local output_dir=`dirname $output`
 
   mkdir -p $output_dir

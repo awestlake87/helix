@@ -1,2 +1,6 @@
 
-static fun int main()
+static fun int blargh()
+  return 0
+
+extern fun int main()
+  return 0

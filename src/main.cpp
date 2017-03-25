@@ -1,7 +1,7 @@
 #include <iostream>
 #include <memory>
 
-#include <meta/context.hpp>
+#include <meta/ir/context.hpp>
 #include <meta/err/exception.hpp>
 #include <meta/err/command-line-errors.hpp>
 
@@ -9,7 +9,7 @@
 
 using namespace Meta;
 
-static std::unique_ptr<Context> s_Compiler;
+static std::unique_ptr<Ir::Context> s_Compiler;
 
 static int parse_opt(int key, char* arg, struct argp_state* state) {
   switch (key) {
@@ -29,14 +29,26 @@ static int parse_opt(int key, char* arg, struct argp_state* state) {
 int main(int argc, char** argv) {
   auto _handleError = [](ErrorCode ec, const char* msg) -> int {
     int ec_int = static_cast<int>(ec);
-    std::cerr << "error[" << ec_int << "]: " << msg << std::endl;
+
+    switch (ec) {
+      case Meta::ErrorCode::NOT_IMPLEMENTED:
+        std::cerr << "todo: " << msg << std::endl;
+        break;
+
+      case Meta::ErrorCode::COMPILER_BUG:
+        std::cerr << "compiler bug: " << msg << std::endl;
+        break;
+
+      default:
+        std::cerr << "error[" << ec_int << "]: " << msg << std::endl;
+    }
     return ec_int;
   };
 
   try {
     initMetaApi();
 
-    s_Compiler = std::make_unique<Context>();
+    s_Compiler = std::make_unique<Ir::Context>();
 
     struct argp_option options[] = {
       { "output", 'o', "PATH", 0, "path to output executable [TEMPORARY]" },
