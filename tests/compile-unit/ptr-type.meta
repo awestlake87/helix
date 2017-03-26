@@ -1,0 +1,9 @@
+
+static fun *int omg()
+  return 0
+
+static fun ****int int_ptr_ptr_ptr_ptr()
+  return 0
+
+extern fun int main()
+  return 0
