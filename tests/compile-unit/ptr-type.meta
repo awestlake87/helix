@@ -5,5 +5,5 @@ static fun *int omg()
 static fun ****int int_ptr_ptr_ptr_ptr()
   return 0
 
-extern fun int main()
+extern fun int main(int argc, **byte argv)
   return 0

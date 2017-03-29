@@ -2,6 +2,7 @@
 #include <memory>
 
 #include <meta/ir/context.hpp>
+#include <meta/ir/values/module.hpp>
 #include <meta/err/exception.hpp>
 #include <meta/err/command-line-errors.hpp>
 
@@ -9,7 +10,7 @@
 
 using namespace Meta;
 
-static std::unique_ptr<Ir::Context> s_Compiler;
+static std::unique_ptr<Ir::Module> s_Compiler;
 
 static int parse_opt(int key, char* arg, struct argp_state* state) {
   switch (key) {
@@ -47,8 +48,7 @@ int main(int argc, char** argv) {
 
   try {
     initMetaApi();
-
-    s_Compiler = std::make_unique<Ir::Context>();
+    s_Compiler = std::make_unique<Ir::Module>(Ir::Context::get());
 
     struct argp_option options[] = {
       { "output", 'o', "PATH", 0, "path to output executable [TEMPORARY]" },
@@ -63,6 +63,8 @@ int main(int argc, char** argv) {
     }
 
     s_Compiler->compile();
+
+    s_Compiler.reset();
 
     return result;
   }
