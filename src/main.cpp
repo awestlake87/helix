@@ -2,7 +2,7 @@
 #include <memory>
 
 #include <meta/ir/context.hpp>
-#include <meta/ir/values/module.hpp>
+
 #include <meta/err/exception.hpp>
 #include <meta/err/command-line-errors.hpp>
 
