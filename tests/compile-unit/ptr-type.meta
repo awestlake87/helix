@@ -1,8 +1,8 @@
 
-static fun *int omg()
+intern fun *int omg()
   return nil
 
-static fun ****int int_ptr_ptr_ptr_ptr()
+intern fun ****int int_ptr_ptr_ptr_ptr()
   return nil
 
 extern fun int main(int argc, **byte argv)

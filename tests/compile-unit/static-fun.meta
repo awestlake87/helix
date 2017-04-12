@@ -1,10 +1,10 @@
 
 
 extern fun int main()
-  static fun int blargh()
+  intern fun int blargh()
     return 0
 
-  static fun int woah_dude(int... spread)
+  intern fun int woah_dude(int... spread)
     return 0
 
 
