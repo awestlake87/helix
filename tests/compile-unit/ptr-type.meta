@@ -1,9 +1,9 @@
 
 static fun *int omg()
-  return 0
+  return nil
 
 static fun ****int int_ptr_ptr_ptr_ptr()
-  return 0
+  return nil
 
 extern fun int main(int argc, **byte argv)
   return 0

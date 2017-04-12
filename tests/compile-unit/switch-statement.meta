@@ -2,6 +2,13 @@
 
 extern fun int main(int argc, **byte argv)
 
+  switch true
+    case true
+      pass
+
+    case false
+      return 4
+
   switch 2
 
     case 1

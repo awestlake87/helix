@@ -1,3 +1,6 @@
 
+extern fun int doBlargh(int i)
+  return i
+
 extern fun int main()
-  return 0
+  return doBlargh(0)

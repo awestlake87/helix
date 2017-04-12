@@ -9,17 +9,19 @@ function meta_test {
   local DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
   function echo_fail {
-    echo -e "\033[1;31m[FAIL]\033[0m $@"
+    echo -e "\033[1;31m[-----FAIL-]\033[0m $@\n"
   }
 
   function echo_pass {
-    echo -e "\033[0;32m[PASS]\033[0m $@"
+    echo -e "\033[0;32m[-------OK-]\033[0m $@\n"
   }
 
   local output="$1.out"
   local output_dir=`dirname $output`
 
   mkdir -p $output_dir
+
+  echo -e "\033[0;32m[ COMPILE  ]\033[0m bin/metac -o $output $1"
   bin/metac -o $output $1
 
   local compile_status=$?
@@ -30,6 +32,7 @@ function meta_test {
     return $compile_status
   fi
 
+  echo -e "\033[0;32m[ RUN      ]\033[0m $output arg1 arg2"
   $output arg1 arg2
 
   local execute_status=$?
