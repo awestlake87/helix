@@ -46,12 +46,12 @@ class IntType(Type):
     def get_llvm_type(self, builder):
         return ir.IntType(self._num_bits)
 
-    def call(self, block, args):
+    def call(self, fun, args):
         if len(args) != 1:
             raise Todo("invalid args")
 
         if args[0].type.can_convert_to(self):
-            return args[0].as_type(self, block._builder)
+            return args[0].as_type(self, fun._builder)
         else:
             raise Todo("invalid args")
 

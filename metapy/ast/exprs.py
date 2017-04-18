@@ -45,10 +45,10 @@ class CallExprNode(ExprNode):
 
     def gen_unit_value(self, unit):
         return self._lhs.gen_unit_value(unit).call(
-            block, [ arg.gen_unit_value(unit) for arg in self._args ]
+            unit, [ arg.gen_unit_value(unit) for arg in self._args ]
         )
 
-    def gen_fun_value(self, block):
-        return self._lhs.gen_fun_value(block).call(
-            block, [ arg.gen_fun_value(block) for arg in self._args ]
+    def gen_fun_value(self, fun):
+        return self._lhs.gen_fun_value(fun).call(
+            fun, [ arg.gen_fun_value(fun) for arg in self._args ]
         )

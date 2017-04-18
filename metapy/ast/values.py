@@ -51,10 +51,10 @@ class FunNode(ExprNode):
         unit.symbols.insert(self._id, self._fun)
 
     def gen_unit_value(self, unit):
-        body = self._fun.create_body()
+        self._fun.create_body()
 
-        self._body.hoist_fun_code(body)
-        self._body.gen_fun_code(body)
+        self._body.hoist_fun_code(self._fun)
+        self._body.gen_fun_code(self._fun)
 
         return self._fun
 

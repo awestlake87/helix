@@ -34,11 +34,11 @@ class ReturnNode(StatementNode):
     def __init__(self, expr):
         self._expr = expr
 
-    def hoist_fun_code(self, block):
-        self._expr.hoist_fun_code(block)
+    def hoist_fun_code(self, fun):
+        self._expr.hoist_fun_code(fun)
 
-    def gen_fun_code(self, block):
-        block.create_return(self._expr.gen_fun_value(block))
+    def gen_fun_code(self, fun):
+        fun.create_return(self._expr.gen_fun_value(fun))
 
 class IfStatementNode(StatementNode):
     def __init__(self, if_branches, else_block=None):
