@@ -59,13 +59,13 @@ class FunNode(ExprNode):
         return self._fun
 
 
-    def hoist_fun_code(self, block):
-        self._fun = self._create_ir_fun(block.get_unit())
+    def hoist_fun_code(self, fun):
+        self._fun = self._create_ir_fun(fun.unit)
 
-        block.symbols.insert(self._id, self._fun)
+        fun.symbols.insert(self._id, self._fun)
 
-    def gen_fun_value(self, block):
-        return self.gen_unit_value(block.get_unit())
+    def gen_fun_value(self, fun):
+        return self.gen_unit_value(fun.unit)
 
 
 class AutoIntNode(ExprNode):
@@ -83,8 +83,8 @@ class AutoIntNode(ExprNode):
             )
         )
 
-    def gen_fun_value(self, block):
-        return self.gen_unit_value(block.get_unit())
+    def gen_fun_value(self, fun):
+        return self.gen_unit_value(fun.unit)
 
 class IntNode(ExprNode):
     def __init__(self, num_bits, is_signed, value, radix=10):
@@ -96,15 +96,22 @@ class IntNode(ExprNode):
     def gen_unit_value(self, unit):
         return StaticValue(
             IntType(self._num_bits, self._is_signed),
-            int(self._value, self._radix)
+            (
+                int(self._value, self._radix)
+                if type(self._value) is str else
+                self._value
+            )
         )
+
+    def gen_fun_value(self, fun):
+        return self.gen_unit_value(fun.unit)
 
 class NilNode(ExprNode):
     def gen_unit_value(self, unit):
         return NilValue()
 
-    def gen_fun_value(self, block):
-        return self.gen_unit_value(block.get_unit())
+    def gen_fun_value(self, fun):
+        return self.gen_unit_value(fun.unit)
 
 class SymbolNode(ExprNode):
     def __init__(self, id):
@@ -113,5 +120,5 @@ class SymbolNode(ExprNode):
     def gen_unit_value(self, unit):
         return unit.symbols.resolve(self._id)
 
-    def gen_fun_value(self, block):
-        return block.symbols.resolve(self._id)
+    def gen_fun_value(self, fun):
+        return fun.symbols.resolve(self._id)

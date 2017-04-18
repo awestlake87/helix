@@ -11,10 +11,11 @@ class Fun(Value):
 
 
     def __init__(self, unit, type, id, param_ids, linkage):
-        self._unit = unit
+        self.unit = unit
+        self.type = type
+
         self._builder = None
         self._id = id
-        self.type = type
         self._fun = ir.Function(
             unit._module, self.type.get_llvm_type(self._builder), id
         )
@@ -37,7 +38,7 @@ class Fun(Value):
         self._builder.branch(self._body)
         self._builder.position_at_end(self._body)
 
-        self.symbols = SymbolTable(self._unit.symbols)
+        self.symbols = SymbolTable(self.unit.symbols)
 
         for type, arg in zip(self.type._param_types, self._fun.args):
             self.symbols.insert(arg.name, LlvmRhsValue(type, arg))
@@ -59,9 +60,6 @@ class Fun(Value):
         return LlvmRhsValue(
             self.type._ret_type, fun._builder.call(self._fun, llvm_args)
         )
-
-    def get_unit(self):
-        return self._unit
 
     def create_return(self, value):
         if value.type.can_convert_to(self.type._ret_type):

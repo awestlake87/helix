@@ -134,6 +134,28 @@ class ExecutionTests(unittest.TestCase):
                 """
             )
 
+    def test_if_statement(self):
+        unit = self._compiler.compile_unit(
+            """
+            extern fun int test()
+                if true
+                    if false
+                        return 2
+                    else
+                        if false
+                            return 3
+                        elif true
+                            return 0
+                        else
+                            return 4
+
+                return 1
+            """
+        )
+
+        test = self._compiler.get_function(CFUNCTYPE(c_int), "test")
+        self.assertEqual(0, test())
+
 if __name__ == "__main__":
     Compiler.initialize()
     unittest.main()

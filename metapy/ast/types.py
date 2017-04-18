@@ -16,8 +16,8 @@ class FunTypeNode(ExprNode):
             [ t.gen_unit_value(unit) for t in self._param_types ]
         )
 
-    def gen_fun_value(self, block):
-        return self.gen_unit_value(block.get_unit())
+    def gen_fun_value(self, fun):
+        return self.gen_unit_value(fun.unit)
 
 class IntTypeNode(ExprNode):
     def __init__(self, num_bits, is_signed):
@@ -27,5 +27,5 @@ class IntTypeNode(ExprNode):
     def gen_unit_value(self, unit):
         return IntType(self._num_bits, self._is_signed)
 
-    def gen_fun_value(self, block):
-        return self.gen_unit_value(block.get_unit())
+    def gen_fun_value(self, fun):
+        return self.gen_unit_value(fun.unit)

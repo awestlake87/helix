@@ -253,7 +253,7 @@ class Lexer:
                 if _accept('l'):
                     if _accept('s'):
                         if _accept('e'):
-                            return _end_kw(Token.KW_FALSE)
+                            return _end_kw(Token.LT_FALSE)
 
             elif _accept('u'):
                 if _accept('n'):

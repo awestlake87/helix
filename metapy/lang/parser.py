@@ -238,10 +238,10 @@ class Parser:
             return AutoIntNode(self._current.value)
 
         elif _accept(Token.LT_TRUE):
-            raise IntNode(1, False, 1)
+            return IntNode(1, False, 1)
 
         elif _accept(Token.LT_FALSE):
-            raise IntNode(1, False, 0)
+            return IntNode(1, False, 0)
 
         elif _accept(Token.LT_NIL):
             return NilNode()
