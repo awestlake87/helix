@@ -1,46 +1,58 @@
 
 
 class Token:
-    NONE                = 0
-    END                 = 1
-    INDENT              = 2
-    DEDENT              = 3
-    NODENT              = 4
+    NONE                = "NONE"
 
-    ID                  = 5
-    
-    KW_EXTERN           = 6
-    KW_INTERN           = 7
+    END                 = "END"
+    INDENT              = "INDENT"
+    DEDENT              = "DEDENT"
+    NODENT              = "NODENT"
 
-    KW_FUN              = 8
-    KW_GLOBAL           = 9
-    KW_STRUCT           = 10
+    ID                  = "ID"
 
-    KW_SWITCH           = 11
-    KW_CASE             = 12
-    KW_DEFAULT          = 13
+    KW_EXTERN           = "extern"
+    KW_INTERN           = "intern"
 
-    KW_IF               = 14
-    KW_ELIF             = 15
-    KW_ELSE             = 16
-    KW_THEN             = 17
+    KW_FUN              = "fun"
+    KW_GLOBAL           = "global"
+    KW_STRUCT           = "struct"
 
-    KW_PASS             = 18
-    KW_RETURN           = 19
+    KW_SWITCH           = "switch"
+    KW_CASE             = "case"
+    KW_DEFAULT          = "default"
 
-    KW_BIT              = 20
-    KW_CHAR             = 25
-    
-    KW_BYTE             = 21
-    KW_SHORT            = 22
-    KW_INT              = 23
-    KW_LONG             = 24
+    KW_IF               = "if"
+    KW_ELIF             = "elif"
+    KW_ELSE             = "else"
+    KW_THEN             = "then"
 
-    KW_UBYTE            = 26
-    KW_USHORT           = 27
-    KW_UINT             = 28
-    KW_ULONG            = 29
-    
+    KW_PASS             = "pass"
+    KW_RETURN           = "return"
+
+    KW_DO               = "do"
+
+    KW_BIT              = "bit"
+    KW_CHAR             = "char"
+
+    KW_BYTE             = "byte"
+    KW_SHORT            = "short"
+    KW_INT              = "int"
+    KW_LONG             = "long"
+
+    KW_UBYTE            = "ubyte"
+    KW_USHORT           = "ushort"
+    KW_UINT             = "uint"
+    KW_ULONG            = "ulong"
+
+    OP_RANGE            = "'..'"
+    OP_SPREAD           = "'...'"
+    OP_UPSERT           = "':='"
+
+    LT_INT_DEC          = "int10"
+    LT_TRUE             = "true"
+    LT_FALSE            = "false"
+    LT_NIL              = "nil"
+
 
     def __init__(self, id, value=None):
         self.id = id
@@ -73,7 +85,7 @@ class Token:
 
             Token.KW_PASS:          "pass",
             Token.KW_RETURN:        "return",
-            
+
             Token.KW_BIT:           "bit",
             Token.KW_CHAR:          "char",
 
@@ -85,7 +97,16 @@ class Token:
             Token.KW_UBYTE:         "ubyte",
             Token.KW_USHORT:        "ushort",
             Token.KW_UINT:          "uint",
-            Token.KW_ULONG:         "ulong"
+            Token.KW_ULONG:         "ulong",
+
+            Token.OP_RANGE:         "..",
+            Token.OP_SPREAD:        "...",
+            Token.OP_UPSERT:        ":=",
+
+            Token.LT_INT_DEC:       "int",
+            Token.LT_TRUE:          "true",
+            Token.LT_FALSE:         "false",
+            Token.LT_NIL:           "nil"
         }
 
         if self.id in ids:
@@ -100,4 +121,3 @@ class Token:
             return "[{}({})]".format(self._get_id_name(), self.value)
         else:
             return "[{}]".format(self._get_id_name())
-
