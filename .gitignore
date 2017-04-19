@@ -31,7 +31,4 @@
 # llvm assembly files
 *.ll
 
-bin
-build
-lib
 __pycache__
