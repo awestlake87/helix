@@ -1,9 +1,8 @@
 
-from .exprs import ExprNode
+from ..expr_node import ExprNode
 
-from ..err import Todo
-
-from ..ir import FunType, IntType
+from ...err import Todo
+from ...ir import FunType, IntType
 
 class FunTypeNode(ExprNode):
     def __init__(self, ret_type, param_types):

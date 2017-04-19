@@ -2,7 +2,7 @@
 from ...err import Todo
 from ...ir import IntType, AutoIntType
 
-from .statements import StatementNode
+from ..statement_node import StatementNode
 
 class SwitchStatementNode(StatementNode):
     def __init__(self, value, case_branches = [ ], default_block = None):

@@ -1,14 +1,8 @@
 
 from ...err import Todo
-
 from ...ir import SymbolTable
 
-class StatementNode:
-    def hoist_unit_code(self, unit):
-        pass
-
-    def hoist_fun_code(self, block):
-        pass
+from ..statement_node import StatementNode
 
 class BlockNode(StatementNode):
     def __init__(self, statements=None):

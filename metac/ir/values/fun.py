@@ -1,14 +1,13 @@
 
 from ...err import ReturnTypeMismatch, NotApplicable, Todo
 from ..symbols import SymbolTable
-from .values import Value, LlvmRhsValue
+from .values import Value, ConstLlvmValue, StackValue
 
 from llvmlite import ir
 
 class Fun(Value):
     EXTERN_C = 0
     INTERN_C = 1
-
 
     def __init__(self, unit, type, id, param_ids, linkage):
         self.unit = unit
@@ -41,7 +40,7 @@ class Fun(Value):
         self.symbols = SymbolTable(self.unit.symbols)
 
         for type, arg in zip(self.type._param_types, self._fun.args):
-            self.symbols.insert(arg.name, LlvmRhsValue(type, arg))
+            self.symbols.insert(arg.name, ConstLlvmValue(type, arg))
 
     def call(self, fun, args):
         if len(args) != len(self.type._param_types):
@@ -57,7 +56,7 @@ class Fun(Value):
             else:
                 raise NotApplicable()
 
-        return LlvmRhsValue(
+        return ConstLlvmValue(
             self.type._ret_type, fun._builder.call(self._fun, llvm_args)
         )
 
@@ -68,6 +67,14 @@ class Fun(Value):
 
         else:
             raise ReturnTypeMismatch()
+
+    def create_stack_var(self, type):
+        with self._builder.goto_block(self._entry):
+            llvm_value = self._builder.alloca(
+                type.get_llvm_type(self._builder)
+            )
+
+        return StackValue(self, type, llvm_value)
 
     def is_rval(self):
         return True

@@ -1,19 +1,9 @@
 
-from ..ir import PtrType, Type
-from ..err import Todo
+from ...ir import PtrType, Type
+from ...err import Todo
 
-from .statements import StatementNode
-
-class ExprNode(StatementNode):
-    def gen_module_code(self, module):
-        self.gen_module_value(module)
-
-    def gen_unit_code(self, unit):
-        self.gen_unit_value(unit)
-
-    def gen_fun_code(self, block):
-        self.gen_fun_value(block)
-
+from ..expr_node import ExprNode
+from ..values import SymbolNode
 
 class PtrExprNode(ExprNode):
     def __init__(self, expr):
@@ -35,8 +25,15 @@ class InitExprNode(ExprNode):
     def gen_unit_value(self, unit):
         raise Todo()
 
-    def gen_fun_value(self, block):
-        raise Todo()
+    def gen_fun_value(self, fun):
+        if type(self._lhs) is SymbolNode:
+            value = self._rhs.gen_fun_value(fun)
+            return fun.symbols.insert(
+                self._lhs._id,
+                fun.create_stack_var(value.type).initialize(value)
+            )
+        else:
+            raise Todo()
 
 class CallExprNode(ExprNode):
     def __init__(self, lhs, args):

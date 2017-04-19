@@ -2,7 +2,7 @@ from .lexer import Lexer
 from .token import Token
 
 from ..ast import *
-from ..err import Todo, ExpectedToken, CompilerBug
+from ..err import Todo, ExpectedToken, UnexpectedToken, CompilerBug
 
 class Parser:
     def __init__(self, str):
@@ -187,9 +187,9 @@ class Parser:
             id = self._current.id
 
             if id == ':':
-                return InitExprNode(lhs, self._parse_expr_prec3())
+                return InitExprNode(lhs, self._parse_expr_prec4())
             elif id == '=':
-                return AssignExprNode(lhs, self._parse_expr_prec3())
+                return AssignExprNode(lhs, self._parse_expr_prec4())
             else:
                 raise CompilerBug("0_0")
 

@@ -1,4 +1,4 @@
 
-from .statements import *
-from .if_statement import *
-from .switch_statement import *
+from .if_statement_node import *
+from .switch_statement_node import *
+from .misc_statement_nodes import *

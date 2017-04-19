@@ -183,6 +183,18 @@ class ExecutionTests(unittest.TestCase):
         test = self._compiler.get_function(CFUNCTYPE(c_int), "test")
         self.assertEqual(0, test())
 
+    def test_init(self):
+        unit = self._compiler.compile_unit(
+            """
+            extern fun int test(int arg)
+                a: b: arg
+                return a
+            """
+        )
+
+        test = self._compiler.get_function(CFUNCTYPE(c_int, c_int), "test")
+        self.assertEqual(1234, test(1234))
+
 if __name__ == "__main__":
     Compiler.initialize()
     unittest.main()
