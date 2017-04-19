@@ -1,6 +1,0 @@
-
-extern fun int doBlargh(int i)
-  return i
-
-extern fun int main()
-  return doBlargh(0)
