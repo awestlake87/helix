@@ -1,0 +1,7 @@
+
+extern fun int main(int argc, **byte argv)
+  i: 0
+  j: 123
+  k: 1234
+
+  return 0
