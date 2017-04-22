@@ -26,6 +26,12 @@ class Token:
     KW_ELSE             = "else"
     KW_THEN             = "then"
 
+    KW_FOR              = "for"
+    KW_WHILE            = "while"
+    KW_EACH             = "each"
+    KW_LOOP             = "loop"
+    KW_UNTIL            = "until"
+
     KW_PASS             = "pass"
     KW_RETURN           = "return"
 
@@ -47,6 +53,18 @@ class Token:
     OP_RANGE            = "'..'"
     OP_SPREAD           = "'...'"
     OP_UPSERT           = "':='"
+    OP_INC              = "'++'"
+    OP_DEC              = "'--'"
+    OP_LEQ              = "'<='"
+    OP_GEQ              = "'>='"
+    OP_SHL              = "'<<'"
+    OP_SHR              = "'>>'"
+    OP_EQ               = "'=='"
+    OP_NEQ              = "'!='"
+
+    OP_AND              = "and"
+    OP_OR               = "or"
+    OP_NOT              = "not"
 
     LT_INT_DEC          = "int10"
     LT_TRUE             = "true"
@@ -59,59 +77,7 @@ class Token:
         self.value = value
 
     def _get_id_name(self):
-        ids = {
-            Token.END:              "END",
-            Token.INDENT:           "INDENT",
-            Token.DEDENT:           "DEDENT",
-            Token.NODENT:           "NODENT",
-
-            Token.ID:               "ID",
-
-            Token.KW_EXTERN:        "extern",
-            Token.KW_INTERN:        "intern",
-
-            Token.KW_FUN:           "fun",
-            Token.KW_GLOBAL:        "global",
-            Token.KW_STRUCT:        "struct",
-
-            Token.KW_SWITCH:        "switch",
-            Token.KW_CASE:          "case",
-            Token.KW_DEFAULT:       "default",
-
-            Token.KW_IF:            "if",
-            Token.KW_ELIF:          "elif",
-            Token.KW_ELSE:          "else",
-            Token.KW_THEN:          "then",
-
-            Token.KW_PASS:          "pass",
-            Token.KW_RETURN:        "return",
-
-            Token.KW_BIT:           "bit",
-            Token.KW_CHAR:          "char",
-
-            Token.KW_BYTE:          "byte",
-            Token.KW_SHORT:         "short",
-            Token.KW_INT:           "int",
-            Token.KW_LONG:          "long",
-
-            Token.KW_UBYTE:         "ubyte",
-            Token.KW_USHORT:        "ushort",
-            Token.KW_UINT:          "uint",
-            Token.KW_ULONG:         "ulong",
-
-            Token.OP_RANGE:         "..",
-            Token.OP_SPREAD:        "...",
-            Token.OP_UPSERT:        ":=",
-
-            Token.LT_INT_DEC:       "int",
-            Token.LT_TRUE:          "true",
-            Token.LT_FALSE:         "false",
-            Token.LT_NIL:           "nil"
-        }
-
-        if self.id in ids:
-            return ids[self.id]
-        elif type(self.id) is str:
+        if type(self.id) is str:
             return "'{}'".format(self.id)
         else:
             return "unknown"

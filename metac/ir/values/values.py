@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 
 from ...err import NoImplicitCast, Todo, CompilerBug
 
@@ -10,34 +11,29 @@ class Value:
     def is_type(self):
         return False
 
+    def is_lval(self):
+        return False
+
     def is_rval(self):
         return False
 
     def is_static(self):
         return False
 
-    def get_llvm_rval(self, builder):
+    def get_llvm_rval(self):
         raise NotApplicable()
 
-    def as_type(self, other_type, builder):
+    def as_type(self, other_type):
         if self.type.can_convert_to(other_type):
             return self
         else:
             raise NoImplicitCast()
 
-class Module(Value):
-    pass
-
-class Unit(Value):
-    def __init__(self):
-        self._module = ir.Module("todo")
-        self.symbols = SymbolTable()
-
 class NilValue(Value):
     def __init__(self, type=NilType()):
         self.type = type
 
-    def as_type(self, other_type, builder):
+    def as_type(self, other_type):
         if self.type.can_convert_to(other_type):
             return NilValue(other_type)
         else:
@@ -46,15 +42,15 @@ class NilValue(Value):
     def is_rval(self):
         return True
 
-    def get_llvm_rval(self, builder):
-        return ir.IntType(32)(0).inttoptr(self.type.get_llvm_type(builder))
+    def get_llvm_rval(self):
+        return ir.IntType(32)(0).inttoptr(self.type.get_llvm_type())
 
 class StaticValue(Value):
     def __init__(self, type, value):
         self.type = type
         self._value = value
 
-    def as_type(self, other_type, builder):
+    def as_type(self, other_type):
         if self.type.can_convert_to(other_type):
             return StaticValue(other_type, self._value)
         else:
@@ -66,8 +62,8 @@ class StaticValue(Value):
     def is_rval(self):
         return True
 
-    def get_llvm_rval(self, builder):
-        return self.type.get_llvm_type(builder)(self._value)
+    def get_llvm_rval(self):
+        return self.type.get_llvm_type()(self._value)
 
 
 class LlvmValue(Value):
@@ -76,11 +72,18 @@ class LlvmValue(Value):
         self._value = llvm_value
 
 
+class LlvmRVal(LlvmValue):
+    def is_rval(self):
+        return True
+
+    def get_llvm_rval(self):
+        return self._value
+
 class ConstLlvmValue(LlvmValue):
     def is_rval(self):
         return True
 
-    def get_llvm_rval(self, builder):
+    def get_llvm_rval(self):
         return self._value
 
 class StackValue(LlvmValue):
@@ -89,16 +92,25 @@ class StackValue(LlvmValue):
 
         self._fun = fun
 
-    def get_llvm_rval(self, builder):
-        return builder.load(self._value)
+    def is_lval(self):
+        return True
+
+    def get_llvm_rval(self):
+        return self._fun._builder.load(self._value)
 
     def initialize(self, value):
         if not value.type.can_convert_to(self.type):
             raise CompilerBug("type mismatch in function level init")
 
-        actual_value = value.as_type(self.type, self._fun._builder)
+        return self.assign(value)
+
+    def assign(self, value):
+        if not value.type.can_convert_to(self.type):
+            raise CompilerBug("type mismatch in function level assign")
 
         self._fun._builder.store(
-            actual_value.get_llvm_rval(self._fun._builder), self._value
+            value.as_type(self.type).get_llvm_rval(),
+            self._value
         )
+
         return self

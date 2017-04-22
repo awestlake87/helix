@@ -19,14 +19,14 @@ class SwitchStatementNode(StatementNode):
         value = self._value.gen_fun_value(fun)
 
         if type(value.type) is AutoIntType:
-            value = value.as_type(IntType(), fun._builder)
+            value = value.as_type(IntType())
 
 
         if not type(value.type) is IntType:
             raise Todo("non-integer switches")
 
         inst = fun._builder.switch(
-            value.get_llvm_rval(fun._builder),
+            value.get_llvm_rval(),
             llvm_default_block
         )
 
@@ -40,10 +40,10 @@ class SwitchStatementNode(StatementNode):
                 raise Todo("non-static cases?")
 
             if type(value.type) is AutoIntType:
-                value = value.as_type(IntType(), fun._builder)
+                value = value.as_type(IntType())
 
             inst.add_case(
-                value.get_llvm_rval(fun._builder),
+                value.get_llvm_rval(),
                 block
             )
 

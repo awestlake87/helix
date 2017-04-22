@@ -14,8 +14,8 @@ class PtrType(Type):
     def __init__(self, type):
         self._type = type
 
-    def get_llvm_type(self, builder):
-        return self._type.get_llvm_type(builder).as_pointer()
+    def get_llvm_type(self):
+        return self._type.get_llvm_type().as_pointer()
 
 class NilType(Type):
     def can_convert_to(self, other):
@@ -24,7 +24,7 @@ class NilType(Type):
         else:
             return False
 
-    def get_llvm_type(self, builder):
+    def get_llvm_type(self):
         return ir.IntType(64)
 
 class IntType(Type):
@@ -43,7 +43,7 @@ class IntType(Type):
         else:
             return False
 
-    def get_llvm_type(self, builder):
+    def get_llvm_type(self):
         return ir.IntType(self._num_bits)
 
     def call(self, fun, args):
@@ -51,7 +51,7 @@ class IntType(Type):
             raise Todo("invalid args")
 
         if args[0].type.can_convert_to(self):
-            return args[0].as_type(self, fun._builder)
+            return args[0].as_type(self)
         else:
             raise Todo("invalid args")
 
@@ -68,8 +68,38 @@ class FunType(Type):
         self._ret_type = ret_type
         self._param_types = param_types
 
-    def get_llvm_type(self, builder):
+    def get_llvm_type(self):
         return ir.FunctionType(
-            self._ret_type.get_llvm_type(builder),
-            [ t.get_llvm_type(builder) for t in self._param_types ]
+            self._ret_type.get_llvm_type(),
+            [ t.get_llvm_type() for t in self._param_types ]
         )
+
+
+def get_common_type(a, b):
+    if type(a) is IntType and type(b) is IntType:
+        if a._num_bits != b._num_bits:
+            return None
+
+        elif a._is_signed != b._is_signed:
+            return None
+
+        else:
+            return a
+
+    elif type(a) is IntType and type(b) is AutoIntType:
+        return a
+
+    elif type(a) is AutoIntType and type(b) is IntType:
+        return b
+
+    elif type(a) is AutoIntType and type(b) is AutoIntType:
+        return get_concrete_type(a)
+
+    else:
+        raise Todo()
+
+def get_concrete_type(t):
+    if type(t) is AutoIntType:
+        return IntType()
+    else:
+        return t

@@ -69,6 +69,18 @@ class Parser:
         elif id == Token.KW_DO:
             return self._parse_block()
 
+        elif id == Token.KW_FOR:
+            return self._parse_loop()
+
+        elif id == Token.KW_WHILE:
+            return self._parse_loop()
+
+        elif id == Token.KW_EACH:
+            return self._parse_loop()
+
+        elif id == Token.KW_LOOP:
+            return self._parse_loop()
+
         else:
             return self._parse_expr()
 
@@ -166,13 +178,154 @@ class Parser:
                 linkage
             )
 
+    def _parse_loop(self):
+        for_clause = None
+        each_clause = None
+        while_clause = None
+
+        loop_kw_required = True
+
+        if self._accept(Token.KW_FOR):
+            for_clause = self._parse_expr()
+            loop_kw_required = False
+
+        if self._accept(Token.KW_WHILE):
+            while_clause = self._parse_condition()
+            loop_kw_required = False
+
+        if loop_kw_required:
+            self._expect(Token.KW_LOOP)
+        else:
+            self._accept(Token.KW_LOOP)
+
+        loop_body = self._parse_block()
+
+        then_clause = None
+        until_clause = None
+
+        if self._accept(Token.KW_THEN):
+            then_clause = self._parse_expr()
+
+        if self._accept(Token.KW_UNTIL):
+            until_clause = self._parse_condition()
+
+        return LoopStatementNode(
+            for_clause,
+            each_clause,
+            while_clause,
+            loop_body,
+            then_clause,
+            until_clause
+        )
+
     def _parse_condition(self):
-        return self._parse_expr()
+        return self._parse_condition_prec5()
+
+    def _parse_condition_prec5(self):
+        def _accept():
+            if self._accept(Token.OP_OR):
+                return True
+            else:
+                return False
+
+        lhs = self._parse_condition_prec4()
+
+        while _accept():
+            id = self._current.id
+
+            if id == Token.OP_OR:
+                lhs = OrNode(lhs, self._parse_condition_prec4())
+            else:
+                raise CompilerBug("#_#")
+
+        return lhs
+
+    def _parse_condition_prec4(self):
+        def _accept():
+            if self._accept(Token.OP_AND):
+                return True
+            else:
+                return False
+
+        lhs = self._parse_condition_prec3()
+
+        while _accept():
+            id = self._current.id
+
+            if id == Token.OP_AND:
+                lhs = AndNode(lhs, self._parse_condition_prec3())
+            else:
+                raise CompilerBug("$.$")
+
+        return lhs
+
+    def _parse_condition_prec3(self):
+        def _accept():
+            if self._accept(Token.OP_EQ) or self._accept(Token.OP_NEQ):
+                return True
+            else:
+                return False
+
+        lhs = self._parse_condition_prec2()
+
+        while _accept():
+            id = self._current.id
+
+            if id == Token.OP_EQ:
+                lhs = EqNode(lhs, self._parse_condition_prec2())
+            elif id == Token.OP_NEQ:
+                lhs = NeqNode(lhs, self._parse_condition_prec2())
+            else:
+                raise CompilerBug("~.~")
+
+        return lhs
+
+    def _parse_condition_prec2(self):
+        def _accept():
+            if self._accept('<') or self._accept('>'):
+                return True
+            elif self._accept(Token.OP_LEQ) or self._accept(Token.OP_GEQ):
+                return True
+            else:
+                return False
+
+        lhs = self._parse_condition_prec1()
+
+        while _accept():
+            id = self._current.id
+
+            if id == '<':
+                lhs = LtnExprNode(lhs, self._parse_condition_prec1())
+            elif id == '>':
+                lhs = GtnExprNode(lhs, self._parse_condition_prec1())
+            elif id == Token.OP_LEQ:
+                lhs = LeqExprNode(lhs, self._parse_condition_prec1())
+            elif id == Token.OP_GEQ:
+                lhs = GeqExprNode(lhs, self._parse_condition_prec1())
+            else:
+                raise CompilerBug("8.8")
+
+        return lhs
+
+    def _parse_condition_prec1(self):
+        def _accept():
+            if self._accept(Token.OP_NOT):
+                return True
+
+        if _accept():
+            id = self._current.id
+
+            if id == Token.OP_NOT:
+                return NotNode(self._parse_condition_prec1())
+            else:
+                raise CompilerBug("%.%")
+        else:
+            return self._parse_expr()
 
     def _parse_expr(self):
-        return self._parse_expr_prec4()
+        return self._parse_expr_prec11()
 
-    def _parse_expr_prec4(self):
+    def _parse_expr_prec11(self):
         def _accept():
             if self._accept(':'):
                 return True
@@ -181,24 +334,119 @@ class Parser:
             else:
                 return False
 
-        lhs = self._parse_expr_prec3()
+        lhs = self._parse_expr_prec10()
 
         if _accept():
             id = self._current.id
 
             if id == ':':
-                return InitExprNode(lhs, self._parse_expr_prec4())
+                return InitExprNode(lhs, self._parse_expr_prec11())
             elif id == '=':
-                return AssignExprNode(lhs, self._parse_expr_prec4())
+                return AssignExprNode(lhs, self._parse_expr_prec11())
             else:
                 raise CompilerBug("0_0")
 
         else:
             return lhs
 
+    def _parse_expr_prec10(self):
+        lhs = self._parse_expr_prec9()
+
+        while self._accept('|'):
+            lhs = BitOrExprNode(lhs, self._parse_expr_prec9())
+
+        return lhs
+
+    def _parse_expr_prec9(self):
+        lhs = self._parse_expr_prec8()
+
+        while self._accept('^'):
+            lhs = BitXorExprNode(lhs, self._parse_expr_prec8())
+
+        return lhs
+
+    def _parse_expr_prec8(self):
+        lhs = self._parse_expr_prec7()
+
+        while self._accept('&'):
+            lhs = BitAndExprNode(lhs, self._parse_expr_prec7())
+
+        return lhs
+
+    def _parse_expr_prec7(self):
+        def _accept():
+            if self._accept(Token.OP_SHL) or self._accept(Token.OP_SHR):
+                return True
+            else:
+                return False
+
+        lhs = self._parse_expr_prec6()
+
+        while _accept():
+            id = self._current.id
+
+            if id == Token.OP_SHL:
+                lhs = ShlExprNode(lhs, self._parse_expr_prec6())
+            elif id == Token.OP_SHR:
+                lhs = ShrExprNode(rhs, self._parse_expr_prec6())
+            else:
+                raise CompilerBug("^.^")
+
+        return lhs
+
+    def _parse_expr_prec6(self):
+        def _accept():
+            if self._accept('+') or self._accept('-'):
+                return True
+            else:
+                return False
+
+        lhs = self._parse_expr_prec5()
+
+        while _accept():
+            id = self._current.id
+
+            if id == '+':
+                lhs = AddExprNode(lhs, self._parse_expr_prec5())
+            elif id == '-':
+                lhs = SubExprNode(lhs, self._parse_expr_prec5())
+            else:
+                raise CompilerBug("*_*")
+
+        return lhs
+
+    def _parse_expr_prec5(self):
+        def _accept():
+            if self._accept('*') or self._accept('/'):
+                return True
+            else:
+                return False
+
+        lhs = self._parse_expr_prec4()
+
+        while _accept():
+            id = self._current.id
+
+            if id == '*':
+                lhs = MulExprNode(lhs, self._parse_expr_prec4())
+            elif id == '/':
+                lhs = DivExprNode(lhs, self._parse_expr_prec4())
+            else:
+                raise CompilerBug("$_$")
+
+        return lhs
+
+    def _parse_expr_prec4(self):
+        # accessors
+        return self._parse_expr_prec3()
+
     def _parse_expr_prec3(self):
         def _accept():
             if self._accept('('):
+                return True
+            elif self._accept(Token.OP_INC):
+                return True
+            elif self._accept(Token.OP_DEC):
                 return True
             else:
                 return False
@@ -218,6 +466,13 @@ class Parser:
                         break
 
                 lhs = CallExprNode(lhs, args)
+
+            elif id == Token.OP_INC:
+                lhs = PostIncExprNode(lhs)
+
+            elif id == Token.OP_DEC:
+                lhs = PostDecExprNode(lhs)
+
             else:
                 raise CompilerBug("O_o")
 
@@ -227,6 +482,12 @@ class Parser:
         def _accept():
             if self._accept('*'):
                 return True
+            elif self._accept('-'):
+                return True
+            elif self._accept(Token.OP_INC):
+                return True
+            elif self._accept(Token.OP_DEC):
+                return True
             else:
                 return False
 
@@ -235,6 +496,16 @@ class Parser:
 
             if id == '*':
                 return PtrExprNode(self._parse_expr_prec2())
+
+            elif id == '-':
+                return NegExprNode(self._parse_expr_prec2())
+
+            elif id == Token.OP_INC:
+                return PreIncExprNode(self._parse_expr_prec2())
+
+            elif id == Token.OP_DEC:
+                return PreDecExprNode(self._parse_expr_prec2())
+
             else:
                 raise CompilerBug("O_O")
 
