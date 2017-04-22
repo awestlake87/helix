@@ -4,24 +4,31 @@ from .expr_node import BinaryExprNode, UnaryExprNode
 from ..err import Todo
 
 class AndNode(BinaryExprNode):
-    def gen_unit_code(self, unit):
+    def gen_unit_value(self, unit):
         raise Todo()
 
-    def gen_fun_code(self, fun):
+    def gen_fun_value(self, fun):
         raise Todo()
 
+class XorNode(BinaryExprNode):
+    def gen_unit_value(self, unit):
+        raise Todo()
+
+    def gen_fun_value(self, fun):
+        raise Todo()
+        
 class OrNode(BinaryExprNode):
-    def gen_unit_code(self, unit):
+    def gen_unit_value(self, unit):
         raise Todo()
 
-    def gen_fun_code(self, fun):
+    def gen_fun_value(self, fun):
         raise Todo()
 
 class NotNode(UnaryExprNode):
-    def gen_unit_code(self, unit):
+    def gen_unit_value(self, unit):
         raise Todo()
 
-    def gen_fun_code(self, fun):
+    def gen_fun_value(self, fun):
         raise Todo()
 
 

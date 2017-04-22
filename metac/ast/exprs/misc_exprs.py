@@ -14,26 +14,6 @@ class PtrExprNode(UnaryExprNode):
         else:
             raise Todo("dereferencing values")
 
-class PreIncExprNode(UnaryExprNode):
-    def gen_fun_value(self, fun):
-        return fun.gen_pre_inc(self._operand.gen_fun_value(fun))
-
-class PostIncExprNode(UnaryExprNode):
-    def gen_fun_value(self, fun):
-        return fun.gen_post_inc(self._operand.gen_fun_value(fun))
-
-class PreDecExprNode(UnaryExprNode):
-    def gen_fun_value(self, fun):
-        return fun.gen_pre_dec(self._operand.gen_fun_value(fun))
-
-class PostDecExprNode(UnaryExprNode):
-    def gen_fun_value(self, fun):
-        return fun.gen_post_dec(self._operand.gen_fun_value(fun))
-
-class NegExprNode(UnaryExprNode):
-    def gen_fun_value(self, fun):
-        return fun.gen_negate(self._operand.gen_fun_value(fun))
-
 class InitExprNode(BinaryExprNode):
     def gen_unit_value(self, unit):
         raise Todo()

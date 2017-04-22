@@ -63,6 +63,7 @@ class Token:
     OP_NEQ              = "'!='"
 
     OP_AND              = "and"
+    OP_XOR              = "xor"
     OP_OR               = "or"
     OP_NOT              = "not"
 
