@@ -2,26 +2,39 @@
 from ...ir import PtrType, Type
 from ...err import Todo
 
-from ..expr_node import ExprNode
+from ..expr_node import ExprNode, UnaryExprNode, BinaryExprNode
 from ..values import SymbolNode
 
-class PtrExprNode(ExprNode):
-    def __init__(self, expr):
-        self._expr = expr
-
+class PtrExprNode(UnaryExprNode):
     def gen_unit_value(self, unit):
-        value = self._expr.gen_unit_value(unit)
+        value = self._operand.gen_unit_value(unit)
 
         if value.is_type():
             return PtrType(value)
         else:
             raise Todo("dereferencing values")
 
-class InitExprNode(ExprNode):
-    def __init__(self, lhs, rhs):
-        self._lhs = lhs
-        self._rhs = rhs
+class PreIncExprNode(UnaryExprNode):
+    def gen_fun_value(self, fun):
+        return fun.gen_pre_inc(self._operand.gen_fun_value(fun))
 
+class PostIncExprNode(UnaryExprNode):
+    def gen_fun_value(self, fun):
+        return fun.gen_post_inc(self._operand.gen_fun_value(fun))
+
+class PreDecExprNode(UnaryExprNode):
+    def gen_fun_value(self, fun):
+        return fun.gen_pre_dec(self._operand.gen_fun_value(fun))
+
+class PostDecExprNode(UnaryExprNode):
+    def gen_fun_value(self, fun):
+        return fun.gen_post_dec(self._operand.gen_fun_value(fun))
+
+class NegExprNode(UnaryExprNode):
+    def gen_fun_value(self, fun):
+        return fun.gen_negate(self._operand.gen_fun_value(fun))
+
+class InitExprNode(BinaryExprNode):
     def gen_unit_value(self, unit):
         raise Todo()
 
@@ -34,6 +47,15 @@ class InitExprNode(ExprNode):
             )
         else:
             raise Todo()
+
+class AssignExprNode(BinaryExprNode):
+    def gen_unit_value(self, unit):
+        raise Todo()
+
+    def gen_fun_value(self, fun):
+        return self._lhs.gen_fun_value(fun).assign(
+            self._rhs.gen_fun_value(fun)
+        )
 
 class CallExprNode(ExprNode):
     def __init__(self, lhs, args):

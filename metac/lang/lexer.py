@@ -136,41 +136,77 @@ class Lexer:
 
 
     def _scan_punct(self):
-        c = self._peek()
-
-        if c == '(':
-            return Token(self._toss())
-        elif c == ')':
-            return Token(self._toss())
-        elif c == '*':
-            return Token(self._toss())
-        elif c == ',':
-            return Token(self._toss())
-        elif c == '=':
-            return Token(self._toss())
-
-        elif c == ':':
-            self._toss()
-            if self._peek() == '=':
+        def _toss(c):
+            if self._peek() == c:
                 self._toss()
+                return True
+            else:
+                return False
+
+        if _toss('('):
+            return Token('(')
+        elif _toss(')'):
+            return Token(')')
+        elif _toss(','):
+            return Token(',')
+
+        elif _toss('='):
+            if _toss('='):
+                return Token(Token.OP_EQ)
+            else:
+                return Token('=')
+
+        elif _toss('!'):
+            if _toss('='):
+                return Token(Token.OP_NEQ)
+
+        elif _toss(':'):
+            if _toss('='):
                 return Token(Token.OP_UPSERT)
             else:
                 return Token(':')
 
-        elif c == '.':
-            self._toss()
-            if self._peek() == '.':
-                self._toss()
-                if self._peek() == '.':
-                    self._toss()
+        elif _toss('.'):
+            if _toss('.'):
+                if _toss('.'):
                     return Token(Token.OP_SPREAD)
                 else:
                     return Token(Token.OP_RANGE)
             else:
                 return Token('.')
 
+        elif _toss('+'):
+            if _toss('+'):
+                return Token(Token.OP_INC)
+            else:
+                return Token('+')
+
+        elif _toss('-'):
+            if _toss('-'):
+                return Token(Token.OP_DEC)
+            else:
+                return Token('-')
+
+        elif _toss('*'):
+            return Token('*')
+
+        elif _toss('/'):
+            return Token('/')
+
+        elif _toss('<'):
+            if _toss('='):
+                return Token(Token.OP_LEQ)
+            else:
+                return Token('<')
+
+        elif _toss('>'):
+            if _toss('='):
+                return Token(Token.OP_GEQ)
+            else:
+                return Token('>')
+
         else:
-            raise UnexpectedChar(c)
+            raise UnexpectedChar(self._peek())
 
     def _scan_alpha(self):
         def _end_id():
@@ -201,7 +237,12 @@ class Lexer:
 
         _accept = self._accept
 
-        if _accept('b'):
+        if _accept('a'):
+            if _accept('n'):
+                if _accept('d'):
+                    return _end_kw(Token.OP_AND)
+
+        elif _accept('b'):
             if _accept('i'):
                 if _accept('t'):
                     return _end_kw(Token.KW_BIT)
@@ -229,11 +270,17 @@ class Lexer:
                             if _accept('l'):
                                 if _accept('t'):
                                     return _end_kw(Token.KW_DEFAULT)
+
             elif _accept('o'):
                 return _end_kw(Token.KW_DO)
 
         elif _accept('e'):
-            if _accept('l'):
+            if _accept('a'):
+                if _accept('c'):
+                    if _accept('h'):
+                        return _end_kw(Token.KW_EACH)
+
+            elif _accept('l'):
                 if _accept('i'):
                     if _accept('f'):
                         return _end_kw(Token.KW_ELIF)
@@ -254,6 +301,10 @@ class Lexer:
                     if _accept('s'):
                         if _accept('e'):
                             return _end_kw(Token.LT_FALSE)
+
+            elif _accept('o'):
+                if _accept('r'):
+                    return _end_kw(Token.KW_FOR)
 
             elif _accept('u'):
                 if _accept('n'):
@@ -288,10 +339,22 @@ class Lexer:
                     if _accept('g'):
                         return _end_kw(Token.KW_LONG)
 
+                elif _accept('o'):
+                    if _accept('p'):
+                        return _end_kw(Token.KW_LOOP)
+
         elif _accept('n'):
             if _accept('i'):
                 if _accept('l'):
                     return _end_kw(Token.LT_NIL)
+
+            elif _accept('o'):
+                if _accept('t'):
+                    return _end_kw(Token.OP_NOT)
+
+        elif _accept('o'):
+            if _accept('r'):
+                return _end_kw(Token.OP_OR)
 
         elif _accept('p'):
             if _accept('a'):
@@ -357,6 +420,12 @@ class Lexer:
                         if _accept('g'):
                             return _end_kw(Token.KW_ULONG)
 
+            elif _accept('n'):
+                if _accept('t'):
+                    if _accept('i'):
+                        if _accept('l'):
+                            return _end_kw(Token.KW_UNTIL)
+
             elif _accept('s'):
                 if _accept('h'):
                     if _accept('o'):
@@ -364,6 +433,11 @@ class Lexer:
                             if _accept('t'):
                                 return _end_kw(Token.KW_USHORT)
 
-
+        elif _accept('w'):
+            if _accept('h'):
+                if _accept('i'):
+                    if _accept('l'):
+                        if _accept('e'):
+                            return _end_kw(Token.KW_WHILE)
 
         return _end_id()

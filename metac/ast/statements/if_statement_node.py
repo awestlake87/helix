@@ -29,7 +29,7 @@ class IfStatementNode(StatementNode):
             condition, block = branch
 
             fun._builder.cbranch(
-                condition.gen_fun_value(fun).get_llvm_rval(fun._builder),
+                condition.gen_fun_value(fun).get_llvm_rval(),
                 then_block,
                 else_block
             )
