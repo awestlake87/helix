@@ -61,8 +61,13 @@ class LoopStatementNode(StatementNode):
                     self._then_clause.gen_fun_code(fun)
 
             if self._until_clause != None:
-                raise Todo("until clause")
-
-            fun._builder.branch(loop_head)
+                with fun.using_scope(iter_symbols):
+                    fun._builder.cbranch(
+                        self._until_clause.gen_fun_value(fun).get_llvm_rval(),
+                        loop_exit,
+                        loop_head
+                    )
+            else:
+                fun._builder.branch(loop_head)
 
         fun._builder.position_at_start(loop_exit)

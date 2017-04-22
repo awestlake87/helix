@@ -49,6 +49,23 @@ class LoopTests(unittest.TestCase):
             )
         )
 
+    def test_until_loop(self):
+        self.assertEqual(
+            100,
+            run_test(
+                """
+                extern fun int test()
+                    i: 0
+
+                    loop
+                        ++i
+                    until i == 100
+
+                    return i
+                """
+            )
+        )
+
     def test_switch(self):
         self.assertEqual(
             0,
