@@ -568,7 +568,10 @@ class Parser:
             return self._parse_fun(FunNode.INTERN_C)
 
         elif _accept(Token.LT_INT_DEC):
-            return AutoIntNode(self._current.value)
+            return AutoIntNode(self._current.value, radix=10)
+
+        elif _accept(Token.LT_INT_BIN):
+            return AutoIntNode(self._current.value, radix=2)
 
         elif _accept(Token.LT_TRUE):
             return IntNode(1, False, 1)

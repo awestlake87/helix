@@ -104,13 +104,17 @@ class Lexer:
 
 
     def _scan_num(self):
-        def _take_dec_digits():
+        def _accept_dec_digits():
             c = self._peek()
             while c >= '0' and c <= '9':
                 self._take()
                 c = self._peek()
 
-        def _end_int_dec():
+        def _accept_bin_digits():
+            while self._accept('0') or self._accept('1'):
+                pass
+
+        def _end_int(id):
             c = self._peek()
             if (
                 c >= 'a' and c <= 'z' or
@@ -121,16 +125,26 @@ class Lexer:
                 raise UnexpectedChar(c)
 
             else:
-                return Token(Token.LT_INT_DEC, self._token)
+                if len(self._token) > 0:
+                    return Token(id, self._token)
+                else:
+                    raise Todo("make an error for this")
 
         c = self._peek()
 
-        if c == '0':
-            self._take()
-            return _end_int_dec()
+        if self._accept('0'):
+            if self._accept('b'):
+                self._token = ""
+                _accept_bin_digits()
+
+                return _end_int(Token.LT_INT_BIN)
+            else:
+                return _end_int(Token.LT_INT_DEC)
+                
         elif c >= '0' and c <= '9':
-            _take_dec_digits()
-            return _end_int_dec()
+            _accept_dec_digits()
+            return _end_int(Token.LT_INT_DEC)
+
         else:
             raise UnexpectedChar(c)
 
