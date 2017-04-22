@@ -161,10 +161,7 @@ class Lexer:
                 return Token(Token.OP_NEQ)
 
         elif _toss(':'):
-            if _toss('='):
-                return Token(Token.OP_UPSERT)
-            else:
-                return Token(':')
+            return Token(':')
 
         elif _toss('.'):
             if _toss('.'):
@@ -178,20 +175,36 @@ class Lexer:
         elif _toss('+'):
             if _toss('+'):
                 return Token(Token.OP_INC)
+            elif _toss('='):
+                return Token(Token.OP_ADD_ASSIGN)
             else:
                 return Token('+')
 
         elif _toss('-'):
             if _toss('-'):
                 return Token(Token.OP_DEC)
+            elif _toss('='):
+                return Token(Token.OP_SUB_ASSIGN)
             else:
                 return Token('-')
 
         elif _toss('*'):
-            return Token('*')
+            if _toss('='):
+                return Token(Token.OP_MUL_ASSIGN)
+            else:
+                return Token('*')
 
         elif _toss('/'):
-            return Token('/')
+            if _toss('='):
+                return Token(Token.OP_DIV_ASSIGN)
+            else:
+                return Token('/')
+
+        elif _toss('%'):
+            if _toss('='):
+                return Token(Token.OP_MOD_ASSIGN)
+            else:
+                return Token('%')
 
         elif _toss('<'):
             if _toss('='):

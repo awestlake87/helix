@@ -327,10 +327,22 @@ class Parser:
 
     def _parse_expr_prec11(self):
         def _accept():
-            if self._accept(':'):
-                return True
-            elif self._accept('='):
-                return True
+            if self._accept(':'):                       return True
+            elif self._accept('='):                     return True
+
+            elif self._accept(Token.OP_ADD_ASSIGN):     return True
+            elif self._accept(Token.OP_SUB_ASSIGN):     return True
+            elif self._accept(Token.OP_MUL_ASSIGN):     return True
+            elif self._accept(Token.OP_DIV_ASSIGN):     return True
+            elif self._accept(Token.OP_MOD_ASSIGN):     return True
+
+            elif self._accept(Token.OP_AND_ASSIGN):     return True
+            elif self._accept(Token.OP_XOR_ASSIGN):     return True
+            elif self._accept(Token.OP_OR_ASSIGN):      return True
+            elif self._accept(Token.OP_NOT_ASSIGN):     return True
+            elif self._accept(Token.OP_SHL_ASSIGN):     return True
+            elif self._accept(Token.OP_SHR_ASSIGN):     return True
+
             else:
                 return False
 
@@ -343,6 +355,31 @@ class Parser:
                 return InitExprNode(lhs, self._parse_expr_prec11())
             elif id == '=':
                 return AssignExprNode(lhs, self._parse_expr_prec11())
+
+            elif id == Token.OP_ADD_ASSIGN:
+                return AddAssignExprNode(lhs, self._parse_expr_prec11())
+            elif id == Token.OP_SUB_ASSIGN:
+                return SubAssignExprNode(lhs, self._parse_expr_prec11())
+            elif id == Token.OP_MUL_ASSIGN:
+                return MulAssignExprNode(lhs, self._parse_expr_prec11())
+            elif id == Token.OP_DIV_ASSIGN:
+                return DivAssignExprNode(lhs, self._parse_expr_prec11())
+            elif id == Token.OP_MOD_ASSIGN:
+                return ModAssignExprNode(lhs, self._parse_expr_prec11())
+
+            elif id == Token.OP_AND_ASSIGN:
+                return AndAssignExprNode(lhs, self._parse_expr_prec11())
+            elif id == Token.OP_XOR_ASSIGN:
+                return XorAssignExprNode(lhs, self._parse_expr_prec11())
+            elif id == Token.OP_OR_ASSIGN:
+                return OrAssignExprNode(lhs, self._parse_expr_prec11())
+            elif id == Token.OP_NOT_ASSIGN:
+                return NotAssignExprNode(lhs, self._parse_expr_prec11())
+            elif id == Token.OP_SHL_ASSIGN:
+                return ShlAssignExprNode(lhs, self._parse_expr_prec11())
+            elif id == Token.OP_SHR_ASSIGN:
+                return ShrAssignExprNode(lhs, self._parse_expr_prec11())
+
             else:
                 raise CompilerBug("0_0")
 
@@ -417,7 +454,7 @@ class Parser:
 
     def _parse_expr_prec5(self):
         def _accept():
-            if self._accept('*') or self._accept('/'):
+            if self._accept('*') or self._accept('/') or self._accept('%'):
                 return True
             else:
                 return False
@@ -431,6 +468,8 @@ class Parser:
                 lhs = MulExprNode(lhs, self._parse_expr_prec4())
             elif id == '/':
                 lhs = DivExprNode(lhs, self._parse_expr_prec4())
+            elif id == '%':
+                lhs = ModExprNode(lhs, self._parse_expr_prec4())
             else:
                 raise CompilerBug("$_$")
 

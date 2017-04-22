@@ -184,7 +184,6 @@ class Fun(Value):
         else:
             raise Todo()
 
-
     def gen_negate(self, operand):
         op_type = get_concrete_type(operand.type)
 
@@ -199,7 +198,98 @@ class Fun(Value):
         else:
             raise Todo()
 
+    def gen_add(self, lhs, rhs):
+        common_type = get_common_type(lhs.type, rhs.type)
 
+        if type(common_type) is IntType:
+            return LlvmRVal(
+                common_type,
+                self._builder.add(
+                    lhs.as_type(common_type).get_llvm_rval(),
+                    rhs.as_type(common_type).get_llvm_rval()
+                )
+            )
+
+        else:
+            raise Todo()
+
+    def gen_sub(self, lhs, rhs):
+        common_type = get_common_type(lhs.type, rhs.type)
+
+        if type(common_type) is IntType:
+            return LlvmRVal(
+                common_type,
+                self._builder.sub(
+                    lhs.as_type(common_type).get_llvm_rval(),
+                    rhs.as_type(common_type).get_llvm_rval()
+                )
+            )
+
+        else:
+            raise Todo()
+
+    def gen_mul(self, lhs, rhs):
+        common_type = get_common_type(lhs.type, rhs.type)
+
+        if type(common_type) is IntType:
+            return LlvmRVal(
+                common_type,
+                self._builder.mul(
+                    lhs.as_type(common_type).get_llvm_rval(),
+                    rhs.as_type(common_type).get_llvm_rval()
+                )
+            )
+
+        else:
+            raise Todo()
+
+    def gen_div(self, lhs, rhs):
+        common_type = get_common_type(lhs.type, rhs.type)
+
+        if type(common_type) is IntType:
+            if common_type._is_signed:
+                return LlvmRVal(
+                    common_type,
+                    self._builder.sdiv(
+                        lhs.as_type(common_type).get_llvm_rval(),
+                        rhs.as_type(common_type).get_llvm_rval()
+                    )
+                )
+            else:
+                return LlvmRVal(
+                    common_type,
+                    self._builder.udiv(
+                        lhs.as_type(common_type).get_llvm_rval(),
+                        rhs.as_type(common_type).get_llvm_rval()
+                    )
+                )
+
+        else:
+            raise Todo()
+
+    def gen_mod(self, lhs, rhs):
+        common_type = get_common_type(lhs.type, rhs.type)
+
+        if type(common_type) is IntType:
+            if common_type._is_signed:
+                return LlvmRVal(
+                    common_type,
+                    self._builder.srem(
+                        lhs.as_type(common_type).get_llvm_rval(),
+                        rhs.as_type(common_type).get_llvm_rval()
+                    )
+                )
+            else:
+                return LlvmRVal(
+                    common_type,
+                    self._builder.urem(
+                        lhs.as_type(common_type).get_llvm_rval(),
+                        rhs.as_type(common_type).get_llvm_rval()
+                    )
+                )
+
+        else:
+            raise Todo()
 
     def gen_ltn(self, lhs, rhs):
         return self._gen_cmp("<", lhs, rhs)
