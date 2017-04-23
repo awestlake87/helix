@@ -2,7 +2,7 @@ from contextlib import contextmanager
 
 from ...err import ReturnTypeMismatch, NotApplicable, Todo
 from ..symbols import SymbolTable
-from .values import Value, ConstLlvmValue, StackValue, StaticValue, LlvmRVal
+from .values import Value, ConstLlvmValue, StackValue, StaticValue, FunLlvmRVal
 from ..types import AutoIntType, IntType, get_common_type, get_concrete_type
 
 from llvmlite import ir
@@ -98,7 +98,8 @@ class Fun(Value):
 
         if type(op_type) is IntType:
             return operand.assign(
-                LlvmRVal(
+                FunLlvmRVal(
+                    self,
                     op_type,
                     self._builder.add(
                         operand.as_type(op_type).get_llvm_rval(),
@@ -117,13 +118,15 @@ class Fun(Value):
         op_type = get_concrete_type(operand.type)
 
         if type(op_type) is IntType:
-            value = LlvmRVal(
+            value = FunLlvmRVal(
+                self,
                 op_type,
                 operand.as_type(op_type).get_llvm_rval()
             )
 
             operand.assign(
-                LlvmRVal(
+                FunLlvmRVal(
+                    self,
                     op_type,
                     self._builder.add(
                         value.get_llvm_rval(),
@@ -145,7 +148,8 @@ class Fun(Value):
 
         if type(op_type) is IntType:
             return operand.assign(
-                LlvmRVal(
+                FunLlvmRVal(
+                    self,
                     op_type,
                     self._builder.sub(
                         operand.as_type(op_type).get_llvm_rval(),
@@ -164,13 +168,15 @@ class Fun(Value):
         op_type = get_concrete_type(operand.type)
 
         if type(op_type) is IntType:
-            value = LlvmRVal(
+            value = FunLlvmRVal(
+                self,
                 op_type,
                 operand.as_type(op_type).get_llvm_rval()
             )
 
             operand.assign(
-                LlvmRVal(
+                FunLlvmRVal(
+                    self,
                     op_type,
                     self._builder.sub(
                         value.get_llvm_rval(),
@@ -188,7 +194,8 @@ class Fun(Value):
         op_type = get_concrete_type(operand.type)
 
         if type(op_type) is IntType:
-            return LlvmRVal(
+            return FunLlvmRVal(
+                self,
                 op_type,
                 self._builder.neg(
                     operand.as_type(op_type).get_llvm_rval()
@@ -202,7 +209,8 @@ class Fun(Value):
         common_type = get_common_type(lhs.type, rhs.type)
 
         if type(common_type) is IntType:
-            return LlvmRVal(
+            return FunLlvmRVal(
+                self,
                 common_type,
                 self._builder.add(
                     lhs.as_type(common_type).get_llvm_rval(),
@@ -217,7 +225,8 @@ class Fun(Value):
         common_type = get_common_type(lhs.type, rhs.type)
 
         if type(common_type) is IntType:
-            return LlvmRVal(
+            return FunLlvmRVal(
+                self,
                 common_type,
                 self._builder.sub(
                     lhs.as_type(common_type).get_llvm_rval(),
@@ -232,7 +241,8 @@ class Fun(Value):
         common_type = get_common_type(lhs.type, rhs.type)
 
         if type(common_type) is IntType:
-            return LlvmRVal(
+            return FunLlvmRVal(
+                self,
                 common_type,
                 self._builder.mul(
                     lhs.as_type(common_type).get_llvm_rval(),
@@ -248,7 +258,8 @@ class Fun(Value):
 
         if type(common_type) is IntType:
             if common_type._is_signed:
-                return LlvmRVal(
+                return FunLlvmRVal(
+                    self,
                     common_type,
                     self._builder.sdiv(
                         lhs.as_type(common_type).get_llvm_rval(),
@@ -256,7 +267,8 @@ class Fun(Value):
                     )
                 )
             else:
-                return LlvmRVal(
+                return FunLlvmRVal(
+                    self,
                     common_type,
                     self._builder.udiv(
                         lhs.as_type(common_type).get_llvm_rval(),
@@ -272,7 +284,8 @@ class Fun(Value):
 
         if type(common_type) is IntType:
             if common_type._is_signed:
-                return LlvmRVal(
+                return FunLlvmRVal(
+                    self,
                     common_type,
                     self._builder.srem(
                         lhs.as_type(common_type).get_llvm_rval(),
@@ -280,7 +293,8 @@ class Fun(Value):
                     )
                 )
             else:
-                return LlvmRVal(
+                return FunLlvmRVal(
+                    self,
                     common_type,
                     self._builder.urem(
                         lhs.as_type(common_type).get_llvm_rval(),
@@ -295,7 +309,8 @@ class Fun(Value):
         common_type = get_common_type(lhs.type, rhs.type)
 
         if type(common_type) is IntType:
-            return LlvmRVal(
+            return FunLlvmRVal(
+                self,
                 common_type,
                 self._builder.and_(
                     lhs.as_type(common_type).get_llvm_rval(),
@@ -310,7 +325,8 @@ class Fun(Value):
         common_type = get_common_type(lhs.type, rhs.type)
 
         if type(common_type) is IntType:
-            return LlvmRVal(
+            return FunLlvmRVal(
+                self,
                 common_type,
                 self._builder.xor(
                     lhs.as_type(common_type).get_llvm_rval(),
@@ -325,7 +341,8 @@ class Fun(Value):
         common_type = get_common_type(lhs.type, rhs.type)
 
         if type(common_type) is IntType:
-            return LlvmRVal(
+            return FunLlvmRVal(
+                self,
                 common_type,
                 self._builder.or_(
                     lhs.as_type(common_type).get_llvm_rval(),
@@ -340,7 +357,8 @@ class Fun(Value):
         common_type = get_concrete_type(operand.type)
 
         if type(common_type) is IntType:
-            return LlvmRVal(
+            return FunLlvmRVal(
+                self,
                 common_type,
                 self._builder.not_(
                     operand.as_type(common_type).get_llvm_rval()
@@ -355,7 +373,8 @@ class Fun(Value):
 
         if type(common_type) is IntType:
             if common_type._is_signed:
-                return LlvmRVal(
+                return FunLlvmRVal(
+                    self,
                     common_type,
                     self._builder.ashr(
                         lhs.as_type(common_type).get_llvm_rval(),
@@ -363,7 +382,8 @@ class Fun(Value):
                     )
                 )
             else:
-                return LlvmRVal(
+                return FunLlvmRVal(
+                    self,
                     common_type,
                     self._builder.lshr(
                         lhs.as_type(common_type).get_llvm_rval(),
@@ -378,7 +398,8 @@ class Fun(Value):
         common_type = get_common_type(lhs.type, rhs.type)
 
         if type(common_type) is IntType:
-            return LlvmRVal(
+            return FunLlvmRVal(
+                self,
                 common_type,
                 self._builder.shl(
                     lhs.as_type(common_type).get_llvm_rval(),
@@ -413,7 +434,8 @@ class Fun(Value):
 
         if type(cmp_type) is IntType:
             if cmp_type._is_signed:
-                return LlvmRVal(
+                return FunLlvmRVal(
+                    self,
                     IntType(1, False),
                     self._builder.icmp_signed(
                         op,
@@ -422,7 +444,8 @@ class Fun(Value):
                     )
                 )
             else:
-                return LlvmRVal(
+                return FunLlvmRVal(
+                    self,
                     IntType(1, False),
                     self._builder.icmp_unsigned(
                         op,

@@ -5,7 +5,7 @@ from ...err import NoImplicitCast, Todo, CompilerBug
 from llvmlite import ir
 
 from ..symbols import SymbolTable
-from ..types import NilType
+from ..types import NilType, IntType, AutoIntType
 
 class Value:
     def is_type(self):
@@ -29,6 +29,9 @@ class Value:
         else:
             raise NoImplicitCast()
 
+    def as_bit(self):
+        raise NoImplicitCast()
+
 class NilValue(Value):
     def __init__(self, type=NilType()):
         self.type = type
@@ -45,6 +48,9 @@ class NilValue(Value):
     def get_llvm_rval(self):
         return ir.IntType(32)(0).inttoptr(self.type.get_llvm_type())
 
+    def as_bit(self):
+        return StaticValue(IntType(1, False), 0)
+
 class StaticValue(Value):
     def __init__(self, type, value):
         self.type = type
@@ -55,6 +61,16 @@ class StaticValue(Value):
             return StaticValue(other_type, self._value)
         else:
             raise NoImplicitCast()
+
+    def as_bit(self):
+        if type(self.type) is IntType:
+            return (
+                StaticValue(IntType(1, False), 1)
+                if self._value != 0 else
+                StaticValue(IntType(1, False), 0)
+            )
+        else:
+            raise Todo()
 
     def is_static(self):
         return True
@@ -72,12 +88,22 @@ class LlvmValue(Value):
         self._value = llvm_value
 
 
-class LlvmRVal(LlvmValue):
+class FunLlvmRVal(LlvmValue):
+    def __init__(self, fun, type, llvm_value):
+        super().__init__(type, llvm_value)
+        self._fun = fun
+
     def is_rval(self):
         return True
 
     def get_llvm_rval(self):
         return self._value
+
+    def as_bit(self):
+        if type(self.type) is IntType:
+            return self._fun.gen_neq(self, StaticValue(self.type, 0))
+        else:
+            raise Todo()
 
 class ConstLlvmValue(LlvmValue):
     def is_rval(self):
@@ -114,3 +140,8 @@ class StackValue(LlvmValue):
         )
 
         return self
+
+    def as_bit(self):
+        return FunLlvmRVal(
+            self._fun, self.type, self.get_llvm_rval()
+        ).as_bit()

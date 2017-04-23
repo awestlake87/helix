@@ -50,7 +50,7 @@ class IfStatementNode(StatementNode):
                 then_block = fun._builder.append_basic_block("then")
                 else_block = fun._builder.append_basic_block("else")
 
-        if self._else_block != None:
+        if self._else_block != None and not self._else_block.is_empty():
             self._else_block.hoist_fun_code(fun)
             self._else_block.gen_fun_code(fun)
         else:
