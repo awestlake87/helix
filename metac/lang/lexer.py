@@ -51,12 +51,21 @@ class Lexer:
         else:
             return False
 
+    def _ignore_space_and_comments(self):
+        while True:
+            while self._peek() == ' ' or self._peek() == '\n':
+                self._toss()
+
+            if self._peek() == '#':
+                while self._peek() != '\n' and self._peek() != '\0':
+                    self._toss()
+            else:
+                return
+
     def scan(self):
         self._token = ""
 
-        while self._peek() == ' ' or self._peek() == '\n':
-            self._toss()
-
+        self._ignore_space_and_comments()
 
         if self._peek() == '\0' and self._state != Lexer.DEDENTING:
             self._state = Lexer.DEDENTING
@@ -498,5 +507,10 @@ class Lexer:
                     if _accept('l'):
                         if _accept('e'):
                             return _end_kw(Token.KW_WHILE)
+
+        elif _accept('x'):
+            if _accept('o'):
+                if _accept('r'):
+                    return _end_kw(Token.OP_XOR)
 
         return _end_id()

@@ -39,6 +39,7 @@ class Compiler:
         try:
             llvm_module = llvm.parse_assembly(str(unit._module))
             llvm_module.verify()
+            
         except Exception as e:
             print(unit._module)
             raise e

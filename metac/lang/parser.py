@@ -219,43 +219,29 @@ class Parser:
         )
 
     def _parse_condition(self):
-        return self._parse_condition_prec5()
+        return self._parse_condition_prec6()
+
+    def _parse_condition_prec6(self):
+        lhs = self._parse_condition_prec5()
+
+        while self._accept(Token.OP_OR):
+            lhs = OrNode(lhs, self._parse_condition_prec5())
+
+        return lhs
 
     def _parse_condition_prec5(self):
-        def _accept():
-            if self._accept(Token.OP_OR):
-                return True
-            else:
-                return False
-
         lhs = self._parse_condition_prec4()
 
-        while _accept():
-            id = self._current.id
-
-            if id == Token.OP_OR:
-                lhs = OrNode(lhs, self._parse_condition_prec4())
-            else:
-                raise CompilerBug("#_#")
+        while self._accept(Token.OP_XOR):
+            lhs = XorNode(lhs, self._parse_condition_prec4())
 
         return lhs
 
     def _parse_condition_prec4(self):
-        def _accept():
-            if self._accept(Token.OP_AND):
-                return True
-            else:
-                return False
-
         lhs = self._parse_condition_prec3()
 
-        while _accept():
-            id = self._current.id
-
-            if id == Token.OP_AND:
-                lhs = AndNode(lhs, self._parse_condition_prec3())
-            else:
-                raise CompilerBug("$.$")
+        while self._accept(Token.OP_AND):
+            lhs = AndNode(lhs, self._parse_condition_prec3())
 
         return lhs
 

@@ -80,9 +80,12 @@ def get_common_type(a, b):
         if a._num_bits != b._num_bits:
             return None
 
-        elif a._is_signed != b._is_signed:
+        elif a._is_signed and not b._is_signed:
             return None
 
+        elif not a._is_signed and b._is_signed:
+            return None
+            
         else:
             return a
 

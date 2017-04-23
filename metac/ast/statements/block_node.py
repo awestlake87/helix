@@ -4,8 +4,12 @@ from ...ir import SymbolTable
 from ..statement_node import StatementNode
 
 class BlockNode(StatementNode):
-    def __init__(self, statements=None):
+    def __init__(self, statements=[ ]):
         self._statements = statements
+
+
+    def is_empty(self):
+        return len(self._statements) == 0
 
     def hoist_unit_code(self, unit):
         self._symbols = SymbolTable(unit.symbols)
