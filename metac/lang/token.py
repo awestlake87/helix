@@ -62,7 +62,6 @@ class Token:
     OP_AND_ASSIGN       = "&="
     OP_XOR_ASSIGN       = "^="
     OP_OR_ASSIGN        = "|="
-    OP_NOT_ASSIGN       = "~="
     OP_SHL_ASSIGN       = "<<="
     OP_SHR_ASSIGN       = ">>="
 

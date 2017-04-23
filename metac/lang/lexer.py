@@ -140,7 +140,7 @@ class Lexer:
                 return _end_int(Token.LT_INT_BIN)
             else:
                 return _end_int(Token.LT_INT_DEC)
-                
+
         elif c >= '0' and c <= '9':
             _accept_dec_digits()
             return _end_int(Token.LT_INT_DEC)
@@ -220,15 +220,47 @@ class Lexer:
             else:
                 return Token('%')
 
+        elif _toss('&'):
+            if _toss('='):
+                return Token(Token.OP_AND_ASSIGN)
+            else:
+                return Token('&')
+
+        elif _toss('^'):
+            if _toss('='):
+                return Token(Token.OP_XOR_ASSIGN)
+            else:
+                return Token('^')
+
+        elif _toss('|'):
+            if _toss('='):
+                return Token(Token.OP_OR_ASSIGN)
+            else:
+                return Token('|')
+
+
+        elif _toss('~'):
+            return Token('~')
+
         elif _toss('<'):
             if _toss('='):
                 return Token(Token.OP_LEQ)
+            elif _toss('<'):
+                if _toss('='):
+                    return Token(Token.OP_SHL_ASSIGN)
+                else:
+                    return Token(Token.OP_SHL)
             else:
                 return Token('<')
 
         elif _toss('>'):
             if _toss('='):
                 return Token(Token.OP_GEQ)
+            elif _toss('>'):
+                if _toss('='):
+                    return Token(Token.OP_SHR_ASSIGN)
+                else:
+                    return Token(Token.OP_SHR)
             else:
                 return Token('>')
 

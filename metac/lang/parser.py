@@ -339,7 +339,6 @@ class Parser:
             elif self._accept(Token.OP_AND_ASSIGN):     return True
             elif self._accept(Token.OP_XOR_ASSIGN):     return True
             elif self._accept(Token.OP_OR_ASSIGN):      return True
-            elif self._accept(Token.OP_NOT_ASSIGN):     return True
             elif self._accept(Token.OP_SHL_ASSIGN):     return True
             elif self._accept(Token.OP_SHR_ASSIGN):     return True
 
@@ -368,17 +367,15 @@ class Parser:
                 return ModAssignExprNode(lhs, self._parse_expr_prec11())
 
             elif id == Token.OP_AND_ASSIGN:
-                return AndAssignExprNode(lhs, self._parse_expr_prec11())
+                return BitAndAssignExprNode(lhs, self._parse_expr_prec11())
             elif id == Token.OP_XOR_ASSIGN:
-                return XorAssignExprNode(lhs, self._parse_expr_prec11())
+                return BitXorAssignExprNode(lhs, self._parse_expr_prec11())
             elif id == Token.OP_OR_ASSIGN:
-                return OrAssignExprNode(lhs, self._parse_expr_prec11())
-            elif id == Token.OP_NOT_ASSIGN:
-                return NotAssignExprNode(lhs, self._parse_expr_prec11())
+                return BitOrAssignExprNode(lhs, self._parse_expr_prec11())
             elif id == Token.OP_SHL_ASSIGN:
-                return ShlAssignExprNode(lhs, self._parse_expr_prec11())
+                return BitShlAssignExprNode(lhs, self._parse_expr_prec11())
             elif id == Token.OP_SHR_ASSIGN:
-                return ShrAssignExprNode(lhs, self._parse_expr_prec11())
+                return BitShrAssignExprNode(lhs, self._parse_expr_prec11())
 
             else:
                 raise CompilerBug("0_0")
@@ -423,9 +420,9 @@ class Parser:
             id = self._current.id
 
             if id == Token.OP_SHL:
-                lhs = ShlExprNode(lhs, self._parse_expr_prec6())
+                lhs = BitShlExprNode(lhs, self._parse_expr_prec6())
             elif id == Token.OP_SHR:
-                lhs = ShrExprNode(rhs, self._parse_expr_prec6())
+                lhs = BitShrExprNode(lhs, self._parse_expr_prec6())
             else:
                 raise CompilerBug("^.^")
 
@@ -527,6 +524,8 @@ class Parser:
                 return True
             elif self._accept(Token.OP_DEC):
                 return True
+            elif self._accept('~'):
+                return True
             else:
                 return False
 
@@ -544,6 +543,9 @@ class Parser:
 
             elif id == Token.OP_DEC:
                 return PreDecExprNode(self._parse_expr_prec2())
+
+            elif id == '~':
+                return BitNotExprNode(self._parse_expr_prec2())
 
             else:
                 raise CompilerBug("O_O")
