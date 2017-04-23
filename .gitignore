@@ -27,8 +27,3 @@
 *.exe
 *.out
 *.app
-
-# llvm assembly files
-*.ll
-
-__pycache__
