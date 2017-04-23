@@ -291,6 +291,104 @@ class Fun(Value):
         else:
             raise Todo()
 
+    def gen_bit_and(self, lhs, rhs):
+        common_type = get_common_type(lhs.type, rhs.type)
+
+        if type(common_type) is IntType:
+            return LlvmRVal(
+                common_type,
+                self._builder.and_(
+                    lhs.as_type(common_type).get_llvm_rval(),
+                    rhs.as_type(common_type).get_llvm_rval()
+                )
+            )
+
+        else:
+            raise Todo()
+
+    def gen_bit_xor(self, lhs, rhs):
+        common_type = get_common_type(lhs.type, rhs.type)
+
+        if type(common_type) is IntType:
+            return LlvmRVal(
+                common_type,
+                self._builder.xor(
+                    lhs.as_type(common_type).get_llvm_rval(),
+                    rhs.as_type(common_type).get_llvm_rval()
+                )
+            )
+
+        else:
+            raise Todo()
+
+    def gen_bit_or(self, lhs, rhs):
+        common_type = get_common_type(lhs.type, rhs.type)
+
+        if type(common_type) is IntType:
+            return LlvmRVal(
+                common_type,
+                self._builder.or_(
+                    lhs.as_type(common_type).get_llvm_rval(),
+                    rhs.as_type(common_type).get_llvm_rval()
+                )
+            )
+
+        else:
+            raise Todo()
+
+    def gen_bit_not(self, operand):
+        common_type = get_concrete_type(operand.type)
+
+        if type(common_type) is IntType:
+            return LlvmRVal(
+                common_type,
+                self._builder.not_(
+                    operand.as_type(common_type).get_llvm_rval()
+                )
+            )
+
+        else:
+            raise Todo()
+
+    def gen_bit_shr(self, lhs, rhs):
+        common_type = get_common_type(lhs.type, rhs.type)
+
+        if type(common_type) is IntType:
+            if common_type._is_signed:
+                return LlvmRVal(
+                    common_type,
+                    self._builder.ashr(
+                        lhs.as_type(common_type).get_llvm_rval(),
+                        rhs.as_type(common_type).get_llvm_rval()
+                    )
+                )
+            else:
+                return LlvmRVal(
+                    common_type,
+                    self._builder.lshr(
+                        lhs.as_type(common_type).get_llvm_rval(),
+                        rhs.as_type(common_type).get_llvm_rval()
+                    )
+                )
+
+        else:
+            raise Todo()
+
+    def gen_bit_shl(self, lhs, rhs):
+        common_type = get_common_type(lhs.type, rhs.type)
+
+        if type(common_type) is IntType:
+            return LlvmRVal(
+                common_type,
+                self._builder.shl(
+                    lhs.as_type(common_type).get_llvm_rval(),
+                    rhs.as_type(common_type).get_llvm_rval()
+                )
+            )
+
+        else:
+            raise Todo()
+
     def gen_ltn(self, lhs, rhs):
         return self._gen_cmp("<", lhs, rhs)
 
