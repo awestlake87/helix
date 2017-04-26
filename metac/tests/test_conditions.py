@@ -29,9 +29,9 @@ class ConditionTests(unittest.TestCase):
                         if a == 34
                             return 5
 
-                    #if true and a = 45
-                    #    if a == 45
-                    #        return 6
+                    if true and a = 45
+                        if a != 45
+                            return 6
 
                     return 0
                 """
@@ -81,15 +81,15 @@ class ConditionTests(unittest.TestCase):
 
                     a: 123
 
-                    #if false or a = 34
-                    #    if a == 34
-                    #        pass
-                    #    else
-                    #        return 2
+                    if false or a = 34
+                        if a == 34
+                            pass
+                        else
+                            return 2
 
-                    #if true or a = 45
-                    #    if a == 45
-                    #        return 3
+                    if true or a = 45
+                        if a == 45
+                            return 3
 
                     return 0
                 """

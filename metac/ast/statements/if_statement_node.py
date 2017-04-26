@@ -9,17 +9,7 @@ class IfStatementNode(StatementNode):
     def gen_fun_code(self, fun):
         assert len(self._if_branches) >= 1
 
-        end_if = None
-
-        def get_end_if():
-            nonlocal end_if
-
-            if end_if != None:
-                return end_if
-            else:
-                end_if = fun._builder.append_basic_block("end_if")
-                return end_if
-
+        end_if = fun._builder.append_basic_block("end_if")
         then_block = fun._builder.append_basic_block("then")
         else_block = fun._builder.append_basic_block("else")
 
@@ -38,9 +28,8 @@ class IfStatementNode(StatementNode):
                 block.hoist_fun_code(fun)
                 block.gen_fun_code(fun)
 
-            if not then_block.is_terminated:
-                with fun._builder.goto_block(then_block):
-                    fun._builder.branch(get_end_if())
+                if not fun._builder.block.is_terminated:
+                    fun._builder.branch(end_if)
 
             assert then_block.is_terminated
 
@@ -50,19 +39,18 @@ class IfStatementNode(StatementNode):
                 then_block = fun._builder.append_basic_block("then")
                 else_block = fun._builder.append_basic_block("else")
 
-        if self._else_block != None and not self._else_block.is_empty():
-            self._else_block.hoist_fun_code(fun)
-            self._else_block.gen_fun_code(fun)
-        else:
-            fun._builder.branch(get_end_if())
 
-        if not else_block.is_terminated:
-            with fun._builder.goto_block(else_block):
-                fun._builder.branch(get_end_if())
+        with fun._builder.goto_block(else_block):
+            if self._else_block != None:
+                self._else_block.hoist_fun_code(fun)
+                self._else_block.gen_fun_code(fun)
+
+                if not fun._builder.block.is_terminated:
+                    fun._builder.branch(end_if)
+            else:
+                fun._builder.branch(end_if)
 
         assert else_block.is_terminated
+        assert not end_if.is_terminated
 
-        if end_if != None:
-            fun._builder.position_at_start(get_end_if())
-
-        assert end_if == None or not end_if.is_terminated
+        fun._builder.position_at_start(end_if)

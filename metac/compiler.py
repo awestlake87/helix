@@ -29,7 +29,7 @@ class Compiler:
 
         return llvm_module
 
-    def compile_unit(self, code):
+    def compile_unit(self, code, dump_ir=False):
         parser = Parser(code)
         ast = parser.parse()
 
@@ -39,10 +39,13 @@ class Compiler:
         try:
             llvm_module = llvm.parse_assembly(str(unit._module))
             llvm_module.verify()
-            
+
         except Exception as e:
             print(unit._module)
             raise e
+
+        if dump_ir:
+            print(unit._module)
 
         self._engine.add_module(llvm_module)
         self._engine.finalize_object()
