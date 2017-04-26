@@ -47,9 +47,30 @@ class MiscExprTests(unittest.TestCase):
             1234,
             run_test(
                 """
-                extern fun int test(int arg)
+                extern fun int test()
                     a: b: 1234
                     return a
+                """
+            )
+        )
+
+    def test_ternary_conditional(self):
+        self.assertEqual(
+            0,
+            run_test(
+                """
+                extern fun int test()
+                    a: 432 if true else 321
+
+                    if a == 321
+                        return 1
+
+                    a = 11 if false else 13
+
+                    if a == 11
+                        return 2
+
+                    return 0
                 """
             )
         )

@@ -309,9 +309,9 @@ class Parser:
             return self._parse_expr()
 
     def _parse_expr(self):
-        return self._parse_expr_prec11()
+        return self._parse_expr_prec12()
 
-    def _parse_expr_prec11(self):
+    def _parse_expr_prec12(self):
         def _accept():
             if self._accept(':'):                       return True
             elif self._accept('='):                     return True
@@ -331,41 +331,55 @@ class Parser:
             else:
                 return False
 
-        lhs = self._parse_expr_prec10()
+        lhs = self._parse_expr_prec11()
 
         if _accept():
             id = self._current.id
 
             if id == ':':
-                return InitExprNode(lhs, self._parse_expr_prec11())
+                return InitExprNode(lhs, self._parse_expr_prec12())
             elif id == '=':
-                return AssignExprNode(lhs, self._parse_expr_prec11())
+                return AssignExprNode(lhs, self._parse_expr_prec12())
 
             elif id == Token.OP_ADD_ASSIGN:
-                return AddAssignExprNode(lhs, self._parse_expr_prec11())
+                return AddAssignExprNode(lhs, self._parse_expr_prec12())
             elif id == Token.OP_SUB_ASSIGN:
-                return SubAssignExprNode(lhs, self._parse_expr_prec11())
+                return SubAssignExprNode(lhs, self._parse_expr_prec12())
             elif id == Token.OP_MUL_ASSIGN:
-                return MulAssignExprNode(lhs, self._parse_expr_prec11())
+                return MulAssignExprNode(lhs, self._parse_expr_prec12())
             elif id == Token.OP_DIV_ASSIGN:
-                return DivAssignExprNode(lhs, self._parse_expr_prec11())
+                return DivAssignExprNode(lhs, self._parse_expr_prec12())
             elif id == Token.OP_MOD_ASSIGN:
-                return ModAssignExprNode(lhs, self._parse_expr_prec11())
+                return ModAssignExprNode(lhs, self._parse_expr_prec12())
 
             elif id == Token.OP_AND_ASSIGN:
-                return BitAndAssignExprNode(lhs, self._parse_expr_prec11())
+                return BitAndAssignExprNode(lhs, self._parse_expr_prec12())
             elif id == Token.OP_XOR_ASSIGN:
-                return BitXorAssignExprNode(lhs, self._parse_expr_prec11())
+                return BitXorAssignExprNode(lhs, self._parse_expr_prec12())
             elif id == Token.OP_OR_ASSIGN:
-                return BitOrAssignExprNode(lhs, self._parse_expr_prec11())
+                return BitOrAssignExprNode(lhs, self._parse_expr_prec12())
             elif id == Token.OP_SHL_ASSIGN:
-                return BitShlAssignExprNode(lhs, self._parse_expr_prec11())
+                return BitShlAssignExprNode(lhs, self._parse_expr_prec12())
             elif id == Token.OP_SHR_ASSIGN:
-                return BitShrAssignExprNode(lhs, self._parse_expr_prec11())
+                return BitShrAssignExprNode(lhs, self._parse_expr_prec12())
 
             else:
                 raise CompilerBug("0_0")
 
+        else:
+            return lhs
+
+    def _parse_expr_prec11(self):
+        lhs = self._parse_expr_prec10()
+
+        if self._accept(Token.KW_IF):
+            condition = self._parse_condition()
+
+            self._expect(Token.KW_ELSE)
+
+            rhs = self._parse_expr_prec10()
+
+            return TernaryConditionalNode(lhs, condition, rhs)
         else:
             return lhs
 

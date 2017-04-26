@@ -1,5 +1,8 @@
 
-from ...ir import PtrType, Type
+from ...ir import (
+    PtrType, Type, get_common_type, get_concrete_type, FunLlvmRVal, IntType
+)
+
 from ...err import Todo
 
 from ..expr_node import ExprNode, UnaryExprNode, BinaryExprNode
@@ -51,3 +54,53 @@ class CallExprNode(ExprNode):
         return self._lhs.gen_fun_value(fun).call(
             fun, [ arg.gen_fun_value(fun) for arg in self._args ]
         )
+
+
+class TernaryConditionalNode(ExprNode):
+    def __init__(self, lhs, condition, rhs):
+        self._lhs = lhs
+        self._condition = condition
+        self._rhs = rhs
+
+    def gen_fun_value(self, fun):
+        tern_true = fun._builder.append_basic_block("tern_true")
+        tern_false = fun._builder.append_basic_block("tern_false")
+        tern_end = fun._builder.append_basic_block("tern_end")
+
+        fun._builder.cbranch(
+            self._condition.gen_fun_value(fun).as_bit().get_llvm_rval(),
+            tern_true,
+            tern_false
+        )
+
+        lhs_value = None
+        rhs_value = None
+
+        with fun._builder.goto_block(tern_true):
+            lhs_value = self._lhs.gen_fun_value(fun)
+            fun._builder.branch(tern_end)
+
+        with fun._builder.goto_block(tern_false):
+            rhs_value = self._rhs.gen_fun_value(fun)
+            fun._builder.branch(tern_end)
+
+        val_type = get_concrete_type(
+            get_common_type(lhs_value.type, rhs_value.type)
+        )
+
+        if type(val_type) is IntType:
+            fun._builder.position_at_start(tern_end)
+
+            phi = fun._builder.phi(val_type.get_llvm_type())
+
+            phi.add_incoming(
+                lhs_value.as_type(val_type).get_llvm_rval(), tern_true
+            )
+            phi.add_incoming(
+                rhs_value.as_type(val_type).get_llvm_rval(), tern_false
+            )
+
+            return FunLlvmRVal(fun, val_type, phi)
+
+        else:
+            raise Todo()
