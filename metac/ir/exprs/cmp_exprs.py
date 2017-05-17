@@ -2,7 +2,7 @@
 from ...err import ReturnTypeMismatch, NotApplicable, Todo
 from ..symbols import SymbolTable
 from ..values.values import (
-    Value, ConstLlvmValue, StackValue, StaticValue, FunLlvmRVal
+    Value, ConstLlvmValue, StaticValue, FunLlvmRVal
 )
 from ..types import *
 

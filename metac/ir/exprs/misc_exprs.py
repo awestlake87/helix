@@ -24,12 +24,32 @@ def gen_fun_assign(fun, lhs, rhs):
     if not rhs.type.can_convert_to(lhs.type):
         raise CompilerBug("type mismatch in function level assign")
 
-    if type(lhs) is StackValue:
+    if type(lhs) is FunLlvmLVal:
         fun._builder.store(
             gen_fun_as(fun, rhs, lhs.type).get_llvm_rval(),
             lhs._value
         )
         return lhs
+
+    else:
+        raise Todo()
+
+def gen_fun_dot(fun, lhs, rhs):
+    if type(lhs.type) is StructType:
+        if type(rhs) is str:
+            attr_type, attr_index = lhs.type.get_attr_info(rhs)
+
+            return FunLlvmLVal(
+                fun,
+                attr_type,
+                fun._builder.gep(
+                    lhs.get_llvm_lval(),
+                    [ ir.IntType(32)(0), ir.IntType(32)(attr_index) ]
+                )
+            )
+
+        else:
+            raise Todo("make a \"rhs of '.' must be an identifier\" error")
 
     else:
         raise Todo()

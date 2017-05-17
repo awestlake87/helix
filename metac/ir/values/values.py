@@ -72,7 +72,7 @@ class ConstLlvmValue(LlvmValue):
     def get_llvm_rval(self):
         return self._value
 
-class StackValue(LlvmValue):
+class FunLlvmLVal(LlvmValue):
     def __init__(self, fun, type, value):
         super().__init__(type, value)
 
@@ -80,6 +80,9 @@ class StackValue(LlvmValue):
 
     def is_lval(self):
         return True
+
+    def get_llvm_lval(self):
+        return self._value
 
     def get_llvm_rval(self):
         return self._fun._builder.load(self._value)

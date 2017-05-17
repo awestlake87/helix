@@ -54,7 +54,7 @@ class Fun(Value):
                     var_type.get_llvm_type()
                 )
 
-                return StackValue(self, var_type, llvm_value)
+                return FunLlvmLVal(self, var_type, llvm_value)
 
         else:
             with self._builder.goto_block(self._entry):
@@ -62,7 +62,7 @@ class Fun(Value):
                     ir_type.get_llvm_type()
                 )
 
-                return StackValue(self, ir_type, llvm_value)
+                return FunLlvmLVal(self, ir_type, llvm_value)
 
     @contextmanager
     def using_scope(self, symbols):

@@ -116,6 +116,18 @@ class StructType(Type):
             [ t.get_llvm_type() for t, id in self._attrs ]
         )
 
+    def get_attr_info(self, id):
+
+        for i in range(0, len(self._attrs)):
+            attr_type, attr_id = self._attrs[i]
+
+            if attr_id == id:
+                return (attr_type, i)
+
+        raise Todo(
+            "make a \"unable to resolve struct attr '{}'\" error".format(id)
+        )
+
 
 def get_common_type(a, b):
     if type(a) is IntType and type(b) is IntType:

@@ -9,7 +9,8 @@ from ...ir import (
     gen_fun_call,
     gen_fun_as_bit,
     gen_fun_as,
-    gen_fun_assign
+    gen_fun_assign,
+    gen_fun_dot
 )
 
 from ...err import Todo
@@ -29,10 +30,13 @@ class PtrExprNode(UnaryExprNode):
 
 class DotExpr(BinaryExprNode):
     def gen_fun_value(self, fun):
-        lhs_value = self._lhs.gen_fun_value(fun)
-
         if type(self._rhs) is SymbolNode:
-            return lhs_value.dot_access(self._rhs._id)
+            return gen_fun_dot(
+                fun,
+                self._lhs.gen_fun_value(fun),
+                self._rhs._id
+            )
+
         else:
             raise Todo()
 
