@@ -80,21 +80,29 @@ class MiscExprTests(unittest.TestCase):
             0,
             run_test(
                 """
+                struct Lard
+                    int @fat
+
                 struct Blargh
                     int @an_attr
                     int @_b123_b
+                    Lard @_lard
 
                 extern fun int test()
                     blargh: Blargh()
 
                     blargh.an_attr = 1
                     blargh._b123_b = 2
+                    blargh._lard.fat = 5
 
                     if blargh.an_attr != 1
                         return 1
 
                     if blargh._b123_b != 2
                         return 2
+
+                    if blargh._lard.fat != 5
+                        return 3
 
                     return 0
                 """
