@@ -1,5 +1,7 @@
 
-from ...ir import Unit, Fun, NilValue, AutoIntType, IntType, StaticValue
+from ...ir import (
+    Unit, Fun, NilValue, AutoIntType, IntType, StaticValue, StructType
+)
 from ...err import Todo
 
 from ..expr_node import ExprNode
@@ -122,3 +124,20 @@ class SymbolNode(ExprNode):
 
     def gen_fun_value(self, fun):
         return fun.symbols.resolve(self._id)
+
+
+class StructNode(ExprNode):
+    def __init__(self, id, attrs = [ ]):
+        self._id = id
+        self._attrs = attrs
+
+    def gen_unit_value(self, unit):
+        return unit.symbols.insert(
+            self._id,
+            StructType([
+                (type.gen_unit_value(unit), id) for type, id in self._attrs
+            ])
+        )
+
+    def gen_fun_value(self, fun):
+        raise Todo()

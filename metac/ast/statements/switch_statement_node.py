@@ -1,6 +1,6 @@
 
 from ...err import Todo
-from ...ir import IntType, AutoIntType
+from ...ir import IntType, AutoIntType, gen_fun_as
 
 from ..statement_node import StatementNode
 
@@ -19,7 +19,7 @@ class SwitchStatementNode(StatementNode):
         value = self._value.gen_fun_value(fun)
 
         if type(value.type) is AutoIntType:
-            value = value.as_type(IntType())
+            value = gen_fun_as(fun, value, IntType())
 
 
         if not type(value.type) is IntType:
@@ -40,7 +40,7 @@ class SwitchStatementNode(StatementNode):
                 raise Todo("non-static cases?")
 
             if type(value.type) is AutoIntType:
-                value = value.as_type(IntType())
+                value = gen_fun_as(fun, value, IntType())
 
             inst.add_case(
                 value.get_llvm_rval(),

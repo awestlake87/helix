@@ -1,6 +1,15 @@
 
 from ...ir import (
-    PtrType, Type, get_common_type, get_concrete_type, FunLlvmRVal, IntType
+    PtrType,
+    Type,
+    get_common_type,
+    get_concrete_type,
+    FunLlvmRVal,
+    IntType,
+    gen_fun_call,
+    gen_fun_as_bit,
+    gen_fun_as,
+    gen_fun_assign
 )
 
 from ...err import Todo
@@ -17,6 +26,16 @@ class PtrExprNode(UnaryExprNode):
         else:
             raise Todo("dereferencing values")
 
+
+class DotExpr(BinaryExprNode):
+    def gen_fun_value(self, fun):
+        lhs_value = self._lhs.gen_fun_value(fun)
+
+        if type(self._rhs) is SymbolNode:
+            return lhs_value.dot_access(self._rhs._id)
+        else:
+            raise Todo()
+
 class InitExprNode(BinaryExprNode):
     def gen_unit_value(self, unit):
         raise Todo()
@@ -26,7 +45,11 @@ class InitExprNode(BinaryExprNode):
             value = self._rhs.gen_fun_value(fun)
             return fun.symbols.insert(
                 self._lhs._id,
-                fun.create_stack_var(value.type).initialize(value)
+                gen_fun_assign(
+                    fun,
+                    fun.create_stack_var(value.type),
+                    value
+                )
             )
         else:
             raise Todo()
@@ -36,7 +59,9 @@ class AssignExprNode(BinaryExprNode):
         raise Todo()
 
     def gen_fun_value(self, fun):
-        return self._lhs.gen_fun_value(fun).assign(
+        return gen_fun_assign(
+            fun,
+            self._lhs.gen_fun_value(fun),
             self._rhs.gen_fun_value(fun)
         )
 
@@ -51,8 +76,10 @@ class CallExprNode(ExprNode):
         )
 
     def gen_fun_value(self, fun):
-        return self._lhs.gen_fun_value(fun).call(
-            fun, [ arg.gen_fun_value(fun) for arg in self._args ]
+        return gen_fun_call(
+            fun,
+            self._lhs.gen_fun_value(fun),
+            [ arg.gen_fun_value(fun) for arg in self._args ]
         )
 
 
@@ -68,7 +95,10 @@ class TernaryConditionalNode(ExprNode):
         tern_end = fun._builder.append_basic_block("tern_end")
 
         fun._builder.cbranch(
-            self._condition.gen_fun_value(fun).as_bit().get_llvm_rval(),
+            gen_fun_as_bit(
+                fun,
+                self._condition.gen_fun_value(fun)
+            ).get_llvm_rval(),
             tern_true,
             tern_false
         )
@@ -94,10 +124,12 @@ class TernaryConditionalNode(ExprNode):
             phi = fun._builder.phi(val_type.get_llvm_type())
 
             phi.add_incoming(
-                lhs_value.as_type(val_type).get_llvm_rval(), tern_true
+                gen_fun_as(fun, lhs_value, val_type).get_llvm_rval(),
+                tern_true
             )
             phi.add_incoming(
-                rhs_value.as_type(val_type).get_llvm_rval(), tern_false
+                gen_fun_as(fun, rhs_value, val_type).get_llvm_rval(),
+                tern_false
             )
 
             return FunLlvmRVal(fun, val_type, phi)

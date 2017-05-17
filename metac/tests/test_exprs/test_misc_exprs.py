@@ -74,3 +74,29 @@ class MiscExprTests(unittest.TestCase):
                 """
             )
         )
+
+    def test_structs(self):
+        self.assertEqual(
+            0,
+            run_test(
+                """
+                struct Blargh
+                    int @an_attr
+                    int @_b123_b
+
+                extern fun int test()
+                    blargh: Blargh()
+
+                    blargh.an_attr = 1
+                    blargh._b123_b = 2
+
+                    if blargh.an_attr != 1
+                        return 1
+
+                    if blargh._b123_b != 2
+                        return 2
+
+                    return 0
+                """
+            )
+        )

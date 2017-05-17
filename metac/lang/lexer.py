@@ -42,7 +42,11 @@ class Lexer:
         return c
 
     def _take(self):
-        self._token += self._toss()
+        c = self._toss()
+
+        self._token += c
+
+        return c
 
     def _accept(self, c):
         if self._peek() == c:
@@ -104,13 +108,42 @@ class Lexer:
 
         c = self._peek()
 
-        if c >= 'a' and c <= 'z' or c >= 'A' and c <= 'Z':
+        if c >= 'a' and c <= 'z' or c >= 'A' and c <= 'Z' or c == '_':
             return self._scan_alpha()
+
         elif c >= '0' and c <= '9':
             return self._scan_num()
+
+        elif c == '@':
+            return self._scan_attribute()
+
         else:
             return self._scan_punct()
 
+
+    def _scan_attribute(self):
+        assert self._toss() == '@'
+
+        c = self._peek()
+
+        if c >= 'a' and c <= 'z' or c >= 'A' and c <= 'Z' or c == '_':
+            self._take()
+
+        else:
+            raise UnexpectedChar(c)
+
+        c = self._peek()
+
+        while (
+            c >= 'a' and c <= 'z' or
+            c >= 'A' and c <= 'Z' or
+            c >= '0' and c <= '9' or
+            c == '_'
+        ):
+            self._take()
+            c = self._peek()
+
+        return Token(Token.ATTR_ID, self._token)
 
     def _scan_num(self):
         def _accept_dec_digits():

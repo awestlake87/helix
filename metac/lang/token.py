@@ -9,6 +9,7 @@ class Token:
     NODENT              = "NODENT"
 
     ID                  = "ID"
+    ATTR_ID             = "ATTR_ID"
 
     KW_EXTERN           = "extern"
     KW_INTERN           = "intern"

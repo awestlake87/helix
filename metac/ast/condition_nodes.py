@@ -2,7 +2,7 @@
 from .expr_node import BinaryExprNode, UnaryExprNode
 
 from ..err import Todo
-from ..ir import IntType, FunLlvmRVal
+from ..ir import *
 
 import llvmlite
 
@@ -17,7 +17,7 @@ class AndNode(BinaryExprNode):
         and_end = fun._builder.append_basic_block("and_end")
 
         fun._builder.cbranch(
-            self._lhs.gen_fun_value(fun).as_bit().get_llvm_rval(),
+            gen_fun_as_bit(fun, self._lhs.gen_fun_value(fun)).get_llvm_rval(),
             and_lhs_true,
             and_false
         )
@@ -27,7 +27,9 @@ class AndNode(BinaryExprNode):
 
         with fun._builder.goto_block(and_lhs_true):
             fun._builder.cbranch(
-                self._rhs.gen_fun_value(fun).as_bit().get_llvm_rval(),
+                gen_fun_as_bit(
+                    fun, self._rhs.gen_fun_value(fun)
+                ).get_llvm_rval(),
                 and_true,
                 and_false
             )
@@ -53,9 +55,10 @@ class XorNode(BinaryExprNode):
         raise Todo()
 
     def gen_fun_value(self, fun):
-        return fun.gen_bit_xor(
-            self._lhs.gen_fun_value(fun).as_bit(),
-            self._rhs.gen_fun_value(fun).as_bit()
+        return gen_fun_bit_xor(
+            fun,
+            gen_fun_as_bit(fun, self._lhs.gen_fun_value(fun)),
+            gen_fun_as_bit(fun, self._rhs.gen_fun_value(fun))
         )
 
 class OrNode(BinaryExprNode):
@@ -69,7 +72,7 @@ class OrNode(BinaryExprNode):
         or_end = fun._builder.append_basic_block("or_end")
 
         fun._builder.cbranch(
-            self._lhs.gen_fun_value(fun).as_bit().get_llvm_rval(),
+            gen_fun_as_bit(fun, self._lhs.gen_fun_value(fun)).get_llvm_rval(),
             or_true,
             or_lhs_false
         )
@@ -79,7 +82,9 @@ class OrNode(BinaryExprNode):
 
         with fun._builder.goto_block(or_lhs_false):
             fun._builder.cbranch(
-                self._rhs.gen_fun_value(fun).as_bit().get_llvm_rval(),
+                gen_fun_as_bit(
+                    fun, self._rhs.gen_fun_value(fun)
+                ).get_llvm_rval(),
                 or_true,
                 or_false
             )
@@ -105,35 +110,44 @@ class NotNode(UnaryExprNode):
         raise Todo()
 
     def gen_fun_value(self, fun):
-        return fun.gen_bit_not(
-            self._operand.gen_fun_value(fun).as_type(IntType(1, False))
+        return gen_fun_bit_not(
+            fun,
+            gen_fun_as(
+                fun,
+                self._operand.gen_fun_value(fun),
+                IntType(1, False)
+            )
         )
 
 
 class LtnExprNode(BinaryExprNode):
     def gen_fun_value(self, fun):
-        return fun.gen_ltn(
+        return gen_fun_ltn(
+            fun,
             self._lhs.gen_fun_value(fun),
             self._rhs.gen_fun_value(fun)
         )
 
 class GtnExprNode(BinaryExprNode):
     def gen_fun_value(self, fun):
-        return fun.gen_gtn(
+        return gen_fun_gtn(
+            fun,
             self._lhs.gen_fun_value(fun),
             self._rhs.gen_fun_value(fun)
         )
 
 class LeqExprNode(BinaryExprNode):
     def gen_fun_value(self, fun):
-        return fun.gen_leq(
+        return gen_fun_leq(
+            fun,
             self._lhs.gen_fun_value(fun),
             self._rhs.gen_fun_value(fun)
         )
 
 class GeqExprNode(BinaryExprNode):
     def gen_fun_value(self, fun):
-        return fun.gen_geq(
+        return gen_fun_geq(
+            fun,
             self._lhs.gen_fun_value(fun),
             self._rhs.gen_fun_value(fun)
         )
@@ -141,13 +155,15 @@ class GeqExprNode(BinaryExprNode):
 
 class EqNode(BinaryExprNode):
     def gen_fun_value(self, fun):
-        return fun.gen_eq(
+        return gen_fun_eql(
+            fun,
             self._lhs.gen_fun_value(fun),
             self._rhs.gen_fun_value(fun)
         )
 class NeqNode(BinaryExprNode):
     def gen_fun_value(self, fun):
-        return fun.gen_neq(
+        return gen_fun_neq(
+            fun,
             self._lhs.gen_fun_value(fun),
             self._rhs.gen_fun_value(fun)
         )

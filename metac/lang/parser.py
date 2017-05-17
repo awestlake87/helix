@@ -178,6 +178,33 @@ class Parser:
                 linkage
             )
 
+    def _parse_struct(self):
+        self._expect(Token.KW_STRUCT)
+
+        self._expect(Token.ID)
+        id = self._current.value
+
+        self._expect(Token.INDENT)
+
+        if self._accept(Token.KW_PASS):
+            self._expect(Token.DEDENT)
+            return StructNode(id)
+
+        else:
+            attrs = [ ]
+
+            while not self._accept(Token.DEDENT):
+                attr_type = self._parse_expr()
+
+                self._expect(Token.ATTR_ID)
+                attr_id = self._current.value
+
+                attrs.append((attr_type, attr_id))
+
+                self._accept(Token.NODENT)
+
+            return StructNode(id, attrs)
+
     def _parse_loop(self):
         for_clause = None
         each_clause = None
@@ -473,8 +500,22 @@ class Parser:
         return lhs
 
     def _parse_expr_prec4(self):
-        # accessors
-        return self._parse_expr_prec3()
+        def _accept():
+            if self._accept('.'): return True
+            else:
+                return False
+
+        lhs = self._parse_expr_prec3()
+
+        while _accept():
+            id = self._current.id
+
+            if id == '.':
+                lhs = DotExpr(lhs, self._parse_expr_prec3())
+            else:
+                raise CompilerBug("%.%")
+
+        return lhs
 
     def _parse_expr_prec3(self):
         def _accept():
@@ -495,11 +536,12 @@ class Parser:
             if id == '(':
                 args = [ ]
 
-                while True:
-                    args.append(self._parse_expr())
-                    if not self._accept(','):
-                        self._expect(')')
-                        break
+                if not self._accept(')'):
+                    while True:
+                        args.append(self._parse_expr())
+                        if not self._accept(','):
+                            self._expect(')')
+                            break
 
                 lhs = CallExprNode(lhs, args)
 
@@ -615,4 +657,7 @@ class Parser:
             return IntTypeNode(64, False)
 
         else:
-            raise UnexpectedToken(self._next)
+            if self._peek() == Token.KW_STRUCT:
+                return self._parse_struct()
+            else:
+                raise UnexpectedToken(self._next)

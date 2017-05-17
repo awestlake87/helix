@@ -7,12 +7,18 @@ class Type:
     def is_type(self):
         return True
 
+    def is_equal_to(self, other_type):
+        return False
+
     def can_convert_to(self, other_type):
         return False
 
 class PtrType(Type):
     def __init__(self, type):
         self._type = type
+
+    def is_equal_to(self, other_type):
+        raise Todo()
 
     def get_llvm_type(self):
         return self._type.get_llvm_type().as_pointer()
@@ -24,6 +30,12 @@ class NilType(Type):
         else:
             return False
 
+    def is_equal_to(self, other_type):
+        if type(other_type) is NilType:
+            return True
+        else:
+            return False
+
     def get_llvm_type(self):
         return ir.IntType(64)
 
@@ -31,6 +43,12 @@ class IntType(Type):
     def __init__(self, num_bits=32, is_signed=True):
         self._num_bits = num_bits
         self._is_signed = is_signed
+
+    def is_equal_to(self, other_type):
+        if self.can_convert_to(other_type):
+            return True
+        else:
+            return False
 
     def can_convert_to(self, other):
         if type(other) is IntType and self._num_bits == other._num_bits:
@@ -46,17 +64,15 @@ class IntType(Type):
     def get_llvm_type(self):
         return ir.IntType(self._num_bits)
 
-    def call(self, fun, args):
-        if len(args) != 1:
-            raise Todo("invalid args")
-
-        if args[0].type.can_convert_to(self):
-            return args[0].as_type(self)
-        else:
-            raise Todo("invalid args")
-
 
 class AutoIntType(Type):
+
+    def is_equal_to(self, other_type):
+        if type(other_type) is AutoIntType:
+            return True
+        else:
+            return False
+
     def can_convert_to(self, other):
         if type(other) is IntType:
             return True
@@ -68,10 +84,36 @@ class FunType(Type):
         self._ret_type = ret_type
         self._param_types = param_types
 
+    def is_equal_to(self, other_type):
+        raise Todo()
+
     def get_llvm_type(self):
         return ir.FunctionType(
             self._ret_type.get_llvm_type(),
             [ t.get_llvm_type() for t in self._param_types ]
+        )
+
+class StructType(Type):
+    def __init__(self, attrs=[]):
+        self._attrs = attrs
+
+    def is_equal_to(self, other_type):
+        if type(other_type) is StructType:
+            for a1, a2 in zip(self._attrs, other_type._attrs):
+                t1, id1 = a1
+                t2, id2 = a2
+
+                if not t1.is_equal_to(t2) or id1 != id2:
+                    return False
+
+            return True
+
+    def can_convert_to(self, other_type):
+        return self.is_equal_to(other_type)
+
+    def get_llvm_type(self):
+        return ir.LiteralStructType(
+            [ t.get_llvm_type() for t, id in self._attrs ]
         )
 
 
@@ -85,7 +127,7 @@ def get_common_type(a, b):
 
         elif not a._is_signed and b._is_signed:
             return None
-            
+
         else:
             return a
 
