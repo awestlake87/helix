@@ -1,5 +1,7 @@
 
-class StatementNode:
+from .node import Node
+
+class StatementNode(Node):
     def hoist_unit_code(self, unit):
         pass
 

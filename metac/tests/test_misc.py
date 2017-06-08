@@ -1,6 +1,5 @@
 import unittest
 
-
 from ..err import ReturnTypeMismatch
 
 from .utils import run_test, compile_test

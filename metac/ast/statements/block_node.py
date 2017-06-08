@@ -3,10 +3,23 @@ from ...ir import SymbolTable
 
 from ..statement_node import StatementNode
 
+from ...dep import Scope
+
 class BlockNode(StatementNode):
     def __init__(self, statements=[ ]):
         self._statements = statements
 
+    def hoist(self, scope):
+        for statement in self._statements:
+            statement.hoist(scope)
+
+    def create_targets(self, scope):
+        targets = [ ]
+
+        for statement in self._statements:
+            targets += statement.create_targets(scope)
+
+        return targets
 
     def is_empty(self):
         return len(self._statements) == 0

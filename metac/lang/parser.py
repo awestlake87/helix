@@ -659,5 +659,7 @@ class Parser:
         else:
             if self._peek() == Token.KW_STRUCT:
                 return self._parse_struct()
+            elif self._peek() == Token.KW_FUN:
+                return self._parse_fun(FunNode.META)
             else:
                 raise UnexpectedToken(self._next)
