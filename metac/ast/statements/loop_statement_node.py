@@ -20,15 +20,57 @@ class LoopStatementNode(StatementNode):
         self._then_clause = then_clause
         self._until_clause = until_clause
 
+    def hoist(self, scope):
+        if self._for_clause:
+            self._for_clause.hoist(scope)
+
+        if self._each_clause:
+            self._each_clause.hoist(scope)
+
+        if self._while_clause:
+            self._while_clause.hoist(scope)
+
+        if self._loop_body:
+            self._loop_body.hoist(scope)
+
+        if self._then_clause:
+            self._then_clause.hoist(scope)
+
+        if self._until_clause:
+            self._until_clause.hoist(scope)
+
+    def get_deps(self, scope):
+        targets = [ ]
+
+        if self._for_clause:
+            targets += self._for_clause.get_deps(scope)
+
+        if self._each_clause:
+            targets += self._each_clause.get_deps(scope)
+
+        if self._while_clause:
+            targets += self._while_clause.get_deps(scope)
+
+        if self._loop_body:
+            targets += self._loop_body.get_deps(scope)
+
+        if self._then_clause:
+            targets += self._then_clause.get_deps(scope)
+
+        if self._until_clause:
+            targets += self._until_clause.get_deps(scope)
+
+        return targets
+
     def gen_fun_code(self, fun):
         iter_symbols = SymbolTable(fun.symbols)
         body_symbols = SymbolTable(iter_symbols)
 
-        if self._for_clause != None:
+        if self._for_clause:
             with fun.using_scope(iter_symbols):
                 self._for_clause.gen_fun_code(fun)
 
-        if self._each_clause != None:
+        if self._each_clause:
             raise Todo("each clause")
 
 

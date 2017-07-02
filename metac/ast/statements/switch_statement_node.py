@@ -10,6 +10,30 @@ class SwitchStatementNode(StatementNode):
         self._case_branches = case_branches
         self._default_block = default_block
 
+    def hoist(self, scope):
+        self._value.hoist(scope)
+
+        for value, block in self._case_branches:
+            value.hoist(scope)
+            block.hoist(scope)
+
+        if self._default_block:
+            self._default_block.hoist(scope)
+
+    def get_deps(self, scope):
+        targets = [ ]
+
+        targets += self._value.get_deps(scope)
+
+        for value, block in self._case_branches:
+            targets += value.get_deps(scope)
+            targets += block.get_deps(scope)
+
+        if self._default_block:
+            targets += self._default_block.get_deps(scope)
+
+        return targets
+
     def gen_unit_code(self, unit):
         raise Todo()
 

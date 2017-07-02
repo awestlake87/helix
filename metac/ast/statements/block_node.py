@@ -13,11 +13,11 @@ class BlockNode(StatementNode):
         for statement in self._statements:
             statement.hoist(scope)
 
-    def create_targets(self, scope):
+    def get_deps(self, scope):
         targets = [ ]
 
         for statement in self._statements:
-            targets += statement.create_targets(scope)
+            targets += statement.get_deps(scope)
 
         return targets
 

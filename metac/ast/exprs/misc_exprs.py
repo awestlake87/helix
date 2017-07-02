@@ -74,6 +74,26 @@ class CallExprNode(ExprNode):
         self._lhs = lhs
         self._args = args
 
+    def hoist(self, scope):
+        self._lhs.hoist(scope)
+
+        for arg in self._args:
+            arg.hoist(scope)
+
+    def get_deps(self, scope):
+        targets = [ ]
+        targets += self._lhs.get_deps(scope)
+
+        for arg in self._args:
+            targets += arg.get_deps(scope)
+
+        targets += self._lhs.get_value(scope).get_call_deps(
+            scope, self._args
+        )
+
+        return targets
+
+
     def gen_unit_value(self, unit):
         return self._lhs.gen_unit_value(unit).call(
             unit, [ arg.gen_unit_value(unit) for arg in self._args ]

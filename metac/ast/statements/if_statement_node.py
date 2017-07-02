@@ -6,6 +6,26 @@ class IfStatementNode(StatementNode):
         self._if_branches = if_branches
         self._else_block = else_block
 
+    def hoist(self, scope):
+        for condition, block in self._if_branches:
+            condition.hoist(scope)
+            block.hoist(scope)
+
+        if self._else_block:
+            self._else_block.hoist(scope)
+
+    def get_deps(self, scope):
+        targets = [ ]
+
+        for condition, block in self._if_branches:
+            targets += condition.get_deps(scope)
+            targets += block.get_deps(scope)
+
+        if self._else_block:
+            self._else_block.get_deps(scope)
+
+        return targets
+
     def gen_fun_code(self, fun):
         assert len(self._if_branches) >= 1
 

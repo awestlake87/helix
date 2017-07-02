@@ -21,6 +21,9 @@ class DepTests(unittest.TestCase):
                 return 123
 
             intern fun int c()
+                struct Lalala
+                    int @t
+
                 blargh: Blargh()
                 blargh.n = 456
 
@@ -48,3 +51,5 @@ class DepTests(unittest.TestCase):
 
         print(unit_symbol.get_scope())
         print(unit_symbol.get_target())
+
+        unit_symbol.get_target().build()
