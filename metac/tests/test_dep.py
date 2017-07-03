@@ -2,6 +2,7 @@
 import unittest
 
 from ..lang import Parser
+from ..dep import UnitSymbol
 
 def parse_ast(code):
     parser = Parser(code)
@@ -9,7 +10,7 @@ def parse_ast(code):
 
 class DepTests(unittest.TestCase):
     def test_unit(self):
-        unit = parse_ast(
+        block = parse_ast(
             """
             struct Blargh
                 int @n
@@ -22,7 +23,9 @@ class DepTests(unittest.TestCase):
 
             intern fun int c()
                 struct Lalala
-                    int @t
+                    Blargh @a
+
+                ladeeda: Lalala()
 
                 blargh: Blargh()
                 blargh.n = 456
@@ -47,9 +50,8 @@ class DepTests(unittest.TestCase):
             """
         )
 
-        unit_symbol = unit.get_symbol()
+        unit_symbol = UnitSymbol("test", block)
 
-        print(unit_symbol.get_scope())
         print(unit_symbol.get_target())
 
         unit_symbol.get_target().build()

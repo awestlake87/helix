@@ -3,6 +3,7 @@ import llvmlite.binding as llvm
 
 from .lang import Parser
 from .ir import Module
+from .ast import UnitNode
 
 class Compiler:
     @staticmethod
@@ -31,7 +32,7 @@ class Compiler:
 
     def compile_unit(self, code, dump_ir=False):
         parser = Parser(code)
-        ast = parser.parse()
+        ast = UnitNode("test", parser.parse())
 
         module = Module()
         unit = ast.gen_module_value(module)

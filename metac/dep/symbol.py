@@ -13,8 +13,11 @@ class Symbol:
     def can_overload(self):
         return Falses
 
-    def get_scope(self):
-        return self.__repr__()
-        
     def get_call_deps(self, scope, args):
         return [ ]
+
+    def get_target(self):
+        return None
+
+def mangle_qualified_name(name):
+    return name

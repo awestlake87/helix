@@ -10,14 +10,16 @@ class BlockNode(StatementNode):
         self._statements = statements
 
     def hoist(self, scope):
+        self._scope = Scope(None, scope)
+
         for statement in self._statements:
-            statement.hoist(scope)
+            statement.hoist(self._scope)
 
     def get_deps(self, scope):
         targets = [ ]
 
         for statement in self._statements:
-            targets += statement.get_deps(scope)
+            targets += statement.get_deps(self._scope)
 
         return targets
 

@@ -11,11 +11,11 @@ class Parser:
         self._next = self._lexer.scan()
 
     def parse(self):
-        unit = self._parse_unit()
+        block = self._parse_block()
 
         self._expect(Token.END)
 
-        return unit
+        return block
 
     def _peek(self):
         return self._next.id
@@ -31,9 +31,6 @@ class Parser:
             return True
         else:
             return False
-
-    def _parse_unit(self):
-        return UnitNode(self._parse_block())
 
     def _parse_block(self):
         self._accept(Token.KW_DO)

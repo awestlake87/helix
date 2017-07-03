@@ -1,6 +1,6 @@
 
-from ..symbol import Symbol
-from ..targets import FunTarget
+from ..symbol import Symbol, mangle_qualified_name
+from ..targets import FunTarget, FunProtoTarget
 
 from ...err import Todo
 
@@ -29,14 +29,6 @@ class MetaFunSymbol(Symbol):
                 )
             )
 
-    def get_scope(self):
-        overloads = [ ]
-
-        for overload in self._overloads:
-            overloads.append(overload.get_scope())
-
-        return overloads
-
     def is_fun(self):
         return True
 
@@ -54,22 +46,43 @@ class MetaOverloadSymbol(Symbol):
         self._param_ids = param_ids
         self._body = body
 
+        self._targets = { }
+
     def matches(self, scope, args):
         if len(self._type._param_types) == len(args):
             return True
         else:
             return False
 
-    def get_call_deps(self, scope, args):
-        return [
-            FunTarget(
+    def get_target(self, scope, args):
+        name = "_ZN{}{}".format(
+            mangle_qualified_name(
+                self._parent_scope.get_qualified_name(self._id)
+            ),
+            "_".join([
+                "arg" for arg in args
+            ])
+        )
+
+        if not name in self._targets:
+            target = FunTarget(
                 self._parent_scope,
                 self._id,
                 self._type,
                 self._param_ids,
                 self._body
             )
-        ]
+            self._targets[name] = target
+            return target
+
+        else:
+            return self._targets[name]
+
+    def get_proto_target(self, scope, args):
+        return self.get_target(scope, args).get_proto_target()
+
+    def get_call_deps(self, scope, args):
+        return [ self.get_proto_target(scope, args) ]
 
     def __repr__(self):
         return "({})".format(", ".join(self._param_ids))
@@ -85,7 +98,7 @@ class ExternFunSymbol(Symbol):
         self._target = None
 
     def get_call_deps(self, scope, args):
-        return [ self.get_target() ]
+        return [ self.get_proto_target() ]
 
     def get_target(self):
         if self._target is None:
@@ -98,6 +111,9 @@ class ExternFunSymbol(Symbol):
             )
 
         return self._target
+
+    def get_proto_target(self):
+        return self.get_target().get_proto_target()
 
     def __repr__(self):
         return "extern fun"
@@ -111,9 +127,10 @@ class InternFunSymbol(Symbol):
         self._body = body
 
         self._target = None
+        self._proto_target = None
 
     def get_call_deps(self, scope, args):
-        return [ self.get_target() ]
+        return [ self.get_proto_target() ]
 
     def get_target(self):
         if self._target is None:
@@ -126,6 +143,9 @@ class InternFunSymbol(Symbol):
             )
 
         return self._target
+
+    def get_proto_target(self):
+        return self.get_target().get_proto_target()
 
     def __repr__(self):
         return "intern fun"

@@ -4,7 +4,8 @@ import json
 from ..err import SymbolNotFound, SymbolAlreadyExists
 
 class Scope:
-    def __init__(self, parent=None):
+    def __init__(self, id, parent=None):
+        self._id = id
         self._parent = parent
         self._symbols = { }
 
@@ -36,11 +37,28 @@ class Scope:
         else:
             return False
 
-
     def resolve(self, id):
         if self.has_local(id):
             return self._symbols[id]
         elif self._parent:
             return self._parent.resolve(id)
+        else:
+            raise SymbolNotFound(id)
+
+    def get_scope_name(self):
+        if self._id and self._parent:
+            return "{}/{}".format(self._parent.get_scope_name(), self._id)
+        elif self._id:
+            return self._id
+        elif self._parent:
+            return self._parent.get_scope_name()
+        else:
+            return ""
+
+    def get_qualified_name(self, id):
+        if self.has_local(id):
+            return "{}/{}".format(self.get_scope_name(), id)
+        elif self._parent:
+            return self._parent.get_qualified_name(id)
         else:
             raise SymbolNotFound(id)

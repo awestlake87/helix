@@ -7,9 +7,9 @@ from ..expr_node import ExprNode
 from ...dep import UnitSymbol
 
 class UnitNode(ExprNode):
-    def __init__(self, block):
+    def __init__(self, id, block):
         self._block = block
-        self._symbol = UnitSymbol(self._block)
+        self._symbol = UnitSymbol(id, self._block)
 
     def get_symbol(self):
         return self._symbol
