@@ -13,6 +13,12 @@ class Target:
         self._built = False
         self._met = False
 
+    def get_deps(self):
+        return self._deps
+
+    def get_post_deps(self):
+        return self._post_deps
+
     def build(self):
         if not self.is_met():
             while self._perform_build_pass() != 0: pass
@@ -24,6 +30,9 @@ class Target:
 
     def _build_target(self):
         raise Todo("implement build for {}".format(self))
+
+    def _meet_target(self):
+        pass
 
     def _perform_build_pass(self):
         num_built = 0
@@ -55,6 +64,7 @@ class Target:
                     num_built += dep._perform_build_pass()
 
             if not unmet_deps and not self.is_met():
+                self._meet_target()
                 self._met = True
                 num_built += 1
 

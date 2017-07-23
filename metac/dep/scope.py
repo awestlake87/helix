@@ -4,7 +4,7 @@ import json
 from ..err import SymbolNotFound, SymbolAlreadyExists
 
 class Scope:
-    def __init__(self, id, parent=None):
+    def __init__(self, id=None, parent=None):
         self._id = id
         self._parent = parent
         self._symbols = { }

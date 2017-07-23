@@ -2,7 +2,7 @@
 import unittest
 
 from ..lang import Parser
-from ..dep import UnitSymbol
+from ..dep import ModuleSymbol, Scope
 
 def parse_ast(code):
     parser = Parser(code)
@@ -49,9 +49,11 @@ class DepTests(unittest.TestCase):
                 return 0
             """
         )
+        global_scope = Scope()
 
-        unit_symbol = UnitSymbol("test", block)
+        module_symbol = ModuleSymbol("test", global_scope)
+        global_scope.insert("test", module_symbol)
 
-        print(unit_symbol.get_target())
+        module_symbol.set_entry(block)
 
-        unit_symbol.get_target().build()
+        module_symbol.get_target().build()

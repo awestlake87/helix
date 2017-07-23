@@ -117,7 +117,6 @@ class StructType(Type):
         )
 
     def get_attr_info(self, id):
-
         for i in range(0, len(self._attrs)):
             attr_type, attr_id = self._attrs[i]
 
