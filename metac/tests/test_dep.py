@@ -23,7 +23,7 @@ class DepTests(unittest.TestCase):
 
             intern fun int c()
                 struct Lalala
-                    Blargh @a
+                    Blargh @b
 
                 ladeeda: Lalala()
 
@@ -56,4 +56,4 @@ class DepTests(unittest.TestCase):
 
         module_symbol.set_entry(block)
 
-        module_symbol.get_target().build()
+        module_symbol.get_target().meet()

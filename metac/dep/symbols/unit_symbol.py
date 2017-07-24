@@ -21,6 +21,9 @@ class UnitTarget(Target):
         )
 
     def _build_target(self):
+        pass
+
+    def _meet_target(self):
         for target in self._deps:
             if type(target) is FunTarget:
                 print(

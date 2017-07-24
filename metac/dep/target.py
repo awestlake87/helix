@@ -13,6 +13,8 @@ class Target:
         self._built = False
         self._met = False
 
+        self._marked = False
+
     def get_deps(self):
         return self._deps
 
@@ -20,13 +22,23 @@ class Target:
         return self._post_deps
 
     def build(self):
+        if not self.is_built():
+            while self._perform_build_pass() != 0: pass
+
+            if self.is_built():
+                return
+            else:
+                raise Todo("unable to build")
+
+    def meet(self):
         if not self.is_met():
             while self._perform_build_pass() != 0: pass
 
             if self.is_met():
                 return
             else:
-                raise Todo("unable to build")
+                raise Todo("unable to meet")
+
 
     def _build_target(self):
         raise Todo("implement build for {}".format(self))
@@ -35,6 +47,11 @@ class Target:
         pass
 
     def _perform_build_pass(self):
+        if self._marked:
+            return 0
+        else:
+            self._marked = True
+
         num_built = 0
 
         if not self.is_built():
@@ -67,6 +84,8 @@ class Target:
                 self._meet_target()
                 self._met = True
                 num_built += 1
+
+        self._marked = False
 
         return num_built
 

@@ -13,6 +13,13 @@ class Type:
     def can_convert_to(self, other_type):
         return False
 
+
+    def __repr__(self):
+        if self.get_llvm_type:
+            return repr(self.get_llvm_type())
+        else:
+            raise Todo()
+
 class PtrType(Type):
     def __init__(self, type):
         self._type = type
