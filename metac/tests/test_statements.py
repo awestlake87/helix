@@ -5,6 +5,7 @@ from .utils import run_test
 
 class LoopTests(unittest.TestCase):
 
+    @unittest.SkipTest
     def test_return(self):
         self.assertEqual(
             6573,
@@ -16,6 +17,7 @@ class LoopTests(unittest.TestCase):
             )
         )
 
+    @unittest.SkipTest
     def test_for_loop(self):
         self.assertEqual(
             9,
@@ -33,6 +35,7 @@ class LoopTests(unittest.TestCase):
             )
         )
 
+    @unittest.SkipTest
     def test_while_loop(self):
         self.assertEqual(
             100,
@@ -49,6 +52,7 @@ class LoopTests(unittest.TestCase):
             )
         )
 
+    @unittest.SkipTest
     def test_until_loop(self):
         self.assertEqual(
             100,
@@ -66,6 +70,7 @@ class LoopTests(unittest.TestCase):
             )
         )
 
+    @unittest.SkipTest
     def test_switch(self):
         self.assertEqual(
             0,
@@ -92,6 +97,7 @@ class LoopTests(unittest.TestCase):
             )
         )
 
+    @unittest.SkipTest
     def test_if(self):
         self.assertEqual(
             0,

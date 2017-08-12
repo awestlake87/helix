@@ -23,6 +23,10 @@ class BlockNode(StatementNode):
 
         return targets
 
+    def gen_code(self, fun, scope):
+        for statement in self._statements:
+            statement.gen_code(fun, scope)
+
     def is_empty(self):
         return len(self._statements) == 0
 

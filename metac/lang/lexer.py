@@ -426,13 +426,7 @@ class Lexer:
 
             elif _accept('n'):
                 if _accept('t'):
-                    if _accept('e'):
-                        if _accept('r'):
-                            if _accept('n'):
-                                return _end_kw(Token.KW_INTERN)
-
-                    else:
-                        return _end_kw(Token.KW_INT)
+                    return _end_kw(Token.KW_INT)
 
         elif _accept('l'):
             if _accept('o'):

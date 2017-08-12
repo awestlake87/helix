@@ -21,7 +21,7 @@ class DepTests(unittest.TestCase):
             fun int a()
                 return 123
 
-            intern fun int c()
+            extern fun int c()
                 struct Lalala
                     Blargh @b
 

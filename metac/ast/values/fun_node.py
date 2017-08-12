@@ -5,13 +5,12 @@ from ...err import Todo
 from ..expr_node import ExprNode
 
 from ...dep import (
-    MetaFunSymbol, MetaOverloadSymbol, ExternFunSymbol, InternFunSymbol
+    MetaFunSymbol, MetaOverloadSymbol, ExternFunSymbol
 )
 
 class FunNode(ExprNode):
     EXTERN_C = 0
-    INTERN_C = 1
-    META     = 2
+    META     = 1
 
     def __init__(self, type, id, param_ids, linkage, body):
         self._type = type
@@ -55,44 +54,21 @@ class FunNode(ExprNode):
             )
             scope.insert(self._id, self._symbol)
 
-        elif self._linkage == FunNode.INTERN_C:
-            self._symbol = InternFunSymbol(
-                scope,
-                self._id,
-                self._type,
-                self._param_ids,
-                self._body
-            )
-            scope.insert(self._id, self._symbol)
-
         else:
             raise Todo()
 
     def get_deps(self, scope):
-        if (
-            self._linkage == FunNode.EXTERN_C or
-            self._linkage == FunNode.INTERN_C
-        ):
+        if self._linkage == FunNode.EXTERN_C:
             return [ self._symbol.get_target() ]
         else:
             return [ ]
 
     def _create_ir_fun(self, unit):
-        linkage = None
-
-        if self._linkage == FunNode.EXTERN_C:
-            linkage = Fun.EXTERN_C
-        elif self._linkage == FunNode.INTERN_C:
-            linkage = Fun.INTERN_C
-        else:
-            raise Todo("handle error")
-
         return Fun(
             unit,
             self._type.gen_unit_value(unit),
             self._id,
-            self._param_ids,
-            linkage
+            self._param_ids
         )
 
     def hoist_unit_code(self, unit):

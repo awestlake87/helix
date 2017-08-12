@@ -15,5 +15,8 @@ class ReturnNode(StatementNode):
     def get_deps(self, scope):
         return self._expr.get_deps(scope)
 
+    def gen_code(self, fun, scope):
+        raise Todo()
+
     def gen_fun_code(self, fun):
         gen_fun_return(fun, self._expr.gen_fun_value(fun))

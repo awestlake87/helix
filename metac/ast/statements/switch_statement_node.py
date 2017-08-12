@@ -34,6 +34,9 @@ class SwitchStatementNode(StatementNode):
 
         return targets
 
+    def gen_code(self, fun, scope):
+        raise Todo()
+
     def gen_unit_code(self, unit):
         raise Todo()
 

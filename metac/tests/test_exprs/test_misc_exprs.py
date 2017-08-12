@@ -6,23 +6,25 @@ from ..utils import run_test, compile_test
 
 class MiscExprTests(unittest.TestCase):
 
+    @unittest.SkipTest
     def test_fun_calls(self):
         self.assertEqual(
             43,
             run_test(
                 """
                 extern fun int test()
-                    intern fun int call_fun(int a, int b)
+                    extern fun int call_fun(int a, int b)
                         return return_43(a, b)
 
                     return call_fun(46, 3)
 
-                intern fun int return_43(int a, int b)
+                extern fun int return_43(int a, int b)
                     return 43
                 """
             )
         )
 
+    @unittest.SkipTest
     def test_int_inits(self):
         self.assertEqual(
             123,
@@ -42,6 +44,7 @@ class MiscExprTests(unittest.TestCase):
                 """
             )
 
+    @unittest.SkipTest
     def test_init(self):
         self.assertEqual(
             1234,
@@ -54,6 +57,7 @@ class MiscExprTests(unittest.TestCase):
             )
         )
 
+    @unittest.SkipTest
     def test_ternary_conditional(self):
         self.assertEqual(
             0,
@@ -75,6 +79,7 @@ class MiscExprTests(unittest.TestCase):
             )
         )
 
+    @unittest.SkipTest
     def test_structs(self):
         self.assertEqual(
             0,

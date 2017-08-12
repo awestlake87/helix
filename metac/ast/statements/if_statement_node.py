@@ -1,5 +1,6 @@
 
 from ..statement_node import StatementNode
+from ...err import Todo
 
 class IfStatementNode(StatementNode):
     def __init__(self, if_branches, else_block=None):
@@ -25,6 +26,9 @@ class IfStatementNode(StatementNode):
             self._else_block.get_deps(scope)
 
         return targets
+
+    def gen_code(self, fun, scope):
+        raise Todo()
 
     def gen_fun_code(self, fun):
         assert len(self._if_branches) >= 1

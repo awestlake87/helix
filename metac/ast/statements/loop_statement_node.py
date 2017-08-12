@@ -62,6 +62,9 @@ class LoopStatementNode(StatementNode):
 
         return targets
 
+    def gen_code(self, fun, scope):
+        raise Todo()
+
     def gen_fun_code(self, fun):
         iter_symbols = SymbolTable(fun.symbols)
         body_symbols = SymbolTable(iter_symbols)

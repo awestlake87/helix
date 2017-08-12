@@ -605,9 +605,6 @@ class Parser:
         elif _accept(Token.KW_EXTERN):
             return self._parse_fun(FunNode.EXTERN_C)
 
-        elif _accept(Token.KW_INTERN):
-            return self._parse_fun(FunNode.INTERN_C)
-
         elif _accept(Token.LT_INT_DEC):
             return AutoIntNode(self._current.value, radix=10)
 

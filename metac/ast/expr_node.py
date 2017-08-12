@@ -2,7 +2,6 @@
 from .statements import StatementNode
 
 class ExprNode(StatementNode):
-
     def hoist(self, scope):
         pass
 
@@ -17,6 +16,9 @@ class ExprNode(StatementNode):
 
     def gen_fun_code(self, block):
         self.gen_fun_value(block)
+
+    def gen_code(self, fun, scope):
+        self.gen_value(fun, scope)
 
 class UnaryExprNode(ExprNode):
     def __init__(self, operand):
