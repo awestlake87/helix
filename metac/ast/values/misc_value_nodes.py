@@ -1,63 +1,26 @@
-
-from ...ir import NilValue, AutoIntType, IntType, StaticValue
-from ...err import Todo
-
 from ..expr_node import ExprNode
 
-class AutoIntNode(ExprNode):
+class LiteralNode(ExprNode):
+    pass
+
+class AutoIntNode(LiteralNode):
     def __init__(self, value, radix=10):
-        self._value = value
-        self._radix = radix
+        self.value = value
+        self.radix = radix
 
-    def gen_unit_value(self, unit):
-        return StaticValue(
-            AutoIntType(),
-            (
-                int(self._value, self._radix)
-                if type(self._value) is str else
-                self._value
-            )
-        )
-
-    def gen_fun_value(self, fun):
-        return self.gen_unit_value(fun.unit)
-
-class IntNode(ExprNode):
+class IntNode(LiteralNode):
     def __init__(self, num_bits, is_signed, value, radix=10):
-        self._num_bits = num_bits
+        self.num_bits = num_bits
         self._is_signed = is_signed
-        self._value = value
-        self._radix = radix
+        self.value = value
+        self.radix = radix
 
-    def gen_unit_value(self, unit):
-        return StaticValue(
-            IntType(self._num_bits, self._is_signed),
-            (
-                int(self._value, self._radix)
-                if type(self._value) is str else
-                self._value
-            )
-        )
+    def is_signed(self):
+        return self._is_signed
 
-    def gen_fun_value(self, fun):
-        return self.gen_unit_value(fun.unit)
-
-class NilNode(ExprNode):
-    def gen_unit_value(self, unit):
-        return NilValue()
-
-    def gen_fun_value(self, fun):
-        return self.gen_unit_value(fun.unit)
+class NilNode(LiteralNode):
+    pass
 
 class SymbolNode(ExprNode):
     def __init__(self, id):
-        self._id = id
-
-    def get_value(self, scope):
-        return scope.resolve(self._id)
-
-    def gen_unit_value(self, unit):
-        return unit.symbols.resolve(self._id)
-
-    def gen_fun_value(self, fun):
-        return fun.symbols.resolve(self._id)
+        self.id = id

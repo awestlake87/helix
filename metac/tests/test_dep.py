@@ -2,7 +2,7 @@
 import unittest
 
 from ..lang import Parser
-from ..dep import ModuleSymbol, Scope
+from ..dep import hoist, Scope, create_jit_target
 
 def parse_ast(code):
     parser = Parser(code)
@@ -10,16 +10,10 @@ def parse_ast(code):
 
 class DepTests(unittest.TestCase):
     def test_unit(self):
-        block = parse_ast(
+        unit_ast = parse_ast(
             """
             struct Blargh
                 int @n
-
-            fun int a(Blargh blargh)
-                return blargh.n
-
-            fun int a()
-                return 123
 
             extern fun int c()
                 struct Lalala
@@ -30,30 +24,23 @@ class DepTests(unittest.TestCase):
                 blargh: Blargh()
                 blargh.n = 456
 
-                if a() != 123
-                    return 1
+                return b()
 
-                elif a(blargh) != 456
-                    return 2
 
             extern fun int b()
                 blargh: Blargh()
                 blargh.n = 456
 
-                if a() != 123
-                    return 1
-
-                elif a(blargh) != 456
-                    return 2
-
                 return 0
+
+            c()
+            b()
             """
         )
+
         global_scope = Scope()
 
-        module_symbol = ModuleSymbol("test", global_scope)
-        global_scope.insert("test", module_symbol)
+        hoist(global_scope, unit_ast)
+        jit_target = create_jit_target(global_scope, unit_ast)
 
-        module_symbol.set_entry(block)
-
-        module_symbol.get_target().meet()
+        jit_target.build()

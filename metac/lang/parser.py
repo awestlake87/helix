@@ -133,7 +133,8 @@ class Parser:
             return IfStatementNode(if_branches)
 
 
-    def _parse_fun(self, linkage):
+    def _parse_fun(self):
+        self._expect(Token.KW_EXTERN)
         self._expect(Token.KW_FUN)
 
         ret_type = self._parse_expr()
@@ -164,15 +165,13 @@ class Parser:
                 FunTypeNode(ret_type, param_types),
                 id,
                 param_ids,
-                linkage,
                 self._parse_block()
             )
         else:
             return FunNode(
                 FunTypeNode(ret_type, param_types),
                 id,
-                param_ids,
-                linkage
+                param_ids
             )
 
     def _parse_struct(self):
@@ -508,7 +507,7 @@ class Parser:
             id = self._current.id
 
             if id == '.':
-                lhs = DotExpr(lhs, self._parse_expr_prec3())
+                lhs = DotExprNode(lhs, self._parse_expr_prec3())
             else:
                 raise CompilerBug("%.%")
 
@@ -602,9 +601,6 @@ class Parser:
             self._expect(')')
             return expr
 
-        elif _accept(Token.KW_EXTERN):
-            return self._parse_fun(FunNode.EXTERN_C)
-
         elif _accept(Token.LT_INT_DEC):
             return AutoIntNode(self._current.value, radix=10)
 
@@ -653,7 +649,9 @@ class Parser:
         else:
             if self._peek() == Token.KW_STRUCT:
                 return self._parse_struct()
-            elif self._peek() == Token.KW_FUN:
-                return self._parse_fun(FunNode.META)
+
+            elif self._peek() == Token.KW_EXTERN:
+                return self._parse_fun()
+
             else:
                 raise UnexpectedToken(self._next)
