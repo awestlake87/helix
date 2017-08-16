@@ -36,10 +36,14 @@ class IntType(Type):
     def __eq__(self, other):
 
         return (
-            type(other) is IntType and
+            issubclass(type(other), IntType) and
             self.num_bits == other.num_bits and
             self.is_signed == other.is_signed
         )
+
+class BitType(IntType):
+    def __init__(self):
+        super().__init__(1, False)
 
 class AutoIntType(Type):
     pass
@@ -80,18 +84,8 @@ class StructType(Type):
 
 
 def get_common_type(a, b):
-    if type(a) is IntType and type(b) is IntType:
-        if a.num_bits != b.num_bits:
-            return None
-
-        elif a.is_signed and not b.is_signed:
-            return None
-
-        elif not a.is_signed and b.is_signed:
-            return None
-
-        else:
-            return a
+    if a is b or a == b:
+        return a
 
     elif type(a) is IntType and type(b) is AutoIntType:
         return a

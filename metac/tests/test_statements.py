@@ -97,7 +97,6 @@ class LoopTests(unittest.TestCase):
             )
         )
 
-    @unittest.SkipTest
     def test_if(self):
         self.assertEqual(
             0,
@@ -116,6 +115,8 @@ class LoopTests(unittest.TestCase):
                                 return 4
 
                     return 1
+
+                return test()
                 """
             )
         )

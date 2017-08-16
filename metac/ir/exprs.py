@@ -15,6 +15,12 @@ def gen_static_expr_ir(scope, expr):
     if expr_type is AutoIntNode:
         return IntValue(AutoIntType(), int(str(expr.value), expr.radix))
 
+    if expr_type is IntNode:
+        return IntValue(
+            IntType(expr.num_bits, expr.is_signed),
+            int(str(expr.value), expr.radix)
+        )
+
     else:
         raise Todo(expr)
 
@@ -29,6 +35,23 @@ def gen_expr_ir(ctx, expr):
 
     else:
         return gen_static_expr_ir(ctx.scope, expr)
+
+def gen_condition_ir(ctx, expr):
+    expr_type = type(expr)
+
+    return gen_as_bit_ir(ctx, gen_expr_ir(ctx, expr))
+
+def gen_as_bit_ir(ctx, value):
+    val_type = type(value.type)
+
+    if value.type == BitType():
+        return value
+
+    elif val_type is IntType:
+        return gen_neq_ir(ctx, value, IntValue(value.type, 0))
+
+    else:
+        raise Todo()
 
 def gen_implicit_cast_ir(ctx, value, ir_as_type):
     val_type = type(value.type)
@@ -66,3 +89,46 @@ def gen_call_ir(ctx, expr):
 
     else:
         raise Todo(lhs)
+
+def _gen_fun_cmp(ctx, op, lhs, rhs):
+    cmp_type = get_common_type(lhs.type, rhs.type)
+
+    if issubclass(type(cmp_type), IntType):
+        if cmp_type.is_signed:
+            return LlvmValue(
+                BitType(),
+                ctx.builder.icmp_signed(
+                    op,
+                    gen_implicit_cast_ir(ctx, lhs, cmp_type).get_llvm_value(),
+                    gen_implicit_cast_ir(ctx, rhs, cmp_type).get_llvm_value()
+                )
+            )
+        else:
+            return LlvmValue(
+                BitType(),
+                ctx.builder.icmp_unsigned(
+                    op,
+                    gen_implicit_cast_ir(ctx, lhs, cmp_type).get_llvm_value(),
+                    gen_implicit_cast_ir(ctx, rhs, cmp_type).get_llvm_value()
+                )
+            )
+    else:
+        raise Todo()
+
+def gen_ltn_ir(ctx, lhs, rhs):
+    return _gen_fun_cmp(ctx, "<", lhs, rhs)
+
+def gen_leq_ir(ctx, lhs, rhs):
+    return _gen_fun_cmp(ctx, "<=", lhs, rhs)
+
+def gen_gtn_ir(ctx, lhs, rhs):
+    return _gen_fun_cmp(ctx, ">", lhs, rhs)
+
+def gen_geq_ir(ctx, lhs, rhs):
+    return _gen_fun_cmp(ctx, ">=", lhs, rhs)
+
+def gen_eql_ir(ctx, lhs, rhs):
+    return _gen_fun_cmp(ctx, "==", lhs, rhs)
+
+def gen_neq_ir(ctx, lhs, rhs):
+    return _gen_fun_cmp(ctx, "!=", lhs, rhs)
