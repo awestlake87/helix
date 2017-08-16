@@ -214,18 +214,60 @@ def gen_and_ir(ctx, expr):
     return LlvmValue(BitType(), phi)
 
 def gen_or_ir(ctx, expr):
-    raise Todo()
+    or_lhs_false = ctx.builder.append_basic_block("or_lhs_false")
+    or_true = ctx.builder.append_basic_block("or_true")
+    or_false = ctx.builder.append_basic_block("or_false")
+    or_end = ctx.builder.append_basic_block("or_end")
+
+    ctx.builder.cbranch(
+        gen_as_bit_ir(ctx, gen_expr_ir(ctx, expr.lhs)).get_llvm_value(),
+        or_true,
+        or_lhs_false
+    )
+
+    ctx.builder.position_at_start(or_end)
+    phi = ctx.builder.phi(BitType().get_llvm_value())
+
+    with ctx.builder.goto_block(or_lhs_false):
+        ctx.builder.cbranch(
+            gen_as_bit_ir(ctx, gen_expr_ir(ctx, expr.rhs)).get_llvm_value(),
+            or_true,
+            or_false
+        )
+
+    with ctx.builder.goto_block(or_true):
+        phi.add_incoming(
+            ir.IntType(1)(1),
+            or_true
+        )
+        ctx.builder.branch(or_end)
+
+    with ctx.builder.goto_block(or_false):
+        phi.add_incoming(
+            ir.IntType(1)(0),
+            or_false
+        )
+        ctx.builder.branch(or_end)
+
+    return LlvmValue(BitType(), phi)
 
 def gen_not_ir(ctx, expr):
-    raise Todo()
+    return gen_bit_not_ir(
+        ctx,
+        gen_as_bit_ir(ctx, gen_expr_ir(ctx, expr.operand))
+    )
 
 def gen_xor_ir(ctx, expr):
-    raise Todo()
+    return gen_bit_xor_ir(
+        ctx,
+        gen_as_bit_ir(ctx, gen_expr_ir(ctx, expr.lhs)),
+        gen_as_bit_ir(ctx, gen_expr_ir(ctx, expr.rhs))
+    )
 
 def _gen_fun_cmp(ctx, op, lhs, rhs):
     cmp_type = get_common_type(lhs.type, rhs.type)
 
-    if issubclass(type(cmp_type), IntType):
+    if type(cmp_type) is IntType:
         if cmp_type.is_signed:
             return LlvmValue(
                 BitType(),
@@ -274,3 +316,41 @@ def gen_eql_ir(ctx, lhs, rhs):
 
 def gen_neq_ir(ctx, lhs, rhs):
     return _gen_fun_cmp(ctx, "!=", lhs, rhs)
+
+
+def gen_bit_and_ir(ctx, lhs, rhs):
+    raise Todo()
+
+def gen_bit_or_ir(ctx, lhs, rhs):
+    raise Todo()
+
+def gen_bit_not_ir(ctx, operand):
+    common_type = get_concrete_type(operand.type)
+
+    if type(common_type) is IntType:
+        return LlvmValue(
+            common_type,
+            ctx.builder.not_(
+                gen_implicit_cast_ir(
+                    ctx, operand, common_type
+                ).get_llvm_value()
+            )
+        )
+
+    else:
+        raise Todo()
+
+def gen_bit_xor_ir(ctx, lhs, rhs):
+    common_type = get_common_type(lhs.type, rhs.type)
+
+    if type(common_type) is IntType:
+        return LlvmValue(
+            common_type,
+            ctx.builder.xor(
+                gen_implicit_cast_ir(ctx, lhs, common_type).get_llvm_value(),
+                gen_implicit_cast_ir(ctx, rhs, common_type).get_llvm_value()
+            )
+        )
+
+    else:
+        raise Todo()

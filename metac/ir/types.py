@@ -34,16 +34,14 @@ class IntType(Type):
         return self._llvm_value
 
     def __eq__(self, other):
-
         return (
-            issubclass(type(other), IntType) and
+            type(other) is IntType and
             self.num_bits == other.num_bits and
             self.is_signed == other.is_signed
         )
 
-class BitType(IntType):
-    def __init__(self):
-        super().__init__(1, False)
+def BitType():
+    return IntType(1, False)
 
 class AutoIntType(Type):
     pass
