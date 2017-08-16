@@ -1,4 +1,5 @@
 from ..expr_node import ExprNode, UnaryExprNode, BinaryExprNode
+from .misc_exprs import AssignExprNode
 
 class BitAndExprNode(BinaryExprNode):
     pass
@@ -19,17 +20,17 @@ class BitShlExprNode(BinaryExprNode):
     pass
 
 
-class BitAndAssignExprNode(BinaryExprNode):
+class BitAndAssignExprNode(AssignExprNode):
     pass
 
-class BitXorAssignExprNode(BinaryExprNode):
+class BitXorAssignExprNode(AssignExprNode):
     pass
 
-class BitOrAssignExprNode(BinaryExprNode):
+class BitOrAssignExprNode(AssignExprNode):
     pass
 
-class BitShrAssignExprNode(BinaryExprNode):
+class BitShrAssignExprNode(AssignExprNode):
     pass
 
-class BitShlAssignExprNode(BinaryExprNode):
+class BitShlAssignExprNode(AssignExprNode):
     pass

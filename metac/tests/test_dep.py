@@ -1,16 +1,11 @@
-
 import unittest
 
-from ..lang import Parser
-from ..dep import hoist, Scope, create_jit_target
-
-def parse_ast(code):
-    parser = Parser(code)
-    return parser.parse()
+from .utils import run_test
 
 class DepTests(unittest.TestCase):
+    @unittest.SkipTest
     def test_unit(self):
-        unit_ast = parse_ast(
+        run_test(
             """
             struct Blargh
                 int @n
@@ -24,23 +19,12 @@ class DepTests(unittest.TestCase):
                 blargh: Blargh()
                 blargh.n = 456
 
-                return b()
+                return b(blargh)
 
 
-            extern fun int b()
-                blargh: Blargh()
-                blargh.n = 456
+            extern fun int b(Blargh blargh)
+                return blargh.n
 
-                return 0
-
-            c()
-            b()
+            return c()
             """
         )
-
-        global_scope = Scope()
-
-        hoist(global_scope, unit_ast)
-        jit_target = create_jit_target(global_scope, unit_ast)
-
-        jit_target.build()

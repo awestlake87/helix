@@ -1,8 +1,8 @@
 
-from metac.compiler import Compiler
+from metac import init_metac
 
 from metac.tests import *
 
 if __name__ == "__main__":
-    Compiler.initialize()
+    init_metac()
     unittest.main()

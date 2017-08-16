@@ -16,3 +16,5 @@ class LoopStatementNode(StatementNode):
         self.loop_body = loop_body
         self.then_clause = then_clause
         self.until_clause = until_clause
+
+        self.scope = None

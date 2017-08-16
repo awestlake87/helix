@@ -25,7 +25,7 @@ class Parser:
             raise ExpectedToken(Token(id), self._next)
 
     def _accept(self, id):
-        if self._next.id == id:
+        if self._peek() == id:
             self._current = self._next
             self._next = self._lexer.scan()
             return True
@@ -118,6 +118,8 @@ class Parser:
         if_cond = self._parse_condition()
         if_block = self._parse_block()
 
+        self._accept(Token.NODENT)
+
         if_branches = [ ]
 
         if_branches.append((if_cond, if_block))
@@ -125,10 +127,14 @@ class Parser:
         while self._accept(Token.KW_ELIF):
             cond = self._parse_condition()
             block = self._parse_block()
+
+            self._accept(Token.NODENT)
+
             if_branches.append((cond, block))
 
         if self._accept(Token.KW_ELSE):
             return IfStatementNode(if_branches, self._parse_block())
+            
         else:
             return IfStatementNode(if_branches)
 
@@ -335,59 +341,35 @@ class Parser:
         return self._parse_expr_prec12()
 
     def _parse_expr_prec12(self):
-        def _accept():
-            if self._accept(':'):                       return True
-            elif self._accept('='):                     return True
-
-            elif self._accept(Token.OP_ADD_ASSIGN):     return True
-            elif self._accept(Token.OP_SUB_ASSIGN):     return True
-            elif self._accept(Token.OP_MUL_ASSIGN):     return True
-            elif self._accept(Token.OP_DIV_ASSIGN):     return True
-            elif self._accept(Token.OP_MOD_ASSIGN):     return True
-
-            elif self._accept(Token.OP_AND_ASSIGN):     return True
-            elif self._accept(Token.OP_XOR_ASSIGN):     return True
-            elif self._accept(Token.OP_OR_ASSIGN):      return True
-            elif self._accept(Token.OP_SHL_ASSIGN):     return True
-            elif self._accept(Token.OP_SHR_ASSIGN):     return True
-
-            else:
-                return False
-
         lhs = self._parse_expr_prec11()
 
-        if _accept():
-            id = self._current.id
+        if self._accept(':'):
+            return InitExprNode(lhs, self._parse_expr_prec12())
+        elif self._accept('='):
+            return AssignExprNode(lhs, self._parse_expr_prec12())
 
-            if id == ':':
-                return InitExprNode(lhs, self._parse_expr_prec12())
-            elif id == '=':
-                return AssignExprNode(lhs, self._parse_expr_prec12())
+        elif self._accept(Token.OP_ADD_ASSIGN):
+            return AddAssignExprNode(lhs, self._parse_expr_prec12())
 
-            elif id == Token.OP_ADD_ASSIGN:
-                return AddAssignExprNode(lhs, self._parse_expr_prec12())
-            elif id == Token.OP_SUB_ASSIGN:
-                return SubAssignExprNode(lhs, self._parse_expr_prec12())
-            elif id == Token.OP_MUL_ASSIGN:
-                return MulAssignExprNode(lhs, self._parse_expr_prec12())
-            elif id == Token.OP_DIV_ASSIGN:
-                return DivAssignExprNode(lhs, self._parse_expr_prec12())
-            elif id == Token.OP_MOD_ASSIGN:
-                return ModAssignExprNode(lhs, self._parse_expr_prec12())
+        elif self._accept(Token.OP_SUB_ASSIGN):
+            return SubAssignExprNode(lhs, self._parse_expr_prec12())
+        elif self._accept(Token.OP_MUL_ASSIGN):
+            return MulAssignExprNode(lhs, self._parse_expr_prec12())
+        elif self._accept(Token.OP_DIV_ASSIGN):
+            return DivAssignExprNode(lhs, self._parse_expr_prec12())
+        elif self._accept(Token.OP_MOD_ASSIGN):
+            return ModAssignExprNode(lhs, self._parse_expr_prec12())
 
-            elif id == Token.OP_AND_ASSIGN:
-                return BitAndAssignExprNode(lhs, self._parse_expr_prec12())
-            elif id == Token.OP_XOR_ASSIGN:
-                return BitXorAssignExprNode(lhs, self._parse_expr_prec12())
-            elif id == Token.OP_OR_ASSIGN:
-                return BitOrAssignExprNode(lhs, self._parse_expr_prec12())
-            elif id == Token.OP_SHL_ASSIGN:
-                return BitShlAssignExprNode(lhs, self._parse_expr_prec12())
-            elif id == Token.OP_SHR_ASSIGN:
-                return BitShrAssignExprNode(lhs, self._parse_expr_prec12())
-
-            else:
-                raise CompilerBug("0_0")
+        elif self._accept(Token.OP_AND_ASSIGN):
+            return BitAndAssignExprNode(lhs, self._parse_expr_prec12())
+        elif self._accept(Token.OP_XOR_ASSIGN):
+            return BitXorAssignExprNode(lhs, self._parse_expr_prec12())
+        elif self._accept(Token.OP_OR_ASSIGN):
+            return BitOrAssignExprNode(lhs, self._parse_expr_prec12())
+        elif self._accept(Token.OP_SHL_ASSIGN):
+            return BitShlAssignExprNode(lhs, self._parse_expr_prec12())
+        elif self._accept(Token.OP_SHR_ASSIGN):
+            return BitShrAssignExprNode(lhs, self._parse_expr_prec12())
 
         else:
             return lhs
@@ -403,6 +385,7 @@ class Parser:
             rhs = self._parse_expr_prec10()
 
             return TernaryConditionalNode(lhs, condition, rhs)
+
         else:
             return lhs
 
@@ -588,7 +571,8 @@ class Parser:
             else:
                 raise CompilerBug("O_O")
 
-        return self._parse_expr_prec1()
+        else:
+            return self._parse_expr_prec1()
 
     def _parse_expr_prec1(self):
         _accept = self._accept

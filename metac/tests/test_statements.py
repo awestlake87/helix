@@ -4,8 +4,6 @@ import unittest
 from .utils import run_test
 
 class LoopTests(unittest.TestCase):
-
-    @unittest.SkipTest
     def test_return(self):
         self.assertEqual(
             6573,
@@ -13,6 +11,8 @@ class LoopTests(unittest.TestCase):
                 """
                 extern fun int test()
                     return 6573
+
+                return test()
                 """
             )
         )

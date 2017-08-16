@@ -1,18 +1,12 @@
+from ..lang import Parser
+from ..dep.symbols.unit_symbol import UnitSymbol
+from ..dep import JitTarget
 
-from ctypes import CFUNCTYPE, c_int
+def run_test(code):
+    parser = Parser(code)
 
-from ..compiler import Compiler
+    jit_target = JitTarget([ UnitSymbol("test", parser.parse()) ])
 
+    jit_target.build()
 
-def compile_test(code):
-    compiler = Compiler()
-    return compiler.compile_unit(code)
-
-def run_test(code, dump_ir=False):
-    compiler = Compiler()
-
-    unit = compiler.compile_unit(code, dump_ir=dump_ir)
-
-    test = compiler.get_function(CFUNCTYPE(c_int), "test")
-
-    return test()
+    return jit_target.run()

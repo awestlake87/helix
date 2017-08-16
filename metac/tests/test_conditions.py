@@ -26,6 +26,7 @@ class ConditionTests(unittest.TestCase):
 
                     if false and a = 34
                         return 4
+
                     else
                         if a == 34
                             return 5
@@ -35,6 +36,8 @@ class ConditionTests(unittest.TestCase):
                             return 6
 
                     return 0
+
+                return test()
                 """
             )
         )
@@ -59,6 +62,8 @@ class ConditionTests(unittest.TestCase):
                         return 2
 
                     return 0
+
+                return test()
                 """
             )
         )
@@ -95,6 +100,8 @@ class ConditionTests(unittest.TestCase):
                             return 3
 
                     return 0
+
+                return test()
                 """
             )
         )
@@ -116,6 +123,8 @@ class ConditionTests(unittest.TestCase):
                         pass
 
                     return 0
+
+                return test()
                 """
             )
         )

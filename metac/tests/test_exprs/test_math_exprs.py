@@ -39,6 +39,8 @@ class MathExprTests(unittest.TestCase):
                         return 6
 
                     return 0
+
+                return test()
                 """
             )
         )
@@ -51,6 +53,8 @@ class MathExprTests(unittest.TestCase):
                 """
                 extern fun int test()
                     return -143
+
+                return test()
                 """
             )
         )
@@ -89,6 +93,8 @@ class MathExprTests(unittest.TestCase):
 
 
                     return 0
+
+                return test()
                 """
             )
         )
@@ -127,6 +133,8 @@ class MathExprTests(unittest.TestCase):
 
 
                     return 0
+
+                return test()
                 """
             )
         )
@@ -165,6 +173,8 @@ class MathExprTests(unittest.TestCase):
 
 
                     return 0
+
+                return test()
                 """
             )
         )
@@ -203,6 +213,8 @@ class MathExprTests(unittest.TestCase):
 
 
                     return 0
+
+                return test()
                 """
             )
         )
@@ -241,6 +253,8 @@ class MathExprTests(unittest.TestCase):
 
 
                     return 0
+
+                return test()
                 """
             )
         )

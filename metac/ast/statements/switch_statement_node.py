@@ -5,3 +5,5 @@ class SwitchStatementNode(StatementNode):
         self.value = value
         self.case_branches = case_branches
         self.default_block = default_block
+
+        self.scope = None

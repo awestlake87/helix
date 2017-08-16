@@ -8,7 +8,4 @@ class FunTypeNode(ExprNode):
 class IntTypeNode(ExprNode):
     def __init__(self, num_bits, is_signed):
         self.num_bits = num_bits
-        self._is_signed = is_signed
-
-    def is_signed(self):
-        return self._is_signed
+        self.is_signed = is_signed

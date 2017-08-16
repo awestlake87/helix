@@ -8,7 +8,10 @@ from ..types import *
 from llvmlite import ir
 
 class Fun(Value):
-    def __init__(self, unit, type, id, param_ids):
+    EXTERN_C = 0
+    INTERN_C = 1
+
+    def __init__(self, unit, type, id, param_ids, linkage):
         self.unit = unit
         self.type = type
 
@@ -17,10 +20,15 @@ class Fun(Value):
         self._fun = ir.Function(
             unit._module, self.type.get_llvm_type(), id
         )
-        self._fun.linkage = "external"
 
         for arg, id in zip(self._fun.args, param_ids):
             arg.name = id
+
+        if linkage == Fun.EXTERN_C:
+            self._fun.linkage = "external"
+
+        elif linkage == Fun.INTERN_C:
+            self._fun.linkage = "internal"
 
     def create_body(self):
         self._entry = self._fun.append_basic_block("entry")

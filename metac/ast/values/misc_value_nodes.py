@@ -12,7 +12,7 @@ class IntNode(LiteralNode):
     def __init__(self, num_bits, is_signed, value, radix=10):
         self.num_bits = num_bits
         self._is_signed = is_signed
-        self.value = value
+        self.value = str(value)
         self.radix = radix
 
     def is_signed(self):

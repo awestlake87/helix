@@ -2,7 +2,7 @@ import unittest
 
 from ...err import ReturnTypeMismatch
 
-from ..utils import run_test, compile_test
+from ..utils import run_test
 
 class MiscExprTests(unittest.TestCase):
 
@@ -37,7 +37,7 @@ class MiscExprTests(unittest.TestCase):
         )
 
         with self.assertRaises(ReturnTypeMismatch):
-            compile_test(
+            run_test(
                 """
                 extern fun int omg()
                     return short(123)
