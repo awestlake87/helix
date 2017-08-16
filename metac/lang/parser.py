@@ -287,7 +287,7 @@ class Parser:
             id = self._current.id
 
             if id == Token.OP_EQ:
-                lhs = EqNode(lhs, self._parse_condition_prec2())
+                lhs = EqlNode(lhs, self._parse_condition_prec2())
             elif id == Token.OP_NEQ:
                 lhs = NeqNode(lhs, self._parse_condition_prec2())
             else:

@@ -99,7 +99,9 @@ def gen_if_statement_code(ctx, statement):
             condition, block = branch
 
             ctx.builder.cbranch(
-                gen_condition_ir(ctx, condition).get_llvm_value(),
+                gen_as_bit_ir(
+                    ctx, gen_expr_ir(ctx, condition)
+                ).get_llvm_value(),
                 then_block,
                 else_block
             )

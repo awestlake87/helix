@@ -14,7 +14,7 @@ class LlvmValue:
         return self._llvm_value
 
 class LlvmRef:
-    def __init__(self, ir_type, llvm_ptr):
+    def __init__(self, ctx, ir_type, llvm_ptr):
         self.type = ir_type
         self._llvm_ptr = llvm_ptr
 
@@ -23,7 +23,7 @@ class LlvmRef:
         return self._llvm_ptr
 
     def get_llvm_value(self):
-        return ctx.builder.load(self.get_llvm_ptr())
+        return self.ctx.builder.load(self.get_llvm_ptr())
 
 class UnitValue(LlvmValue):
     def __init__(self, id):
@@ -51,7 +51,7 @@ class StackValue(LlvmRef):
 
         with self.ctx.builder.goto_block(self.ctx.entry):
             super().__init__(
-                ir_type, self.ctx.builder.alloca(ir_type.get_llvm_value())
+                ctx, ir_type, self.ctx.builder.alloca(ir_type.get_llvm_value())
             )
 
 class IntValue(LlvmValue):

@@ -48,16 +48,26 @@ def gen_expr_ir(ctx, expr):
     elif expr_type is SymbolNode:
         return ctx.scope.resolve(expr.id).get_ir_value()
 
+    elif expr_type is AndNode:
+        return gen_and_ir(ctx, expr)
+
+    elif expr_type is OrNode:
+        return gen_or_ir(ctx, expr)
+
+    elif expr_type is NotNode:
+        return gen_not_ir(ctx, expr)
+
+    elif expr_type is XorNode:
+        return gen_xor_ir(ctx, expr)
+
+    elif expr_type is InitExprNode:
+        return gen_init_ir(ctx, expr)
+
     elif issubclass(expr_type, BinaryExprNode):
         return gen_binary_expr_ir(ctx, expr)
 
     else:
         return gen_static_expr_ir(ctx.scope, expr)
-
-def gen_condition_ir(ctx, expr):
-    expr_type = type(expr)
-
-    return gen_as_bit_ir(ctx, gen_expr_ir(ctx, expr))
 
 def gen_binary_expr_ir(ctx, expr):
     expr_type = type(expr)
@@ -81,6 +91,10 @@ def gen_binary_expr_ir(ctx, expr):
 
     elif expr_type is NeqNode:
         return gen_neq_ir(ctx, lhs, rhs)
+
+    elif expr_type is AssignExprNode:
+        gen_assign_code(ctx, lhs, rhs)
+        return lhs
 
     else:
         raise Todo(expr)
@@ -117,8 +131,25 @@ def gen_implicit_cast_ir(ctx, value, ir_as_type):
     else:
         raise Todo(value)
 
+def gen_init_ir(ctx, expr):
+    rhs = gen_expr_ir(ctx, expr.rhs)
+    lhs = StackValue(ctx, get_concrete_type(rhs.type))
+
+    if type(expr.lhs) is SymbolNode:
+        ctx.scope.resolve(expr.lhs.id).set_ir_value(lhs)
+
+        gen_assign_code(ctx, lhs, rhs)
+
+        return lhs
+
+    else:
+        raise Todo(expr)
+
 def gen_assign_code(ctx, lhs, rhs):
-    ctx.builder.store(rhs.get_llvm_value(), lhs.get_llvm_ptr())
+    ctx.builder.store(
+        gen_implicit_cast_ir(ctx, rhs, lhs.type).get_llvm_value(),
+        lhs.get_llvm_ptr()
+    )
 
 def gen_call_ir(ctx, expr):
     lhs = gen_expr_ir(ctx, expr.lhs)
@@ -143,6 +174,53 @@ def gen_call_ir(ctx, expr):
 
     else:
         raise Todo(lhs)
+
+def gen_and_ir(ctx, expr):
+    and_lhs_true = ctx.builder.append_basic_block("and_lhs_true")
+    and_true = ctx.builder.append_basic_block("and_true")
+    and_false = ctx.builder.append_basic_block("and_false")
+    and_end = ctx.builder.append_basic_block("and_end")
+
+    ctx.builder.cbranch(
+        gen_as_bit_ir(ctx, gen_expr_ir(ctx, expr.lhs)).get_llvm_value(),
+        and_lhs_true,
+        and_false
+    )
+
+    ctx.builder.position_at_start(and_end)
+    phi = ctx.builder.phi(BitType().get_llvm_value())
+
+    with ctx.builder.goto_block(and_lhs_true):
+        ctx.builder.cbranch(
+            gen_as_bit_ir(ctx, gen_expr_ir(ctx, expr.rhs)).get_llvm_value(),
+            and_true,
+            and_false
+        )
+
+    with ctx.builder.goto_block(and_true):
+        phi.add_incoming(
+            ir.IntType(1)(1),
+            and_true
+        )
+        ctx.builder.branch(and_end)
+
+    with ctx.builder.goto_block(and_false):
+        phi.add_incoming(
+            ir.IntType(1)(0),
+            and_false
+        )
+        ctx.builder.branch(and_end)
+
+    return LlvmValue(BitType(), phi)
+
+def gen_or_ir(ctx, expr):
+    raise Todo()
+
+def gen_not_ir(ctx, expr):
+    raise Todo()
+
+def gen_xor_ir(ctx, expr):
+    raise Todo()
 
 def _gen_fun_cmp(ctx, op, lhs, rhs):
     cmp_type = get_common_type(lhs.type, rhs.type)

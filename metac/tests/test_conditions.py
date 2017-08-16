@@ -3,7 +3,6 @@ import unittest
 from .utils import run_test
 
 class ConditionTests(unittest.TestCase):
-    @unittest.SkipTest
     def test_and(self):
         self.assertEqual(
             0,
