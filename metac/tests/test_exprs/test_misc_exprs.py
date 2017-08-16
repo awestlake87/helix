@@ -5,8 +5,6 @@ from ...err import ReturnTypeMismatch
 from ..utils import run_test
 
 class MiscExprTests(unittest.TestCase):
-
-    @unittest.SkipTest
     def test_fun_calls(self):
         self.assertEqual(
             43,
@@ -20,11 +18,12 @@ class MiscExprTests(unittest.TestCase):
 
                 extern fun int return_43(int a, int b)
                     return 43
+
+                return test()
                 """
             )
         )
 
-    @unittest.SkipTest
     def test_int_inits(self):
         self.assertEqual(
             123,
@@ -32,6 +31,8 @@ class MiscExprTests(unittest.TestCase):
                 """
                 extern fun int test()
                     return int(123)
+
+                return test()
                 """
             )
         )
@@ -41,10 +42,11 @@ class MiscExprTests(unittest.TestCase):
                 """
                 extern fun int omg()
                     return short(123)
+
+                return omg()
                 """
             )
 
-    @unittest.SkipTest
     def test_init(self):
         self.assertEqual(
             1234,
@@ -53,6 +55,8 @@ class MiscExprTests(unittest.TestCase):
                 extern fun int test()
                     a: b: 1234
                     return a
+
+                return test()
                 """
             )
         )
@@ -75,6 +79,8 @@ class MiscExprTests(unittest.TestCase):
                         return 2
 
                     return 0
+
+                return test()
                 """
             )
         )
@@ -110,6 +116,8 @@ class MiscExprTests(unittest.TestCase):
                         return 3
 
                     return 0
+
+                return test()
                 """
             )
         )

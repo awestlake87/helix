@@ -150,7 +150,7 @@ def gen_implicit_cast_ir(ctx, value, ir_as_type):
     val_type = type(value.type)
     as_type = type(ir_as_type)
 
-    if val_type is as_type or val_type == as_type:
+    if value.type is ir_as_type or value.type == ir_as_type:
         return value
 
     elif val_type is AutoIntType and as_type is IntType:
