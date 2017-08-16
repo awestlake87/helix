@@ -38,7 +38,7 @@ def gen_code(fun, scope, ast):
 
         gen_assign_code(ctx, value, LlvmValue(param_type, arg))
 
-        ctx.scope.insert(param_id, value)
+        ctx.scope.resolve(param_id).set_ir_value(value)
 
     gen_block_code(ctx, ast.body)
 
@@ -82,48 +82,60 @@ def gen_return_statement_code(ctx, statement):
         raise ReturnTypeMismatch()
 
 def gen_if_statement_code(ctx, statement):
-    assert len(statement.if_branches) >= 1
+    assert statement.scope is not None
 
-    end_if = ctx.builder.append_basic_block("end_if")
-    then_block = ctx.builder.append_basic_block("then")
-    else_block = ctx.builder.append_basic_block("else")
+    with ctx.use_scope(statement.scope):
+        assert len(statement.if_branches) >= 1
 
-    num = len(statement.if_branches)
+        end_if = ctx.builder.append_basic_block("end_if")
+        then_block = ctx.builder.append_basic_block("then")
+        else_block = ctx.builder.append_basic_block("else")
 
-    for branch in statement.if_branches:
-        condition, block = branch
+        num = len(statement.if_branches)
 
-        ctx.builder.cbranch(
-            gen_condition_ir(ctx, condition).get_llvm_value(),
-            then_block,
-            else_block
-        )
+        all_paths_return = True
 
-        with ctx.builder.goto_block(then_block):
-            gen_block_code(ctx, block)
+        for branch in statement.if_branches:
+            condition, block = branch
 
-            if not ctx.builder.block.is_terminated:
+            ctx.builder.cbranch(
+                gen_condition_ir(ctx, condition).get_llvm_value(),
+                then_block,
+                else_block
+            )
+
+            with ctx.builder.goto_block(then_block):
+                gen_block_code(ctx, block)
+
+                if not ctx.builder.block.is_terminated:
+                    ctx.builder.branch(end_if)
+                    all_paths_return = False
+
+            assert then_block.is_terminated
+
+            ctx.builder.position_at_start(else_block)
+
+            if branch is not statement.if_branches[-1]:
+                then_block = ctx.builder.append_basic_block("then")
+                else_block = ctx.builder.append_basic_block("else")
+
+
+        with ctx.builder.goto_block(else_block):
+            if statement.else_block is not None:
+                gen_block_code(ctx, statement.else_block)
+
+                if not ctx.builder.block.is_terminated:
+                    ctx.builder.branch(end_if)
+                    all_paths_return = False
+
+            else:
                 ctx.builder.branch(end_if)
+                all_paths_return = False
 
-        assert then_block.is_terminated
+        assert else_block.is_terminated
+        assert not end_if.is_terminated
 
-        ctx.builder.position_at_start(else_block)
+        ctx.builder.position_at_start(end_if)
 
-        if branch is not statement.if_branches[-1]:
-            then_block = ctx.builder.append_basic_block("then")
-            else_block = ctx.builder.append_basic_block("else")
-
-
-    with ctx.builder.goto_block(else_block):
-        if statement.else_block is not None:
-            gen_block_code(ctx, statement.else_block)
-
-            if not ctx.builder.block.is_terminated:
-                ctx.builder.branch(end_if)
-        else:
-            ctx.builder.branch(end_if)
-
-    assert else_block.is_terminated
-    assert not end_if.is_terminated
-
-    ctx.builder.position_at_start(end_if)
+        if all_paths_return:
+            ctx.builder.unreachable()

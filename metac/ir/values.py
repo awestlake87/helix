@@ -51,7 +51,7 @@ class StackValue(LlvmRef):
 
         with self.ctx.builder.goto_block(self.ctx.entry):
             super().__init__(
-                ir_type, self.builder.alloca(ir_type.get_llvm_value())
+                ir_type, self.ctx.builder.alloca(ir_type.get_llvm_value())
             )
 
 class IntValue(LlvmValue):

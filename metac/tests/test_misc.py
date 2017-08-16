@@ -5,7 +5,6 @@ from ..err import ReturnTypeMismatch
 from .utils import run_test
 
 class MiscTests(unittest.TestCase):
-    @unittest.SkipTest
     def test_nested_fun(self):
         self.assertEqual(
             5,

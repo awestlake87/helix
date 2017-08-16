@@ -66,6 +66,9 @@ def gen_implicit_cast_ir(ctx, value, ir_as_type):
     else:
         raise Todo(value)
 
+def gen_assign_code(ctx, lhs, rhs):
+    ctx.builder.store(rhs.get_llvm_value(), lhs.get_llvm_ptr())
+
 def gen_call_ir(ctx, expr):
     lhs = gen_expr_ir(ctx, expr.lhs)
 
