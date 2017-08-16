@@ -134,7 +134,7 @@ class Parser:
 
         if self._accept(Token.KW_ELSE):
             return IfStatementNode(if_branches, self._parse_block())
-            
+
         else:
             return IfStatementNode(if_branches)
 
@@ -310,13 +310,13 @@ class Parser:
             id = self._current.id
 
             if id == '<':
-                lhs = LtnExprNode(lhs, self._parse_condition_prec1())
+                lhs = LtnNode(lhs, self._parse_condition_prec1())
             elif id == '>':
-                lhs = GtnExprNode(lhs, self._parse_condition_prec1())
+                lhs = GtnNode(lhs, self._parse_condition_prec1())
             elif id == Token.OP_LEQ:
-                lhs = LeqExprNode(lhs, self._parse_condition_prec1())
+                lhs = LeqNode(lhs, self._parse_condition_prec1())
             elif id == Token.OP_GEQ:
-                lhs = GeqExprNode(lhs, self._parse_condition_prec1())
+                lhs = GeqNode(lhs, self._parse_condition_prec1())
             else:
                 raise CompilerBug("8.8")
 

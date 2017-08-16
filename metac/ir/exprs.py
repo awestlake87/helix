@@ -9,20 +9,35 @@ from .values import *
 def gen_static_expr_ir(scope, expr):
     expr_type = type(expr)
 
-    if expr_type is IntTypeNode:
+    if expr_type is PtrExprNode:
+        return gen_static_ptr_expr_ir(scope, expr)
+
+    elif expr_type is IntTypeNode:
         return IntType(expr.num_bits, expr.is_signed)
 
-    if expr_type is AutoIntNode:
+    elif expr_type is AutoIntNode:
         return IntValue(AutoIntType(), int(str(expr.value), expr.radix))
 
-    if expr_type is IntNode:
+    elif expr_type is IntNode:
         return IntValue(
             IntType(expr.num_bits, expr.is_signed),
             int(str(expr.value), expr.radix)
         )
 
+    elif expr_type is NilNode:
+        return NilValue(AutoPtrType())
+
     else:
         raise Todo(expr)
+
+def gen_static_ptr_expr_ir(scope, expr):
+    pointee = gen_static_expr_ir(scope, expr.operand)
+
+    if issubclass(type(pointee), Type):
+        return PtrType(pointee)
+
+    else:
+        raise Todo(pointee)
 
 def gen_expr_ir(ctx, expr):
     expr_type = type(expr)
@@ -33,6 +48,9 @@ def gen_expr_ir(ctx, expr):
     elif expr_type is SymbolNode:
         return ctx.scope.resolve(expr.id).get_ir_value()
 
+    elif issubclass(expr_type, BinaryExprNode):
+        return gen_binary_expr_ir(ctx, expr)
+
     else:
         return gen_static_expr_ir(ctx.scope, expr)
 
@@ -40,6 +58,32 @@ def gen_condition_ir(ctx, expr):
     expr_type = type(expr)
 
     return gen_as_bit_ir(ctx, gen_expr_ir(ctx, expr))
+
+def gen_binary_expr_ir(ctx, expr):
+    expr_type = type(expr)
+    lhs = gen_expr_ir(ctx, expr.lhs)
+    rhs = gen_expr_ir(ctx, expr.rhs)
+
+    if expr_type is LtnNode:
+        return gen_ltn_ir(ctx, lhs, rhs)
+
+    elif expr_type is LeqNode:
+        return gen_leq_ir(ctx, lhs, rhs)
+
+    elif expr_type is GtnNode:
+        return gen_gtn_ir(ctx, lhs, rhs)
+
+    elif expr_type is GeqNode:
+        return gen_geq_ir(ctx, lhs, rhs)
+
+    elif expr_type is EqlNode:
+        return gen_eql_ir(ctx, lhs, rhs)
+
+    elif expr_type is NeqNode:
+        return gen_neq_ir(ctx, lhs, rhs)
+
+    else:
+        raise Todo(expr)
 
 def gen_as_bit_ir(ctx, value):
     val_type = type(value.type)
@@ -62,6 +106,13 @@ def gen_implicit_cast_ir(ctx, value, ir_as_type):
 
     elif val_type is AutoIntType and as_type is IntType:
         return IntValue(ir_as_type, value.value)
+
+    elif val_type is AutoPtrType and as_type is PtrType:
+        if type(value) is NilValue:
+            return NilValue(ir_as_type)
+
+        else:
+            raise Todo()
 
     else:
         raise Todo(value)
@@ -115,6 +166,16 @@ def _gen_fun_cmp(ctx, op, lhs, rhs):
                     gen_implicit_cast_ir(ctx, rhs, cmp_type).get_llvm_value()
                 )
             )
+    elif type(cmp_type) is PtrType:
+        return LlvmValue(
+            BitType(),
+            ctx.builder.icmp_unsigned(
+                op,
+                gen_implicit_cast_ir(ctx, lhs, cmp_type).get_llvm_value(),
+                gen_implicit_cast_ir(ctx, rhs, cmp_type).get_llvm_value()
+            )
+        )
+
     else:
         raise Todo()
 

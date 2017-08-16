@@ -13,20 +13,20 @@ class NotNode(UnaryExprNode):
     pass
 
 
-class LtnExprNode(BinaryExprNode):
+class LtnNode(BinaryExprNode):
     pass
 
-class GtnExprNode(BinaryExprNode):
+class GtnNode(BinaryExprNode):
     pass
 
-class LeqExprNode(BinaryExprNode):
+class LeqNode(BinaryExprNode):
     pass
 
-class GeqExprNode(BinaryExprNode):
+class GeqNode(BinaryExprNode):
     pass
 
 
-class EqNode(BinaryExprNode):
+class EqlNode(BinaryExprNode):
     pass
 
 class NeqNode(BinaryExprNode):

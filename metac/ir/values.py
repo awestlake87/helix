@@ -1,7 +1,7 @@
 
 from llvmlite import ir
 
-from .types import AutoIntType
+from .types import AutoIntType, AutoPtrType
 
 
 class LlvmValue:
@@ -63,3 +63,13 @@ class IntValue(LlvmValue):
 
         else:
             super().__init__(ir_type, ir_type.get_llvm_value()(self.value))
+
+class NilValue(LlvmValue):
+    def __init__(self, ir_type):
+        if type(ir_type) is AutoPtrType:
+            super().__init__(ir_type, None)
+
+        else:
+            super().__init__(
+                ir_type, ir.IntType(32)(0).inttoptr(ir_type.get_llvm_value())
+            )

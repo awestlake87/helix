@@ -20,7 +20,6 @@ class MiscTests(unittest.TestCase):
             )
         )
 
-    @unittest.SkipTest
     def test_ptr_type(self):
         run_test(
             """
@@ -41,7 +40,6 @@ class MiscTests(unittest.TestCase):
             """
         )
 
-    @unittest.SkipTest
     def test_int_types(self):
         run_test(
             """
@@ -81,7 +79,6 @@ class MiscTests(unittest.TestCase):
             """
         )
 
-    @unittest.SkipTest
     def test_return_type_mismatch(self):
         with self.assertRaises(ReturnTypeMismatch):
             run_test(

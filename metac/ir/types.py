@@ -6,23 +6,23 @@ from llvmlite import ir
 class Type:
     pass
 
-class AutoPtrType(Type):
-    pass
-
 class PtrType(Type):
-    def __init__(self, ir_type):
-        self.type = ir_type
+    def __init__(self, pointee):
+        self.pointee = pointee
 
-        if type(self.type) is AutoPtrType:
+        if type(self.pointee) is AutoPtrType:
             self._llvm_value = None
 
         else:
-            self._llvm_value = self.type.get_llvm_value().as_pointer()
+            self._llvm_value = self.pointee.get_llvm_value().as_pointer()
 
     def get_llvm_value(self):
         assert self._llvm_value is not None
 
         return self._llvm_value
+
+class AutoPtrType(Type):
+    pass
 
 class IntType(Type):
     def __init__(self, num_bits=32, is_signed=True):
@@ -91,6 +91,12 @@ def get_common_type(a, b):
         return a
 
     elif type(a) is AutoIntType and type(b) is IntType:
+        return b
+
+    elif type(a) is PtrType and type(b) is AutoPtrType:
+        return a
+
+    elif type(a) is AutoPtrType and type(b) is PtrType:
         return b
 
     else:
