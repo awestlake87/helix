@@ -66,6 +66,9 @@ def gen_expr_ir(ctx, expr):
     elif issubclass(expr_type, BinaryExprNode):
         return gen_binary_expr_ir(ctx, expr)
 
+    elif issubclass(expr_type, UnaryExprNode):
+        return gen_unary_expr_ir(ctx, expr)
+
     else:
         return gen_static_expr_ir(ctx.scope, expr)
 
@@ -76,28 +79,60 @@ def gen_binary_expr_ir(ctx, expr):
 
     if expr_type is LtnNode:
         return gen_ltn_ir(ctx, lhs, rhs)
-
     elif expr_type is LeqNode:
         return gen_leq_ir(ctx, lhs, rhs)
-
     elif expr_type is GtnNode:
         return gen_gtn_ir(ctx, lhs, rhs)
-
     elif expr_type is GeqNode:
         return gen_geq_ir(ctx, lhs, rhs)
-
     elif expr_type is EqlNode:
         return gen_eql_ir(ctx, lhs, rhs)
-
     elif expr_type is NeqNode:
         return gen_neq_ir(ctx, lhs, rhs)
+
+    elif expr_type is BitAndExprNode:
+        return gen_bit_and_ir(ctx, lhs, rhs)
+    elif expr_type is BitOrExprNode:
+        return gen_bit_or_ir(ctx, lhs, rhs)
+    elif expr_type is BitXorExprNode:
+        return gen_bit_xor_ir(ctx, lhs, rhs)
+    elif expr_type is BitShlExprNode:
+        return gen_bit_shl_ir(ctx, lhs, rhs)
+    elif expr_type is BitShrExprNode:
+        return gen_bit_shr_ir(ctx, lhs, rhs)
 
     elif expr_type is AssignExprNode:
         gen_assign_code(ctx, lhs, rhs)
         return lhs
+    elif expr_type is BitAndAssignExprNode:
+        gen_assign_code(ctx, lhs, gen_bit_and_ir(ctx, lhs, rhs))
+        return lhs
+    elif expr_type is BitOrAssignExprNode:
+        gen_assign_code(ctx, lhs, gen_bit_or_ir(ctx, lhs, rhs))
+        return lhs
+    elif expr_type is BitXorAssignExprNode:
+        gen_assign_code(ctx, lhs, gen_bit_xor_ir(ctx, lhs, rhs))
+        return lhs
+    elif expr_type is BitShlAssignExprNode:
+        gen_assign_code(ctx, lhs, gen_bit_shl_ir(ctx, lhs, rhs))
+        return lhs
+    elif expr_type is BitShrAssignExprNode:
+        gen_assign_code(ctx, lhs, gen_bit_shr_ir(ctx, lhs, rhs))
+        return lhs
 
     else:
-        raise Todo(expr)
+        return gen_static_expr_ir(ctx.scope, expr)
+
+def gen_unary_expr_ir(ctx, expr):
+    operand = gen_expr_ir(ctx, expr.operand)
+
+    expr_type = type(expr)
+
+    if expr_type is BitNotExprNode:
+        return gen_bit_not_ir(ctx, operand)
+
+    else:
+        return gen_static_expr_ir(ctx.scope, expr)
 
 def gen_as_bit_ir(ctx, value):
     val_type = type(value.type)
@@ -171,6 +206,18 @@ def gen_call_ir(ctx, expr):
         return LlvmValue(
             lhs.type.ret_type, ctx.builder.call(lhs.get_llvm_value(), ir_args)
         )
+
+    elif type(lhs) is IntType:
+        if len(expr.args) == 0:
+            return LlvmValue(lhs, lhs.get_llvm_value()(ir.Undefined))
+
+        elif len(expr.args) == 1:
+            return gen_implicit_cast_ir(
+                ctx, gen_expr_ir(ctx, expr.args[0]), lhs
+            )
+
+        else:
+            raise Todo("int args")
 
     else:
         raise Todo(lhs)
@@ -319,10 +366,34 @@ def gen_neq_ir(ctx, lhs, rhs):
 
 
 def gen_bit_and_ir(ctx, lhs, rhs):
-    raise Todo()
+    common_type = get_common_type(lhs.type, rhs.type)
+
+    if type(common_type) is IntType:
+        return LlvmValue(
+            common_type,
+            ctx.builder.and_(
+                gen_implicit_cast_ir(ctx, lhs, common_type).get_llvm_value(),
+                gen_implicit_cast_ir(ctx, rhs, common_type).get_llvm_value()
+            )
+        )
+
+    else:
+        raise Todo()
 
 def gen_bit_or_ir(ctx, lhs, rhs):
-    raise Todo()
+    common_type = get_common_type(lhs.type, rhs.type)
+
+    if type(common_type) is IntType:
+        return LlvmValue(
+            common_type,
+            ctx.builder.or_(
+                gen_implicit_cast_ir(ctx, lhs, common_type).get_llvm_value(),
+                gen_implicit_cast_ir(ctx, rhs, common_type).get_llvm_value()
+            )
+        )
+
+    else:
+        raise Todo()
 
 def gen_bit_not_ir(ctx, operand):
     common_type = get_concrete_type(operand.type)
@@ -347,6 +418,53 @@ def gen_bit_xor_ir(ctx, lhs, rhs):
         return LlvmValue(
             common_type,
             ctx.builder.xor(
+                gen_implicit_cast_ir(ctx, lhs, common_type).get_llvm_value(),
+                gen_implicit_cast_ir(ctx, rhs, common_type).get_llvm_value()
+            )
+        )
+
+    else:
+        raise Todo()
+
+def gen_bit_shr_ir(ctx, lhs, rhs):
+    common_type = get_common_type(lhs.type, rhs.type)
+
+    if type(common_type) is IntType:
+        if common_type.is_signed:
+            return LlvmValue(
+                common_type,
+                ctx.builder.ashr(
+                    gen_implicit_cast_ir(
+                        ctx, lhs, common_type
+                    ).get_llvm_value(),
+                    gen_implicit_cast_ir(
+                        ctx, rhs, common_type
+                    ).get_llvm_value()
+                )
+            )
+        else:
+            return LlvmValue(
+                common_type,
+                ctx.builder.lshr(
+                    gen_implicit_cast_ir(
+                        ctx, lhs, common_type
+                    ).get_llvm_value(),
+                    gen_implicit_cast_ir(
+                        ctx, rhs, common_type
+                    ).get_llvm_value()
+                )
+            )
+
+    else:
+        raise Todo()
+
+def gen_bit_shl_ir(ctx, lhs, rhs):
+    common_type = get_common_type(lhs.type, rhs.type)
+
+    if type(common_type) is IntType:
+        return LlvmValue(
+            common_type,
+            ctx.builder.shl(
                 gen_implicit_cast_ir(ctx, lhs, common_type).get_llvm_value(),
                 gen_implicit_cast_ir(ctx, rhs, common_type).get_llvm_value()
             )
