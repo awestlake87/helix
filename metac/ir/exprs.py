@@ -90,6 +90,17 @@ def gen_binary_expr_ir(ctx, expr):
     elif expr_type is NeqNode:
         return gen_neq_ir(ctx, lhs, rhs)
 
+    elif expr_type is AddExprNode:
+        return gen_add_ir(ctx, lhs, rhs)
+    elif expr_type is SubExprNode:
+        return gen_sub_ir(ctx, lhs, rhs)
+    elif expr_type is MulExprNode:
+        return gen_mul_ir(ctx, lhs, rhs)
+    elif expr_type is DivExprNode:
+        return gen_div_ir(ctx, lhs, rhs)
+    elif expr_type is ModExprNode:
+        return gen_mod_ir(ctx, lhs, rhs)
+
     elif expr_type is BitAndExprNode:
         return gen_bit_and_ir(ctx, lhs, rhs)
     elif expr_type is BitOrExprNode:
@@ -104,6 +115,23 @@ def gen_binary_expr_ir(ctx, expr):
     elif expr_type is AssignExprNode:
         gen_assign_code(ctx, lhs, rhs)
         return lhs
+
+    elif expr_type is AddAssignExprNode:
+        gen_assign_code(ctx, lhs, gen_add_ir(ctx, lhs, rhs))
+        return lhs
+    elif expr_type is SubAssignExprNode:
+        gen_assign_code(ctx, lhs, gen_sub_ir(ctx, lhs, rhs))
+        return lhs
+    elif expr_type is MulAssignExprNode:
+        gen_assign_code(ctx, lhs, gen_mul_ir(ctx, lhs, rhs))
+        return lhs
+    elif expr_type is DivAssignExprNode:
+        gen_assign_code(ctx, lhs, gen_div_ir(ctx, lhs, rhs))
+        return lhs
+    elif expr_type is ModAssignExprNode:
+        gen_assign_code(ctx, lhs, gen_mod_ir(ctx, lhs, rhs))
+        return lhs
+
     elif expr_type is BitAndAssignExprNode:
         gen_assign_code(ctx, lhs, gen_bit_and_ir(ctx, lhs, rhs))
         return lhs
@@ -128,7 +156,19 @@ def gen_unary_expr_ir(ctx, expr):
 
     expr_type = type(expr)
 
-    if expr_type is BitNotExprNode:
+    if expr_type is PreIncExprNode:
+        return gen_pre_inc_ir(ctx, operand)
+    elif expr_type is PostIncExprNode:
+        return gen_post_inc_ir(ctx, operand)
+    elif expr_type is PreDecExprNode:
+        return gen_pre_dec_ir(ctx, operand)
+    elif expr_type is PostDecExprNode:
+        return gen_post_dec_ir(ctx, operand)
+
+    elif expr_type is NegExprNode:
+        return gen_neg_ir(ctx, operand)
+
+    elif expr_type is BitNotExprNode:
         return gen_bit_not_ir(ctx, operand)
 
     else:
@@ -364,6 +404,182 @@ def gen_eql_ir(ctx, lhs, rhs):
 def gen_neq_ir(ctx, lhs, rhs):
     return _gen_fun_cmp(ctx, "!=", lhs, rhs)
 
+def gen_neg_ir(ctx, operand):
+    t = get_concrete_type(operand.type)
+
+    if type(t) is IntType:
+        return LlvmValue(
+            t,
+            ctx.builder.neg(
+                gen_implicit_cast_ir(ctx, operand, t).get_llvm_value()
+            )
+        )
+
+    else:
+        raise Todo()
+
+def gen_add_ir(ctx, lhs, rhs):
+    common_type = get_concrete_type(get_common_type(lhs.type, rhs.type))
+
+    if type(common_type) is IntType:
+        return LlvmValue(
+            common_type,
+            ctx.builder.add(
+                gen_implicit_cast_ir(ctx, lhs, common_type).get_llvm_value(),
+                gen_implicit_cast_ir(ctx, rhs, common_type).get_llvm_value()
+            )
+        )
+
+    else:
+        raise Todo()
+
+def gen_sub_ir(ctx, lhs, rhs):
+    common_type = get_concrete_type(get_common_type(lhs.type, rhs.type))
+
+    if type(common_type) is IntType:
+        return LlvmValue(
+            common_type,
+            ctx.builder.sub(
+                gen_implicit_cast_ir(ctx, lhs, common_type).get_llvm_value(),
+                gen_implicit_cast_ir(ctx, rhs, common_type).get_llvm_value()
+            )
+        )
+
+    else:
+        raise Todo()
+
+def gen_mul_ir(ctx, lhs, rhs):
+    common_type = get_concrete_type(get_common_type(lhs.type, rhs.type))
+
+    if type(common_type) is IntType:
+        return LlvmValue(
+            common_type,
+            ctx.builder.mul(
+                gen_implicit_cast_ir(ctx, lhs, common_type).get_llvm_value(),
+                gen_implicit_cast_ir(ctx, rhs, common_type).get_llvm_value()
+            )
+        )
+
+    else:
+        raise Todo()
+
+def gen_div_ir(ctx, lhs, rhs):
+    common_type = get_concrete_type(get_common_type(lhs.type, rhs.type))
+
+    if type(common_type) is IntType:
+        if common_type.is_signed:
+            return LlvmValue(
+                common_type,
+                ctx.builder.sdiv(
+                    gen_implicit_cast_ir(
+                        ctx, lhs, common_type
+                    ).get_llvm_value(),
+                    gen_implicit_cast_ir(
+                        ctx, rhs, common_type
+                    ).get_llvm_value()
+                )
+            )
+        else:
+            return LlvmValue(
+                common_type,
+                ctx.builder.udiv(
+                    gen_implicit_cast_ir(
+                        ctx, lhs, common_type
+                    ).get_llvm_value(),
+                    gen_implicit_cast_ir(
+                        ctx, rhs, common_type
+                    ).get_llvm_value()
+                )
+            )
+
+    else:
+        raise Todo()
+
+def gen_mod_ir(ctx, lhs, rhs):
+    common_type = get_concrete_type(get_common_type(lhs.type, rhs.type))
+
+    if type(common_type) is IntType:
+        if common_type.is_signed:
+            return LlvmValue(
+                common_type,
+                ctx.builder.srem(
+                    gen_implicit_cast_ir(
+                        ctx, lhs, common_type
+                    ).get_llvm_value(),
+                    gen_implicit_cast_ir(
+                        ctx, rhs, common_type
+                    ).get_llvm_value()
+                )
+            )
+        else:
+            return LlvmValue(
+                common_type,
+                ctx.builder.urem(
+                    gen_implicit_cast_ir(
+                        ctx, lhs, common_type
+                    ).get_llvm_value(),
+                    gen_implicit_cast_ir(
+                        ctx, rhs, common_type
+                    ).get_llvm_value()
+                )
+            )
+
+    else:
+        raise Todo()
+
+def gen_pre_inc_ir(ctx, operand):
+    if type(operand.type) is IntType:
+        gen_assign_code(
+            ctx,
+            operand,
+            gen_add_ir(ctx, operand, IntValue(operand.type, 1))
+        )
+        return operand
+
+    else:
+        raise Todo()
+
+def gen_post_inc_ir(ctx, operand):
+    if type(operand.type) is IntType:
+        value = LlvmValue(operand.type, operand.get_llvm_value())
+
+        gen_assign_code(
+            ctx,
+            operand,
+            gen_add_ir(ctx, operand, IntValue(operand.type, 1))
+        )
+
+        return value
+
+    else:
+        raise Todo()
+
+def gen_pre_dec_ir(ctx, operand):
+    if type(operand.type) is IntType:
+        gen_assign_code(
+            ctx,
+            operand,
+            gen_sub_ir(ctx, operand, IntValue(operand.type, 1))
+        )
+        return operand
+
+    else:
+        raise Todo()
+
+def gen_post_dec_ir(ctx, operand):
+    if type(operand.type) is IntType:
+        value = LlvmValue(operand.type, operand.get_llvm_value())
+
+        gen_assign_code(
+            ctx,
+            operand,
+            gen_sub_ir(ctx, operand, IntValue(operand.type, 1))
+        )
+
+        return value
+
+    else:
+        raise Todo()
 
 def gen_bit_and_ir(ctx, lhs, rhs):
     common_type = get_common_type(lhs.type, rhs.type)

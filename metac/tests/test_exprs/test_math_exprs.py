@@ -3,7 +3,6 @@ import unittest
 from ..utils import run_test
 
 class MathExprTests(unittest.TestCase):
-    @unittest.SkipTest
     def test_inc_and_dec(self):
         self.assertEqual(
             0,
@@ -45,7 +44,6 @@ class MathExprTests(unittest.TestCase):
             )
         )
 
-    @unittest.SkipTest
     def test_negate(self):
         self.assertEqual(
             -143,
@@ -59,7 +57,6 @@ class MathExprTests(unittest.TestCase):
             )
         )
 
-    @unittest.SkipTest
     def test_add(self):
         self.assertEqual(
             0,
@@ -99,7 +96,6 @@ class MathExprTests(unittest.TestCase):
             )
         )
 
-    @unittest.SkipTest
     def test_sub(self):
         self.assertEqual(
             0,
@@ -139,7 +135,6 @@ class MathExprTests(unittest.TestCase):
             )
         )
 
-    @unittest.SkipTest
     def test_mul(self):
         self.assertEqual(
             0,
@@ -179,7 +174,6 @@ class MathExprTests(unittest.TestCase):
             )
         )
 
-    @unittest.SkipTest
     def test_sdiv(self):
         self.assertEqual(
             0,
@@ -219,7 +213,6 @@ class MathExprTests(unittest.TestCase):
             )
         )
 
-    @unittest.SkipTest
     def test_smod(self):
         self.assertEqual(
             0,

@@ -22,7 +22,8 @@ class PtrType(Type):
         return self._llvm_value
 
 class AutoPtrType(Type):
-    pass
+    def __eq__(self, other):
+        return type(other) is AutoPtrType
 
 class IntType(Type):
     def __init__(self, num_bits=32, is_signed=True):
@@ -44,7 +45,8 @@ def BitType():
     return IntType(1, False)
 
 class AutoIntType(Type):
-    pass
+    def __eq__(self, other):
+        return type(other) is AutoIntType
 
 class FunType(Type):
     def __init__(self, ret_type, param_types):
