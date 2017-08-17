@@ -3,7 +3,6 @@ import unittest
 from .utils import run_test
 
 class DepTests(unittest.TestCase):
-    @unittest.SkipTest
     def test_unit(self):
         run_test(
             """

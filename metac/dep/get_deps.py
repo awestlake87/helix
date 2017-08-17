@@ -52,6 +52,9 @@ def get_expr_deps(unit, expr):
     elif expr_type is DotExprNode:
         return [ ]
 
+    elif expr_type is TernaryConditionalNode:
+        return get_ternary_conditional_deps(unit, expr)
+
     elif issubclass(expr_type, UnaryExprNode):
         return get_unary_expr_deps(unit, expr)
 
@@ -78,6 +81,13 @@ def get_unary_expr_deps(unit, expr):
 
 def get_binary_expr_deps(unit, expr):
     return get_expr_deps(unit, expr.lhs) + get_expr_deps(unit, expr.rhs)
+
+def get_ternary_conditional_deps(unit, expr):
+    return (
+        get_expr_deps(unit, expr.lhs) +
+        get_expr_deps(unit, expr.condition) +
+        get_expr_deps(unit, expr.rhs)
+    )
 
 def get_call_deps(unit, expr):
     deps = get_expr_deps(unit, expr.lhs)

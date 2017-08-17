@@ -61,7 +61,6 @@ class MiscExprTests(unittest.TestCase):
             )
         )
 
-    @unittest.SkipTest
     def test_ternary_conditional(self):
         self.assertEqual(
             0,
@@ -85,7 +84,6 @@ class MiscExprTests(unittest.TestCase):
             )
         )
 
-    @unittest.SkipTest
     def test_structs(self):
         self.assertEqual(
             0,

@@ -52,6 +52,9 @@ def hoist_expr(unit, expr):
     elif expr_type is DotExprNode:
         pass
 
+    elif expr_type is TernaryConditionalNode:
+        hoist_ternary_conditional(unit, expr)
+
     elif issubclass(expr_type, UnaryExprNode):
         hoist_unary(unit, expr)
 
@@ -96,6 +99,11 @@ def hoist_init_expr(unit, expr):
 
     else:
         raise Todo()
+
+def hoist_ternary_conditional(unit, expr):
+    hoist_expr(unit, expr.lhs)
+    hoist_expr(unit, expr.condition)
+    hoist_expr(unit, expr.rhs)
 
 def hoist_struct(unit, s):
     unit.scope.insert(s.id, StructSymbol(unit, unit.scope, s))

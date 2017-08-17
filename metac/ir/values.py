@@ -15,6 +15,7 @@ class LlvmValue:
 
 class LlvmRef:
     def __init__(self, ctx, ir_type, llvm_ptr):
+        self.ctx = ctx
         self.type = ir_type
         self._llvm_ptr = llvm_ptr
 
@@ -47,11 +48,9 @@ class FunValue(LlvmValue):
 
 class StackValue(LlvmRef):
     def __init__(self, ctx, ir_type):
-        self.ctx = ctx
-
-        with self.ctx.builder.goto_block(self.ctx.entry):
+        with ctx.builder.goto_block(ctx.entry):
             super().__init__(
-                ctx, ir_type, self.ctx.builder.alloca(ir_type.get_llvm_value())
+                ctx, ir_type, ctx.builder.alloca(ir_type.get_llvm_value())
             )
 
 class IntValue(LlvmValue):

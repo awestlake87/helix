@@ -27,6 +27,9 @@ def gen_static_expr_ir(scope, expr):
     elif expr_type is NilNode:
         return NilValue(AutoPtrType())
 
+    elif expr_type is SymbolNode:
+        return scope.resolve(expr.id).get_ir_value()
+
     else:
         raise Todo(expr)
 
@@ -62,6 +65,12 @@ def gen_expr_ir(ctx, expr):
 
     elif expr_type is InitExprNode:
         return gen_init_ir(ctx, expr)
+
+    elif expr_type is DotExprNode:
+        return gen_dot_ir(ctx, expr)
+
+    elif expr_type is TernaryConditionalNode:
+        return gen_ternary_conditional_ir(ctx, expr)
 
     elif issubclass(expr_type, BinaryExprNode):
         return gen_binary_expr_ir(ctx, expr)
@@ -220,6 +229,69 @@ def gen_init_ir(ctx, expr):
     else:
         raise Todo(expr)
 
+def gen_dot_ir(ctx, expr):
+    lhs = gen_expr_ir(ctx, expr.lhs)
+
+    if type(lhs.type) is StructType:
+        if type(expr.rhs) is SymbolNode:
+            attr_type, attr_index = lhs.type.get_attr_info(expr.rhs.id)
+
+            return LlvmRef(
+                ctx,
+                attr_type,
+                ctx.builder.gep(
+                    lhs.get_llvm_ptr(),
+                    [ ir.IntType(32)(0), ir.IntType(32)(attr_index) ]
+                )
+            )
+
+        else:
+            raise Todo("rhs is not a symbol")
+
+    else:
+        raise Todo()
+
+def gen_ternary_conditional_ir(ctx, expr):
+    tern_true = ctx.builder.append_basic_block("tern_true")
+    tern_false = ctx.builder.append_basic_block("tern_false")
+    tern_end = ctx.builder.append_basic_block("tern_end")
+
+    ctx.builder.cbranch(
+        gen_as_bit_ir(ctx, gen_expr_ir(ctx, expr.condition)).get_llvm_value(),
+        tern_true,
+        tern_false
+    )
+
+    lhs_value = None
+    rhs_value = None
+
+    with ctx.builder.goto_block(tern_true):
+        lhs_value = gen_expr_ir(ctx, expr.lhs)
+        ctx.builder.branch(tern_end)
+
+    with ctx.builder.goto_block(tern_false):
+        rhs_value = gen_expr_ir(ctx, expr.rhs)
+        ctx.builder.branch(tern_end)
+
+    val_type = get_concrete_type(
+        get_common_type(lhs_value.type, rhs_value.type)
+    )
+
+    ctx.builder.position_at_start(tern_end)
+    phi = ctx.builder.phi(val_type.get_llvm_value())
+
+    phi.add_incoming(
+        gen_implicit_cast_ir(ctx, lhs_value, val_type).get_llvm_value(),
+        tern_true
+    )
+    phi.add_incoming(
+        gen_implicit_cast_ir(ctx, rhs_value, val_type).get_llvm_value(),
+        tern_false
+    )
+
+    return LlvmValue(val_type, phi)
+
+
 def gen_assign_code(ctx, lhs, rhs):
     ctx.builder.store(
         gen_implicit_cast_ir(ctx, rhs, lhs.type).get_llvm_value(),
@@ -258,6 +330,13 @@ def gen_call_ir(ctx, expr):
 
         else:
             raise Todo("int args")
+
+    elif type(lhs) is StructType:
+        if len(expr.args) == 0:
+            return LlvmValue(lhs, lhs.get_llvm_value()(ir.Undefined))
+
+        else:
+            raise Todo("struct args")
 
     else:
         raise Todo(lhs)

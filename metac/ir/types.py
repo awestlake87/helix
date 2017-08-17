@@ -72,8 +72,8 @@ class StructType(Type):
         return self._llvm_value
 
     def get_attr_info(self, id):
-        for i in range(0, len(self._attrs)):
-            attr_type, attr_id = self._attrs[i]
+        for i in range(0, len(self.attrs)):
+            attr_type, attr_id = self.attrs[i]
 
             if attr_id == id:
                 return (attr_type, i)
