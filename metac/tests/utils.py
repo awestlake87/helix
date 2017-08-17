@@ -1,5 +1,5 @@
 from ..lang import Parser
-from ..dep.symbols.unit_symbol import UnitSymbol
+from ..sym import UnitSymbol
 from ..dep import JitTarget
 
 def run_test(code):

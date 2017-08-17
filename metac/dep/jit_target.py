@@ -3,8 +3,7 @@ from ctypes import CFUNCTYPE, c_int
 import llvmlite.binding as binding
 
 from .target import Target
-
-from .get_deps import get_block_deps
+from .gen_deps import gen_block_deps
 
 class JitTarget(Target):
     def __init__(self, units):

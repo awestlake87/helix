@@ -1,9 +1,9 @@
 from ..ast import *
 
 from .scope import Scope
-from .symbols.fun_symbol import *
-from .symbols.struct_symbol import *
-from .symbols.var_symbol import *
+from .fun_symbol import *
+from .struct_symbol import *
+from .var_symbol import *
 
 from ..err import Todo
 
@@ -29,7 +29,7 @@ def hoist_block(unit, block):
                 hoist_switch_statement(unit, statement)
 
             elif statement_type is ReturnNode:
-                hoist_return(unit, statement)
+                hoist_return_statement(unit, statement)
 
             else:
                 raise Todo()
@@ -44,10 +44,10 @@ def hoist_expr(unit, expr):
         hoist_fun(unit, expr)
 
     elif expr_type is CallExprNode:
-        hoist_call_expr(unit, expr)
+        hoist_call(unit, expr)
 
     elif expr_type is InitExprNode:
-        hoist_init_expr(unit, expr)
+        hoist_init(unit, expr)
 
     elif expr_type is DotExprNode:
         pass
@@ -56,10 +56,10 @@ def hoist_expr(unit, expr):
         hoist_ternary_conditional(unit, expr)
 
     elif issubclass(expr_type, UnaryExprNode):
-        hoist_unary(unit, expr)
+        hoist_unary_expr(unit, expr)
 
     elif issubclass(expr_type, BinaryExprNode):
-        hoist_binary(unit, expr)
+        hoist_binary_expr(unit, expr)
 
     elif expr_type is FunTypeNode:
         hoist_fun_type(unit, expr)
@@ -79,20 +79,20 @@ def hoist_expr(unit, expr):
     else:
         raise Todo(repr(expr))
 
-def hoist_unary(unit, expr):
+def hoist_unary_expr(unit, expr):
     hoist_expr(unit, expr.operand)
 
-def hoist_binary(unit, expr):
+def hoist_binary_expr(unit, expr):
     hoist_expr(unit, expr.lhs)
     hoist_expr(unit, expr.rhs)
 
-def hoist_call_expr(unit, expr):
+def hoist_call(unit, expr):
     hoist_expr(unit, expr.lhs)
 
     for arg in expr.args:
         hoist_expr(unit, arg)
 
-def hoist_init_expr(unit, expr):
+def hoist_init(unit, expr):
     if type(expr.lhs) is SymbolNode:
         hoist_expr(unit, expr.rhs)
         unit.scope.insert(expr.lhs.id, VarSymbol())
@@ -177,5 +177,5 @@ def hoist_switch_statement(unit, statement):
             hoist_block(unit, statement.default_block)
 
 
-def hoist_return(unit, statement):
+def hoist_return_statement(unit, statement):
     hoist_expr(unit, statement.expr)

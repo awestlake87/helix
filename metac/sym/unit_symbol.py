@@ -1,39 +1,14 @@
 from contextlib import contextmanager
 
-import llvmlite.binding as binding
-
-from ..scope import Scope
-from ..target import Target
+from .scope import Scope
 from .fun_symbol import FunSymbol
 
-from ...ir import UnitValue
-from ...ast import *
+from ..err import Todo
+from ..dep import UnitTarget
+from ..ir import UnitValue
+from ..ast import *
 
-from ..hoist import hoist_block
-from ..get_deps import get_block_deps
-
-class UnitTarget(Target):
-    def __init__(self, symbol, on_llvm_module=lambda m: None):
-        self.symbol = symbol
-        self._on_llvm_module = on_llvm_module
-
-        super().__init__(
-            [ self.symbol._jit_fun.get_target() ] + get_block_deps(self.symbol, self.symbol.ast)
-        )
-
-    def _build_target(self):
-        try:
-            llvm_module = binding.parse_assembly(
-                str(self.symbol.get_ir_value().get_llvm_value())
-            )
-
-            llvm_module.verify()
-
-            self._on_llvm_module(llvm_module)
-
-        except Exception as e:
-            print(e)
-            print(self.symbol.get_ir_value().get_llvm_value())
+from .hoist import hoist_block
 
 class UnitSymbol:
     def __init__(self, id, ast):
