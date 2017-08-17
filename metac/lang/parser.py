@@ -9,6 +9,7 @@ class Parser:
         self._lexer = Lexer(str)
         self._current = Token(Token.NONE)
         self._next = self._lexer.scan()
+        self._ahead = self._lexer.scan()
 
     def parse(self):
         block = self._parse_block()
@@ -16,6 +17,9 @@ class Parser:
         self._expect(Token.END)
 
         return block
+
+    def _peek_ahead(self):
+        return self._ahead.id
 
     def _peek(self):
         return self._next.id
@@ -27,7 +31,8 @@ class Parser:
     def _accept(self, id):
         if self._peek() == id:
             self._current = self._next
-            self._next = self._lexer.scan()
+            self._next = self._ahead
+            self._ahead = self._lexer.scan()
             return True
         else:
             return False
@@ -104,6 +109,13 @@ class Parser:
             while self._accept(Token.KW_CASE):
                 case_value = self._parse_expr()
                 case_block = self._parse_block()
+
+                if (
+                    self._peek_ahead() == Token.KW_CASE or
+                    self._peek_ahead() == Token.KW_DEFAULT
+                ):
+                    self._accept(Token.NODENT)
+
                 case_branches.append((case_value, case_block))
 
             if self._accept(Token.KW_DEFAULT):
@@ -128,7 +140,11 @@ class Parser:
             cond = self._parse_condition()
             block = self._parse_block()
 
-            self._accept(Token.NODENT)
+            if (
+                self._peek_ahead() == Token.KW_ELIF or
+                self._peek_ahead() == Token.KW_ELSE
+            ):
+                self._accept(Token.NODENT)
 
             if_branches.append((cond, block))
 
@@ -232,11 +248,16 @@ class Parser:
         then_clause = None
         until_clause = None
 
-        if self._accept(Token.KW_THEN):
-            then_clause = self._parse_expr()
+        if self._peek() == Token.NODENT:
+            if self._peek_ahead() == Token.KW_THEN:
+                self._accept(Token.NODENT)
+                self._accept(Token.KW_THEN)
+                then_clause = self._parse_expr()
 
-        if self._accept(Token.KW_UNTIL):
-            until_clause = self._parse_condition()
+            if self._peek_ahead() == Token.KW_UNTIL:
+                self._accept(Token.NODENT)
+                self._accept(Token.KW_UNTIL)
+                until_clause = self._parse_condition()
 
         return LoopStatementNode(
             for_clause,

@@ -22,14 +22,17 @@ def hoist_block(unit, block):
             elif statement_type is IfStatementNode:
                 hoist_if_statement(unit, statement)
 
+            elif statement_type is LoopStatementNode:
+                hoist_loop_statement(unit, statement)
+
+            elif statement_type is SwitchStatementNode:
+                hoist_switch_statement(unit, statement)
+
             elif statement_type is ReturnNode:
                 hoist_return(unit, statement)
 
             else:
                 raise Todo()
-
-def hoist_condition(unit, expr):
-    hoist_expr(unit, expr)
 
 def hoist_expr(unit, expr):
     expr_type = type(expr)
@@ -122,11 +125,49 @@ def hoist_if_statement(unit, statement):
 
     with unit.use_scope(statement.scope):
         for condition, block in statement.if_branches:
-            hoist_condition(unit, condition)
+            hoist_expr(unit, condition)
             hoist_block(unit, block)
 
         if statement.else_block is not None:
             hoist_block(unit, statement.else_block)
+
+def hoist_loop_statement(unit, statement):
+    assert statement.scope is None
+
+    statement.scope = Scope(unit.scope)
+
+    with unit.use_scope(statement.scope):
+        if statement.for_clause is not None:
+            hoist_expr(unit, statement.for_clause)
+
+        if statement.each_clause is not None:
+            hoist_expr(unit, statement.each_clause)
+
+        if statement.while_clause is not None:
+            hoist_expr(unit, statement.while_clause)
+
+        if statement.loop_body is not None:
+            hoist_block(unit, statement.loop_body)
+
+        if statement.then_clause is not None:
+            hoist_expr(unit, statement.then_clause)
+
+        if statement.until_clause is not None:
+            hoist_expr(unit, statement.until_clause)
+
+def hoist_switch_statement(unit, statement):
+    assert statement.scope is None
+
+    statement.scope = Scope(unit.scope)
+
+    with unit.use_scope(statement.scope):
+        for case_value, case_block in statement.case_branches:
+            hoist_expr(unit, case_value)
+            hoist_block(unit, case_block)
+
+        if statement.default_block is not None:
+            hoist_block(unit, statement.default_block)
+
 
 def hoist_return(unit, statement):
     hoist_expr(unit, statement.expr)

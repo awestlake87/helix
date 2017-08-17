@@ -15,24 +15,27 @@ def get_block_deps(unit, block):
 def get_statement_deps(unit, statement):
     statement_type = type(statement)
 
-    if statement_type is StructNode or statement_type is FunNode:
+    if statement_type is ReturnNode:
+        return get_return_deps(unit, statement)
+
+    elif statement_type is IfStatementNode:
+        return get_if_statement_deps(unit, statement)
+
+    elif statement_type is LoopStatementNode:
+        return get_loop_statement_deps(unit, statement)
+
+    elif statement_type is SwitchStatementNode:
+        return get_switch_statement_deps(unit, statement)
+
+    elif statement_type is StructNode or statement_type is FunNode:
         # standalone structs or funs are not deps
         return [ ]
 
     elif issubclass(statement_type, ExprNode):
         return get_expr_deps(unit, statement)
 
-    elif statement_type is ReturnNode:
-        return get_return_deps(unit, statement)
-
-    elif statement_type is IfStatementNode:
-        return get_if_statement_deps(unit, statement)
-
     else:
         raise Todo(repr(statement))
-
-def get_condition_deps(unit, condition):
-    return get_expr_deps(unit, condition)
 
 def get_expr_deps(unit, expr):
     expr_type = type(expr)
@@ -102,10 +105,51 @@ def get_if_statement_deps(unit, statement):
 
     with unit.use_scope(statement.scope):
         for condition, block in statement.if_branches:
-            deps += get_condition_deps(unit, condition)
+            deps += get_expr_deps(unit, condition)
             deps += get_block_deps(unit, block)
 
         if statement.else_block is not None:
             deps += get_block_deps(unit, statement.else_block)
+
+    return deps
+
+def get_loop_statement_deps(unit, statement):
+    assert statement.scope is not None
+
+    deps = [ ]
+
+    with unit.use_scope(statement.scope):
+        if statement.for_clause is not None:
+            deps += get_expr_deps(unit, statement.for_clause)
+
+        if statement.each_clause is not None:
+            deps += get_expr_deps(unit, statement.each_clause)
+
+        if statement.while_clause is not None:
+            deps += get_expr_deps(unit, statement.while_clause)
+
+        if statement.loop_body is not None:
+            deps += get_block_deps(unit, statement.loop_body)
+
+        if statement.then_clause is not None:
+            deps += get_expr_deps(unit, statement.then_clause)
+
+        if statement.until_clause is not None:
+            deps += get_expr_deps(unit, statement.until_clause)
+
+    return deps
+
+def get_switch_statement_deps(unit, statement):
+    assert statement.scope is not None
+
+    deps = [ ]
+
+    with unit.use_scope(statement.scope):
+        for case_value, case_block in statement.case_branches:
+            deps += get_expr_deps(unit, case_value)
+            deps += get_block_deps(unit, case_block)
+
+        if statement.default_block is not None:
+            deps += get_block_deps(unit, statement.default_block)
 
     return deps

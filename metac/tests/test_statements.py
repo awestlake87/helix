@@ -17,7 +17,6 @@ class LoopTests(unittest.TestCase):
             )
         )
 
-    @unittest.SkipTest
     def test_for_loop(self):
         self.assertEqual(
             9,
@@ -31,11 +30,12 @@ class LoopTests(unittest.TestCase):
                     then i++
 
                     return val
+
+                return test()
                 """
             )
         )
 
-    @unittest.SkipTest
     def test_while_loop(self):
         self.assertEqual(
             100,
@@ -48,11 +48,12 @@ class LoopTests(unittest.TestCase):
                         --i
 
                     return i
+
+                return test()
                 """
             )
         )
 
-    @unittest.SkipTest
     def test_until_loop(self):
         self.assertEqual(
             100,
@@ -66,18 +67,19 @@ class LoopTests(unittest.TestCase):
                     until i == 100
 
                     return i
+
+                return test()
                 """
             )
         )
 
-    @unittest.SkipTest
     def test_switch(self):
         self.assertEqual(
             0,
             run_test(
                 """
-                extern fun int test()
-                    switch 6
+                extern fun int test(int value)
+                    switch value
                         case 1
                             return 1
 
@@ -93,6 +95,8 @@ class LoopTests(unittest.TestCase):
 
                         default
                             return 4
+
+                return test(6)
                 """
             )
         )

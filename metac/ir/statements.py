@@ -58,6 +58,12 @@ def gen_statement_code(ctx, statement):
     elif statement_type is IfStatementNode:
         gen_if_statement_code(ctx, statement)
 
+    elif statement_type is LoopStatementNode:
+        gen_loop_statement_code(ctx, statement)
+
+    elif statement_type is SwitchStatementNode:
+        gen_switch_statement_code(ctx, statement)
+
     elif statement_type is FunNode or statement_type is StructNode:
         # only interested in generating the current fun
         pass
@@ -141,3 +147,90 @@ def gen_if_statement_code(ctx, statement):
 
         if all_paths_return:
             ctx.builder.unreachable()
+
+def gen_loop_statement_code(ctx, statement):
+    assert statement.scope is not None
+
+    with ctx.use_scope(statement.scope):
+        if statement.for_clause is not None:
+            gen_expr_ir(ctx, statement.for_clause)
+
+        if statement.each_clause is not None:
+            raise Todo("each clause")
+
+
+        loop_head = None
+        loop_body = ctx.builder.append_basic_block("loop_body")
+        loop_exit = ctx.builder.append_basic_block("loop_exit")
+
+        if statement.while_clause is not None:
+            loop_head = ctx.builder.append_basic_block("loop_head")
+
+            with ctx.builder.goto_block(loop_head):
+                ctx.builder.cbranch(
+                    gen_as_bit_ir(
+                        ctx, gen_expr_ir(ctx, statement.while_clause)
+                    ).get_llvm_value(),
+                    loop_body,
+                    loop_exit
+                )
+        else:
+            loop_head = loop_body
+
+        ctx.builder.branch(loop_head)
+
+        with ctx.builder.goto_block(loop_body):
+            gen_block_code(ctx, statement.loop_body)
+
+            if statement.then_clause is not None:
+                gen_expr_ir(ctx, statement.then_clause)
+
+            if statement.until_clause is not None:
+                ctx.builder.cbranch(
+                    gen_as_bit_ir(
+                        ctx, gen_expr_ir(ctx, statement.until_clause)
+                    ).get_llvm_value(),
+                    loop_exit,
+                    loop_head
+                )
+            else:
+                ctx.builder.branch(loop_head)
+
+        ctx.builder.position_at_start(loop_exit)
+
+def gen_switch_statement_code(ctx, statement):
+    assert statement.scope is not None
+
+    with ctx.use_scope(statement.scope):
+        value = gen_expr_ir(ctx, statement.value)
+        concrete_type = get_concrete_type(value.type)
+
+        if type(concrete_type) is IntType:
+            default_block = ctx.builder.append_basic_block("default")
+
+            inst = ctx.builder.switch(
+                gen_implicit_cast_ir(
+                    ctx, value, concrete_type
+                ).get_llvm_value(),
+                default_block
+            )
+
+            for case_value, case_block in statement.case_branches:
+                value = gen_implicit_cast_ir(
+                    ctx, gen_expr_ir(ctx, case_value), concrete_type
+                )
+
+                block = ctx.builder.append_basic_block("case")
+                inst.add_case(
+                    value.get_llvm_value(),
+                    block
+                )
+
+                with ctx.builder.goto_block(block):
+                    gen_block_code(ctx, case_block)
+
+            with ctx.builder.goto_block(default_block):
+                gen_block_code(ctx, statement.default_block)
+
+        else:
+            raise Todo("non-integer switches")
