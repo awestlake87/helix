@@ -9,13 +9,17 @@ class Parser:
         self._lexer = Lexer(str)
         self._current = Token(Token.NONE)
         self._next = self._lexer.scan()
+        self._ahead = self._lexer.scan()
 
     def parse(self):
-        unit = self._parse_unit()
+        block = self._parse_block()
 
         self._expect(Token.END)
 
-        return unit
+        return block
+
+    def _peek_ahead(self):
+        return self._ahead.id
 
     def _peek(self):
         return self._next.id
@@ -25,15 +29,13 @@ class Parser:
             raise ExpectedToken(Token(id), self._next)
 
     def _accept(self, id):
-        if self._next.id == id:
+        if self._peek() == id:
             self._current = self._next
-            self._next = self._lexer.scan()
+            self._next = self._ahead
+            self._ahead = self._lexer.scan()
             return True
         else:
             return False
-
-    def _parse_unit(self):
-        return UnitNode(self._parse_block())
 
     def _parse_block(self):
         self._accept(Token.KW_DO)
@@ -107,6 +109,13 @@ class Parser:
             while self._accept(Token.KW_CASE):
                 case_value = self._parse_expr()
                 case_block = self._parse_block()
+
+                if (
+                    self._peek_ahead() == Token.KW_CASE or
+                    self._peek_ahead() == Token.KW_DEFAULT
+                ):
+                    self._accept(Token.NODENT)
+
                 case_branches.append((case_value, case_block))
 
             if self._accept(Token.KW_DEFAULT):
@@ -121,6 +130,8 @@ class Parser:
         if_cond = self._parse_condition()
         if_block = self._parse_block()
 
+        self._accept(Token.NODENT)
+
         if_branches = [ ]
 
         if_branches.append((if_cond, if_block))
@@ -128,15 +139,24 @@ class Parser:
         while self._accept(Token.KW_ELIF):
             cond = self._parse_condition()
             block = self._parse_block()
+
+            if (
+                self._peek_ahead() == Token.KW_ELIF or
+                self._peek_ahead() == Token.KW_ELSE
+            ):
+                self._accept(Token.NODENT)
+
             if_branches.append((cond, block))
 
         if self._accept(Token.KW_ELSE):
             return IfStatementNode(if_branches, self._parse_block())
+
         else:
             return IfStatementNode(if_branches)
 
 
-    def _parse_fun(self, linkage):
+    def _parse_fun(self):
+        self._expect(Token.KW_EXTERN)
         self._expect(Token.KW_FUN)
 
         ret_type = self._parse_expr()
@@ -167,15 +187,13 @@ class Parser:
                 FunTypeNode(ret_type, param_types),
                 id,
                 param_ids,
-                linkage,
                 self._parse_block()
             )
         else:
             return FunNode(
                 FunTypeNode(ret_type, param_types),
                 id,
-                param_ids,
-                linkage
+                param_ids
             )
 
     def _parse_struct(self):
@@ -230,11 +248,16 @@ class Parser:
         then_clause = None
         until_clause = None
 
-        if self._accept(Token.KW_THEN):
-            then_clause = self._parse_expr()
+        if self._peek() == Token.NODENT:
+            if self._peek_ahead() == Token.KW_THEN:
+                self._accept(Token.NODENT)
+                self._accept(Token.KW_THEN)
+                then_clause = self._parse_expr()
 
-        if self._accept(Token.KW_UNTIL):
-            until_clause = self._parse_condition()
+            if self._peek_ahead() == Token.KW_UNTIL:
+                self._accept(Token.NODENT)
+                self._accept(Token.KW_UNTIL)
+                until_clause = self._parse_condition()
 
         return LoopStatementNode(
             for_clause,
@@ -285,7 +308,7 @@ class Parser:
             id = self._current.id
 
             if id == Token.OP_EQ:
-                lhs = EqNode(lhs, self._parse_condition_prec2())
+                lhs = EqlNode(lhs, self._parse_condition_prec2())
             elif id == Token.OP_NEQ:
                 lhs = NeqNode(lhs, self._parse_condition_prec2())
             else:
@@ -308,13 +331,13 @@ class Parser:
             id = self._current.id
 
             if id == '<':
-                lhs = LtnExprNode(lhs, self._parse_condition_prec1())
+                lhs = LtnNode(lhs, self._parse_condition_prec1())
             elif id == '>':
-                lhs = GtnExprNode(lhs, self._parse_condition_prec1())
+                lhs = GtnNode(lhs, self._parse_condition_prec1())
             elif id == Token.OP_LEQ:
-                lhs = LeqExprNode(lhs, self._parse_condition_prec1())
+                lhs = LeqNode(lhs, self._parse_condition_prec1())
             elif id == Token.OP_GEQ:
-                lhs = GeqExprNode(lhs, self._parse_condition_prec1())
+                lhs = GeqNode(lhs, self._parse_condition_prec1())
             else:
                 raise CompilerBug("8.8")
 
@@ -339,59 +362,35 @@ class Parser:
         return self._parse_expr_prec12()
 
     def _parse_expr_prec12(self):
-        def _accept():
-            if self._accept(':'):                       return True
-            elif self._accept('='):                     return True
-
-            elif self._accept(Token.OP_ADD_ASSIGN):     return True
-            elif self._accept(Token.OP_SUB_ASSIGN):     return True
-            elif self._accept(Token.OP_MUL_ASSIGN):     return True
-            elif self._accept(Token.OP_DIV_ASSIGN):     return True
-            elif self._accept(Token.OP_MOD_ASSIGN):     return True
-
-            elif self._accept(Token.OP_AND_ASSIGN):     return True
-            elif self._accept(Token.OP_XOR_ASSIGN):     return True
-            elif self._accept(Token.OP_OR_ASSIGN):      return True
-            elif self._accept(Token.OP_SHL_ASSIGN):     return True
-            elif self._accept(Token.OP_SHR_ASSIGN):     return True
-
-            else:
-                return False
-
         lhs = self._parse_expr_prec11()
 
-        if _accept():
-            id = self._current.id
+        if self._accept(':'):
+            return InitExprNode(lhs, self._parse_expr_prec12())
+        elif self._accept('='):
+            return AssignExprNode(lhs, self._parse_expr_prec12())
 
-            if id == ':':
-                return InitExprNode(lhs, self._parse_expr_prec12())
-            elif id == '=':
-                return AssignExprNode(lhs, self._parse_expr_prec12())
+        elif self._accept(Token.OP_ADD_ASSIGN):
+            return AddAssignExprNode(lhs, self._parse_expr_prec12())
 
-            elif id == Token.OP_ADD_ASSIGN:
-                return AddAssignExprNode(lhs, self._parse_expr_prec12())
-            elif id == Token.OP_SUB_ASSIGN:
-                return SubAssignExprNode(lhs, self._parse_expr_prec12())
-            elif id == Token.OP_MUL_ASSIGN:
-                return MulAssignExprNode(lhs, self._parse_expr_prec12())
-            elif id == Token.OP_DIV_ASSIGN:
-                return DivAssignExprNode(lhs, self._parse_expr_prec12())
-            elif id == Token.OP_MOD_ASSIGN:
-                return ModAssignExprNode(lhs, self._parse_expr_prec12())
+        elif self._accept(Token.OP_SUB_ASSIGN):
+            return SubAssignExprNode(lhs, self._parse_expr_prec12())
+        elif self._accept(Token.OP_MUL_ASSIGN):
+            return MulAssignExprNode(lhs, self._parse_expr_prec12())
+        elif self._accept(Token.OP_DIV_ASSIGN):
+            return DivAssignExprNode(lhs, self._parse_expr_prec12())
+        elif self._accept(Token.OP_MOD_ASSIGN):
+            return ModAssignExprNode(lhs, self._parse_expr_prec12())
 
-            elif id == Token.OP_AND_ASSIGN:
-                return BitAndAssignExprNode(lhs, self._parse_expr_prec12())
-            elif id == Token.OP_XOR_ASSIGN:
-                return BitXorAssignExprNode(lhs, self._parse_expr_prec12())
-            elif id == Token.OP_OR_ASSIGN:
-                return BitOrAssignExprNode(lhs, self._parse_expr_prec12())
-            elif id == Token.OP_SHL_ASSIGN:
-                return BitShlAssignExprNode(lhs, self._parse_expr_prec12())
-            elif id == Token.OP_SHR_ASSIGN:
-                return BitShrAssignExprNode(lhs, self._parse_expr_prec12())
-
-            else:
-                raise CompilerBug("0_0")
+        elif self._accept(Token.OP_AND_ASSIGN):
+            return BitAndAssignExprNode(lhs, self._parse_expr_prec12())
+        elif self._accept(Token.OP_XOR_ASSIGN):
+            return BitXorAssignExprNode(lhs, self._parse_expr_prec12())
+        elif self._accept(Token.OP_OR_ASSIGN):
+            return BitOrAssignExprNode(lhs, self._parse_expr_prec12())
+        elif self._accept(Token.OP_SHL_ASSIGN):
+            return BitShlAssignExprNode(lhs, self._parse_expr_prec12())
+        elif self._accept(Token.OP_SHR_ASSIGN):
+            return BitShrAssignExprNode(lhs, self._parse_expr_prec12())
 
         else:
             return lhs
@@ -407,6 +406,7 @@ class Parser:
             rhs = self._parse_expr_prec10()
 
             return TernaryConditionalNode(lhs, condition, rhs)
+
         else:
             return lhs
 
@@ -511,7 +511,7 @@ class Parser:
             id = self._current.id
 
             if id == '.':
-                lhs = DotExpr(lhs, self._parse_expr_prec3())
+                lhs = DotExprNode(lhs, self._parse_expr_prec3())
             else:
                 raise CompilerBug("%.%")
 
@@ -592,7 +592,8 @@ class Parser:
             else:
                 raise CompilerBug("O_O")
 
-        return self._parse_expr_prec1()
+        else:
+            return self._parse_expr_prec1()
 
     def _parse_expr_prec1(self):
         _accept = self._accept
@@ -604,12 +605,6 @@ class Parser:
             expr = self._parse_expr()
             self._expect(')')
             return expr
-
-        elif _accept(Token.KW_EXTERN):
-            return self._parse_fun(FunNode.EXTERN_C)
-
-        elif _accept(Token.KW_INTERN):
-            return self._parse_fun(FunNode.INTERN_C)
 
         elif _accept(Token.LT_INT_DEC):
             return AutoIntNode(self._current.value, radix=10)
@@ -659,5 +654,9 @@ class Parser:
         else:
             if self._peek() == Token.KW_STRUCT:
                 return self._parse_struct()
+
+            elif self._peek() == Token.KW_EXTERN:
+                return self._parse_fun()
+
             else:
                 raise UnexpectedToken(self._next)

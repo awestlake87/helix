@@ -39,6 +39,8 @@ class BitwiseExprTests(unittest.TestCase):
                         return 9
 
                     return 0
+
+                return test()
                 """
             )
         )
@@ -79,6 +81,8 @@ class BitwiseExprTests(unittest.TestCase):
                         return 9
 
                     return 0
+
+                return test()
                 """
             )
         )
@@ -119,6 +123,8 @@ class BitwiseExprTests(unittest.TestCase):
                         return 9
 
                     return 0
+
+                return test()
                 """
             )
         )
@@ -143,6 +149,8 @@ class BitwiseExprTests(unittest.TestCase):
                         return 3
 
                     return 0
+
+                return test()
                 """
             )
         )
@@ -185,6 +193,8 @@ class BitwiseExprTests(unittest.TestCase):
                         return 9
 
                     return 0
+
+                return test()
                 """
             )
         )
@@ -227,6 +237,8 @@ class BitwiseExprTests(unittest.TestCase):
                         return 9
 
                     return 0
+
+                return test()
                 """
             )
         )

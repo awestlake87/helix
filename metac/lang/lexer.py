@@ -32,8 +32,10 @@ class Lexer:
             self._line += 1
             self._column = 1
             self._state = Lexer.FRESH_LINE
+
         elif c == '\t':
-            assert False
+            raise Todo()
+
         else:
             self._column += 1
 
@@ -76,7 +78,6 @@ class Lexer:
             self._column = 0
 
         if self._state == Lexer.FRESH_LINE:
-
             if self._column == self._indents[-1]:
                 self._state = Lexer.NORMAL
                 return Token(Token.NODENT)
@@ -103,8 +104,12 @@ class Lexer:
                 if self._peek() == '\0':
                     return Token(Token.END)
 
+                else:
+                    return Token(Token.NODENT)
+
             else:
                 raise Exception("invalid indents")
+
 
         c = self._peek()
 
@@ -426,13 +431,7 @@ class Lexer:
 
             elif _accept('n'):
                 if _accept('t'):
-                    if _accept('e'):
-                        if _accept('r'):
-                            if _accept('n'):
-                                return _end_kw(Token.KW_INTERN)
-
-                    else:
-                        return _end_kw(Token.KW_INT)
+                    return _end_kw(Token.KW_INT)
 
         elif _accept('l'):
             if _accept('o'):

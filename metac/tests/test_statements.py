@@ -4,7 +4,6 @@ import unittest
 from .utils import run_test
 
 class LoopTests(unittest.TestCase):
-
     def test_return(self):
         self.assertEqual(
             6573,
@@ -12,6 +11,8 @@ class LoopTests(unittest.TestCase):
                 """
                 extern fun int test()
                     return 6573
+
+                return test()
                 """
             )
         )
@@ -29,6 +30,8 @@ class LoopTests(unittest.TestCase):
                     then i++
 
                     return val
+
+                return test()
                 """
             )
         )
@@ -45,6 +48,8 @@ class LoopTests(unittest.TestCase):
                         --i
 
                     return i
+
+                return test()
                 """
             )
         )
@@ -62,6 +67,8 @@ class LoopTests(unittest.TestCase):
                     until i == 100
 
                     return i
+
+                return test()
                 """
             )
         )
@@ -71,8 +78,8 @@ class LoopTests(unittest.TestCase):
             0,
             run_test(
                 """
-                extern fun int test()
-                    switch 6
+                extern fun int test(int value)
+                    switch value
                         case 1
                             return 1
 
@@ -88,6 +95,8 @@ class LoopTests(unittest.TestCase):
 
                         default
                             return 4
+
+                return test(6)
                 """
             )
         )
@@ -110,6 +119,8 @@ class LoopTests(unittest.TestCase):
                                 return 4
 
                     return 1
+
+                return test()
                 """
             )
         )

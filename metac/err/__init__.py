@@ -49,3 +49,15 @@ class SymbolAlreadyExists(Exception):
         super().__init__(
             "symbol \"{}\" already exists in the current scope".format(id)
         )
+
+class CircularDependency(Exception):
+    def __init__(self):
+        super().__init__("circular dependency")
+
+class CircularAttrDependency(Exception):
+    def __init__(self, struct_id, attr_id):
+        super().__init__(
+            "circular dependency in attr {} of struct {}".format(
+                attr_id, struct_id
+            )
+        )
