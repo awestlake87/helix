@@ -10,6 +10,9 @@ class Target:
         self._marked = False
         self._built = False
 
+    def add_dep(self, dep):
+        self._deps.append(dep)
+
     def build(self):
         if not self.is_built():
             while self._perform_build_pass() != 0: pass

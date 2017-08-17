@@ -1,6 +1,6 @@
 
 from ..err import Todo
-from ..dep import FunTarget
+from ..dep import FunTarget, FunProtoTarget
 
 from .scope import Scope
 
@@ -14,20 +14,20 @@ class FunSymbol:
         self.scope = Scope(parent_scope)
 
         self._target = None
-        self._ir_value = None
+        self._ir_prototype = None
 
     def _on_ir(self, value):
-        self._ir_value = value
+        self._ir_prototype = value
 
     def get_target(self):
         if self._target is None:
-            self._target = FunTarget(self, self._on_ir)
+            self._target = FunProtoTarget(self, self._on_ir)
 
         return self._target
 
     def get_ir_value(self):
-        if self._ir_value is None:
+        if self._ir_prototype is None:
             raise Todo()
 
         else:
-            return self._ir_value
+            return self._ir_prototype

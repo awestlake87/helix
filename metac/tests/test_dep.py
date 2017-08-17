@@ -4,26 +4,51 @@ from .utils import run_test
 
 class DepTests(unittest.TestCase):
     def test_unit(self):
-        run_test(
-            """
-            struct Blargh
-                int @n
+        self.assertEqual(
+            456,
+            run_test(
+                """
+                struct Blargh
+                    int @n
 
-            extern fun int c()
-                struct Lalala
-                    Blargh @b
+                extern fun int c()
+                    struct Lalala
+                        Blargh @b
 
-                ladeeda: Lalala()
+                    ladeeda: Lalala()
 
-                blargh: Blargh()
-                blargh.n = 456
+                    blargh: Blargh()
+                    blargh.n = 456
 
-                return b(blargh)
+                    return b(blargh)
 
 
-            extern fun int b(Blargh blargh)
-                return blargh.n
+                extern fun int b(Blargh blargh)
+                    return blargh.n
 
-            return c()
-            """
+                return c()
+                """
+            )
+        )
+
+    def test_circular_funs(self):
+        self.assertEqual(
+            0,
+            run_test(
+                """
+                extern fun int a(int n)
+                    if n > 0
+                        return b(n - 1)
+                    else
+                        return 0
+
+                extern fun int b(int n)
+                    if n > 0
+                        return a(n - 1)
+                    else
+                        return 0
+
+                return a(15)
+                """
+            )
         )
