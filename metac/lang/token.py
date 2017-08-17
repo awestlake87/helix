@@ -12,7 +12,6 @@ class Token:
     ATTR_ID             = "ATTR_ID"
 
     KW_EXTERN           = "extern"
-    KW_INTERN           = "intern"
 
     KW_FUN              = "fun"
     KW_GLOBAL           = "global"

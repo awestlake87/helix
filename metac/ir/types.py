@@ -4,128 +4,76 @@ from ..err import Todo
 from llvmlite import ir
 
 class Type:
-    def is_type(self):
-        return True
-
-    def is_equal_to(self, other_type):
-        return False
-
-    def can_convert_to(self, other_type):
-        return False
-
-
-    def __repr__(self):
-        if self.get_llvm_type:
-            return repr(self.get_llvm_type())
-        else:
-            raise Todo()
+    pass
 
 class PtrType(Type):
-    def __init__(self, type):
-        self._type = type
+    def __init__(self, pointee):
+        self.pointee = pointee
 
-    def is_equal_to(self, other_type):
-        raise Todo()
+        if type(self.pointee) is AutoPtrType:
+            self._llvm_value = None
 
-    def get_llvm_type(self):
-        return self._type.get_llvm_type().as_pointer()
-
-class NilType(Type):
-    def can_convert_to(self, other):
-        if type(other) is PtrType:
-            return True
         else:
-            return False
+            self._llvm_value = self.pointee.get_llvm_value().as_pointer()
 
-    def is_equal_to(self, other_type):
-        if type(other_type) is NilType:
-            return True
-        else:
-            return False
+    def get_llvm_value(self):
+        assert self._llvm_value is not None
 
-    def get_llvm_type(self):
-        return ir.IntType(64)
+        return self._llvm_value
+
+class AutoPtrType(Type):
+    def __eq__(self, other):
+        return type(other) is AutoPtrType
 
 class IntType(Type):
     def __init__(self, num_bits=32, is_signed=True):
-        self._num_bits = num_bits
-        self._is_signed = is_signed
+        self.num_bits = num_bits
+        self.is_signed = is_signed
+        self._llvm_value = ir.IntType(self.num_bits)
 
-    def is_equal_to(self, other_type):
-        if self.can_convert_to(other_type):
-            return True
-        else:
-            return False
+    def get_llvm_value(self):
+        return self._llvm_value
 
-    def can_convert_to(self, other):
-        if type(other) is IntType and self._num_bits == other._num_bits:
-            if self._is_signed and other._is_signed:
-                return True
-            elif not self._is_signed and not other._is_signed:
-                return True
-            else:
-                return False
-        else:
-            return False
+    def __eq__(self, other):
+        return (
+            type(other) is IntType and
+            self.num_bits == other.num_bits and
+            self.is_signed == other.is_signed
+        )
 
-    def get_llvm_type(self):
-        return ir.IntType(self._num_bits)
-
+def BitType():
+    return IntType(1, False)
 
 class AutoIntType(Type):
-
-    def is_equal_to(self, other_type):
-        if type(other_type) is AutoIntType:
-            return True
-        else:
-            return False
-
-    def can_convert_to(self, other):
-        if type(other) is IntType:
-            return True
-        else:
-            return False
+    def __eq__(self, other):
+        return type(other) is AutoIntType
 
 class FunType(Type):
     def __init__(self, ret_type, param_types):
-        self._ret_type = ret_type
-        self._param_types = param_types
+        self.ret_type = ret_type
+        self.param_types = param_types
 
-    def is_equal_to(self, other_type):
-        raise Todo()
-
-    def get_llvm_type(self):
-        return ir.FunctionType(
-            self._ret_type.get_llvm_type(),
-            [ t.get_llvm_type() for t in self._param_types ]
+        self._llvm_value = ir.FunctionType(
+            self.ret_type.get_llvm_value(),
+            [ t.get_llvm_value() for t in self.param_types ]
         )
+
+    def get_llvm_value(self):
+        return self._llvm_value
 
 class StructType(Type):
     def __init__(self, attrs=[]):
-        self._attrs = attrs
-
-    def is_equal_to(self, other_type):
-        if type(other_type) is StructType:
-            for a1, a2 in zip(self._attrs, other_type._attrs):
-                t1, id1 = a1
-                t2, id2 = a2
-
-                if not t1.is_equal_to(t2) or id1 != id2:
-                    return False
-
-            return True
-
-    def can_convert_to(self, other_type):
-        return self.is_equal_to(other_type)
-
-    def get_llvm_type(self):
-        return ir.LiteralStructType(
-            [ t.get_llvm_type() for t, id in self._attrs ]
+        self.attrs = attrs
+        self._llvm_value = ir.LiteralStructType(
+            [ t.get_llvm_value() for t, _ in self.attrs ]
         )
 
+    def get_llvm_value(self):
+        return self._llvm_value
+
     def get_attr_info(self, id):
-        for i in range(0, len(self._attrs)):
-            attr_type, attr_id = self._attrs[i]
+        for i in range(0, len(self.attrs)):
+            attr_type, attr_id = self.attrs[i]
 
             if attr_id == id:
                 return (attr_type, i)
@@ -136,18 +84,8 @@ class StructType(Type):
 
 
 def get_common_type(a, b):
-    if type(a) is IntType and type(b) is IntType:
-        if a._num_bits != b._num_bits:
-            return None
-
-        elif a._is_signed and not b._is_signed:
-            return None
-
-        elif not a._is_signed and b._is_signed:
-            return None
-
-        else:
-            return a
+    if a is b or a == b:
+        return a
 
     elif type(a) is IntType and type(b) is AutoIntType:
         return a
@@ -155,8 +93,11 @@ def get_common_type(a, b):
     elif type(a) is AutoIntType and type(b) is IntType:
         return b
 
-    elif type(a) is AutoIntType and type(b) is AutoIntType:
-        return get_concrete_type(a)
+    elif type(a) is PtrType and type(b) is AutoPtrType:
+        return a
+
+    elif type(a) is AutoPtrType and type(b) is PtrType:
+        return b
 
     else:
         raise Todo()

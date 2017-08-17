@@ -1,3 +1,8 @@
 
-from .symbols import *
-from .scope import *
+from .fun_target import *
+from .gen_deps import *
+from .jit_target import *
+from .struct_target import *
+from .target import *
+from .unit_target import *
+from .var_target import *

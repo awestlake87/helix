@@ -2,7 +2,7 @@ import unittest
 
 from ..err import ReturnTypeMismatch
 
-from .utils import run_test, compile_test
+from .utils import run_test
 
 class MiscTests(unittest.TestCase):
     def test_nested_fun(self):
@@ -11,54 +11,82 @@ class MiscTests(unittest.TestCase):
             run_test(
                 """
                 extern fun int test()
-                    intern fun int blargh(int a, int b)
+                    extern fun int blargh(int a, int b)
                         return 5
                     return blargh(1, 2)
+
+                return test()
                 """
             )
         )
 
     def test_ptr_type(self):
-        compile_test(
+        run_test(
             """
-            intern fun *int omg()
+            extern fun *int omg()
                 return nil
-            intern fun ****int int_ptr_ptr_ptr_ptr()
+            extern fun ****int int_ptr_ptr_ptr_ptr()
                 return nil
+
+            if int_ptr_ptr_ptr_ptr() != nil
+                return 1
+
+            elif omg() != nil
+                return 2
+
+            else
+                return 0
+
             """
         )
 
     def test_int_types(self):
-        compile_test(
+        run_test(
             """
-            intern fun bit get_bit()
+            extern fun bit get_bit()
                 return 0
 
-            intern fun byte get_byte()
+            extern fun byte get_byte()
                 return 0
-            intern fun short get_short()
+            extern fun short get_short()
                 return 0
-            intern fun int get_int()
+            extern fun int get_int()
                 return 0
-            intern fun long get_long()
+            extern fun long get_long()
                 return 0
 
-            intern fun ubyte get_ubyte()
+            extern fun ubyte get_ubyte()
                 return 0
-            intern fun ushort get_ushort()
+            extern fun ushort get_ushort()
                 return 0
-            intern fun uint get_uint()
+            extern fun uint get_uint()
                 return 0
-            intern fun ulong get_ulong()
+            extern fun ulong get_ulong()
                 return 0
+
+            get_bit()
+            get_byte()
+            get_short()
+            get_int()
+            get_long()
+
+            get_ubyte()
+            get_ushort()
+            get_uint()
+            get_ulong()
+
+            return 0
             """
         )
 
     def test_return_type_mismatch(self):
         with self.assertRaises(ReturnTypeMismatch):
-            compile_test(
+            run_test(
                 """
-                intern fun *int ptr()
-                    return 0
+                extern fun *int ptr()
+                    return 1
+
+                ptr()
+                return 0
                 """
             )
