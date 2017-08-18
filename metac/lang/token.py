@@ -31,6 +31,17 @@ class Token:
     KW_EACH             = "each"
     KW_LOOP             = "loop"
     KW_UNTIL            = "until"
+    KW_BREAK            = "break"
+    KW_CONTINUE         = "continue"
+
+    KW_TRY              = "try"
+    KW_CATCH            = "catch"
+    KW_THROW            = "throw"
+
+    KW_IMPORT           = "import"
+    KW_EXPORT           = "export"
+    KW_LINK             = "link"
+    KW_FROM             = "from"
 
     KW_PASS             = "pass"
     KW_RETURN           = "return"

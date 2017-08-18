@@ -353,6 +353,12 @@ class Lexer:
                 if _accept('t'):
                     return _end_kw(Token.KW_BIT)
 
+            elif _accept('r'):
+                if _accept('e'):
+                    if _accept('a'):
+                        if _accept('k'):
+                            return _end_kw(Token.KW_BREAK)
+
             elif _accept('y'):
                 if _accept('t'):
                     if _accept('e'):
@@ -363,10 +369,24 @@ class Lexer:
                     if _accept('e'):
                         return _end_kw(Token.KW_CASE)
 
+                elif _accept('t'):
+                    if _accept('c'):
+                        if _accept('h'):
+                            return _end_kw(Token.KW_CATCH)
+
             elif _accept('h'):
                 if _accept('a'):
                     if _accept('r'):
                         return _end_kw(Token.KW_CHAR)
+
+            elif _accept('o'):
+                if _accept('n'):
+                    if _accept('t'):
+                        if _accept('i'):
+                            if _accept('n'):
+                                if _accept('u'):
+                                    if _accept('e'):
+                                        return _end_kw(Token.KW_CONTINUE)
 
         elif _accept('d'):
             if _accept('e'):
@@ -396,7 +416,13 @@ class Lexer:
                         return _end_kw(Token.KW_ELSE)
 
             elif _accept('x'):
-                if _accept('t'):
+                if _accept('p'):
+                    if _accept('o'):
+                        if _accept('r'):
+                            if _accept('t'):
+                                return _end_kw(Token.KW_EXPORT)
+
+                elif _accept('t'):
                     if _accept('e'):
                         if _accept('r'):
                             if _accept('n'):
@@ -411,6 +437,11 @@ class Lexer:
             elif _accept('o'):
                 if _accept('r'):
                     return _end_kw(Token.KW_FOR)
+
+            elif _accept('r'):
+                if _accept('o'):
+                    if _accept('m'):
+                        return _end_kw(Token.KW_FROM)
 
             elif _accept('u'):
                 if _accept('n'):
@@ -429,12 +460,24 @@ class Lexer:
             if _accept('f'):
                 return _end_kw(Token.KW_IF)
 
+            elif _accept('m'):
+                if _accept('p'):
+                    if _accept('o'):
+                        if _accept('r'):
+                            if _accept('t'):
+                                return _end_kw(Token.KW_IMPORT)
+
             elif _accept('n'):
                 if _accept('t'):
                     return _end_kw(Token.KW_INT)
 
         elif _accept('l'):
-            if _accept('o'):
+            if _accept('i'):
+                if _accept('n'):
+                    if _accept('k'):
+                        return _end_kw(Token.KW_LINK)
+
+            elif _accept('o'):
                 if _accept('n'):
                     if _accept('g'):
                         return _end_kw(Token.KW_LONG)
@@ -497,10 +540,18 @@ class Lexer:
                     if _accept('n'):
                         return _end_kw(Token.KW_THEN)
 
+                elif _accept('r'):
+                    if _accept('o'):
+                        if _accept('w'):
+                            return _end_kw(Token.KW_THROW)
+
             elif _accept('r'):
                 if _accept('u'):
                     if _accept('e'):
                         return _end_kw(Token.LT_TRUE)
+
+                elif _accept('y'):
+                    return _end_kw(Token.KW_TRY)
 
         elif _accept('u'):
             if _accept('b'):

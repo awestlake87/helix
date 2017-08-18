@@ -27,6 +27,9 @@ def gen_statement_deps(unit, statement):
     elif statement_type is SwitchStatementNode:
         return gen_switch_statement_deps(unit, statement)
 
+    elif statement_type is BreakNode or statement_type is ContinueNode:
+        return [ ]
+
     elif statement_type is StructNode or statement_type is FunNode:
         # standalone structs or funs are not deps
         return [ ]

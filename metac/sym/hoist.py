@@ -31,6 +31,9 @@ def hoist_block(unit, block):
             elif statement_type is ReturnNode:
                 hoist_return_statement(unit, statement)
 
+            elif statement_type is BreakNode or statement_type is ContinueNode:
+                pass
+                
             else:
                 raise Todo()
 

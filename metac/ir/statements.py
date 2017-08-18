@@ -11,6 +11,8 @@ def gen_code(fun, scope, ast):
             self.scope = scope
             self.ast = ast
 
+            self.loop_context = None
+
             self.entry = self.fun.get_llvm_value().append_basic_block("entry")
             self.builder = ir.IRBuilder(self.entry)
 
@@ -26,6 +28,20 @@ def gen_code(fun, scope, ast):
             yield
 
             self.scope = old_scope
+
+        @contextmanager
+        def use_loop_context(self, loop_then, loop_exit):
+            class LoopContext:
+                def __init__(self, loop_then, loop_exit):
+                    self.loop_then = loop_then
+                    self.loop_exit = loop_exit
+
+            old_ctx = self.loop_context
+            self.loop_context = LoopContext(loop_then, loop_exit)
+
+            yield
+
+            self.loop_context = old_ctx
 
     ctx = Context(fun, scope, ast)
 
@@ -63,6 +79,12 @@ def gen_statement_code(ctx, statement):
 
     elif statement_type is SwitchStatementNode:
         gen_switch_statement_code(ctx, statement)
+
+    elif statement_type is BreakNode:
+        gen_break_statement_code(ctx, statement)
+
+    elif statement_type is ContinueNode:
+        gen_continue_statement_code(ctx, statement)
 
     elif statement_type is FunNode or statement_type is StructNode:
         # only interested in generating the current fun
@@ -158,9 +180,9 @@ def gen_loop_statement_code(ctx, statement):
         if statement.each_clause is not None:
             raise Todo("each clause")
 
-
         loop_head = None
         loop_body = ctx.builder.append_basic_block("loop_body")
+        loop_then = ctx.builder.append_basic_block("loop_then")
         loop_exit = ctx.builder.append_basic_block("loop_exit")
 
         if statement.while_clause is not None:
@@ -179,9 +201,15 @@ def gen_loop_statement_code(ctx, statement):
 
         ctx.builder.branch(loop_head)
 
-        with ctx.builder.goto_block(loop_body):
+        ctx.builder.position_at_start(loop_body)
+        with ctx.use_loop_context(loop_then, loop_exit):
             gen_block_code(ctx, statement.loop_body)
 
+        if not ctx.builder.block.is_terminated:
+            ctx.builder.branch(loop_then)
+
+
+        with ctx.builder.goto_block(loop_then):
             if statement.then_clause is not None:
                 gen_expr_ir(ctx, statement.then_clause)
 
@@ -196,7 +224,22 @@ def gen_loop_statement_code(ctx, statement):
             else:
                 ctx.builder.branch(loop_head)
 
+            if not loop_then.is_terminated:
+                ctx.builder.branch(loop_exit)
+
         ctx.builder.position_at_start(loop_exit)
+
+def gen_break_statement_code(ctx, _):
+    if ctx.loop_context is None:
+        raise Todo()
+
+    ctx.builder.branch(ctx.loop_context.loop_exit)
+
+def gen_continue_statement_code(ctx, _):
+    if ctx.loop_context is None:
+        raise Todo()
+
+    ctx.builder.branch(ctx.loop_context.loop_then)
 
 def gen_switch_statement_code(ctx, statement):
     assert statement.scope is not None

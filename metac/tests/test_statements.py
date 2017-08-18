@@ -124,3 +124,48 @@ class LoopTests(unittest.TestCase):
                 """
             )
         )
+
+    def test_loop_control(self):
+        self.assertEqual(
+            0,
+            run_test(
+            """
+            extern fun int test()
+                n: 0
+
+                while n < 12
+                    if n == 7
+                        break
+
+                then n++
+
+                if n != 7
+                    return 1
+
+                for n = 0 while n < 10
+                    if n < 5
+                        continue
+                    else
+                        break
+                then n++
+
+                if n != 5
+                    return 2
+
+
+                for n = 0 while n < 10
+                    for i: 0
+                        if i == 10
+                            break
+                    then i++
+                then n++
+
+                if n != 10
+                    return 3
+
+                return 0
+
+            return test()
+            """
+            )
+        )

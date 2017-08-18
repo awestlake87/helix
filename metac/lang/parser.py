@@ -83,6 +83,12 @@ class Parser:
         elif id == Token.KW_LOOP:
             return self._parse_loop()
 
+        elif self._accept(Token.KW_BREAK):
+            return BreakNode()
+
+        elif self._accept(Token.KW_CONTINUE):
+            return ContinueNode()
+
         else:
             return self._parse_expr()
 
