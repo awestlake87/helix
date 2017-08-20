@@ -258,16 +258,18 @@ def gen_switch_statement_code(ctx, statement):
                 default_block
             )
 
-            for case_value, case_block in statement.case_branches:
-                value = gen_implicit_cast_ir(
-                    ctx, gen_expr_ir(ctx, case_value), concrete_type
-                )
-
+            for case_values, case_block in statement.case_branches:
                 block = ctx.builder.append_basic_block("case")
-                inst.add_case(
-                    value.get_llvm_value(),
-                    block
-                )
+
+                for expr in case_values:
+                    value = gen_implicit_cast_ir(
+                        ctx, gen_expr_ir(ctx, expr), concrete_type
+                    )
+
+                    inst.add_case(
+                        value.get_llvm_value(),
+                        block
+                    )
 
                 with ctx.builder.goto_block(block):
                     gen_block_code(ctx, case_block)

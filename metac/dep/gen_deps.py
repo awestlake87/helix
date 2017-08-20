@@ -158,8 +158,9 @@ def gen_switch_statement_deps(unit, statement):
     deps = [ ]
 
     with unit.use_scope(statement.scope):
-        for case_value, case_block in statement.case_branches:
-            deps += gen_expr_deps(unit, case_value)
+        for case_values, case_block in statement.case_branches:
+            for value in case_values:
+                deps += gen_expr_deps(unit, value)
             deps += gen_block_deps(unit, case_block)
 
         if statement.default_block is not None:

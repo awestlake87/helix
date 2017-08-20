@@ -33,7 +33,7 @@ def hoist_block(unit, block):
 
             elif statement_type is BreakNode or statement_type is ContinueNode:
                 pass
-                
+
             else:
                 raise Todo()
 
@@ -172,8 +172,10 @@ def hoist_switch_statement(unit, statement):
     statement.scope = Scope(unit.scope)
 
     with unit.use_scope(statement.scope):
-        for case_value, case_block in statement.case_branches:
-            hoist_expr(unit, case_value)
+        for case_values, case_block in statement.case_branches:
+            for value in case_values:
+                hoist_expr(unit, value)
+            
             hoist_block(unit, case_block)
 
         if statement.default_block is not None:

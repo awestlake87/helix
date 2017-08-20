@@ -113,7 +113,12 @@ class Parser:
             default_block = None
 
             while self._accept(Token.KW_CASE):
-                case_value = self._parse_expr()
+                case_values = [ self._parse_expr() ]
+
+                while self._accept(Token.NODENT):
+                    self._expect(Token.KW_CASE)
+                    case_values.append(self._parse_expr())
+
                 case_block = self._parse_block()
 
                 if (
@@ -122,7 +127,7 @@ class Parser:
                 ):
                     self._accept(Token.NODENT)
 
-                case_branches.append((case_value, case_block))
+                case_branches.append((case_values, case_block))
 
             if self._accept(Token.KW_DEFAULT):
                 default_block = self._parse_block()

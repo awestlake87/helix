@@ -101,6 +101,37 @@ class LoopTests(unittest.TestCase):
             )
         )
 
+    def test_multi_case_switch(self):
+        self.assertEqual(
+            0,
+            run_test(
+                """
+                extern fun int test()
+                    switch 3
+                        case 0
+                        case 1
+                        case 2
+                            return 1
+
+                        case 3
+                            switch 45
+                                case 1
+                                case 10
+                                case 45
+                                case 50
+                                    return 0
+
+                                default
+                                    return 2
+
+                        default
+                            return 3
+
+                return test()
+                """
+            )
+        )
+
     def test_if(self):
         self.assertEqual(
             0,
