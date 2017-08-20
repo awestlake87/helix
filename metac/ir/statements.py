@@ -11,6 +11,7 @@ def gen_code(fun, scope, ast):
             self.scope = scope
             self.ast = ast
 
+            self.const_string_counter = 0
             self.loop_context = None
 
             self.entry = self.fun.get_llvm_value().append_basic_block("entry")

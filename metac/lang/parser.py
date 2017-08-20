@@ -204,7 +204,8 @@ class Parser:
             return FunNode(
                 FunTypeNode(ret_type, param_types),
                 id,
-                param_ids
+                param_ids,
+                None
             )
 
     def _parse_struct(self):

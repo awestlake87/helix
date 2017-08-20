@@ -218,3 +218,19 @@ class MiscTests(unittest.TestCase):
                 """
             )
         )
+
+    def test_extern_symbol(self):
+        run_test(
+            """
+            extern fun uint strlen(*char s)
+
+            s: "lol"
+
+            if strlen(s) != 3
+                return 1
+            elif strlen("hahhaa") != 6
+                return 2
+
+            return 0
+            """
+        )

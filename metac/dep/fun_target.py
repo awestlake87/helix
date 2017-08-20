@@ -32,7 +32,8 @@ class FunProtoTarget(Target):
             self.symbol.unit, self.symbol.ast.id, fun_type
         )
 
-        self.symbol.unit.get_target().add_dep(FunTarget(self))
+        if self.symbol.ast.body is not None:
+            self.symbol.unit.get_target().add_dep(FunTarget(self))
 
         self._on_ir(self.ir_value)
 

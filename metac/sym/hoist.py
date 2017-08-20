@@ -124,8 +124,9 @@ def hoist_fun(unit, f):
     for param in symbol.ast.param_ids:
         symbol.scope.insert(param, VarSymbol())
 
-    with unit.use_scope(symbol.scope):
-        hoist_block(unit, symbol.ast.body)
+    if symbol.ast.body is not None:
+        with unit.use_scope(symbol.scope):
+            hoist_block(unit, symbol.ast.body)
 
 def hoist_fun_type(unit, fun_type):
     hoist_expr(unit, fun_type.ret_type)

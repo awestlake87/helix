@@ -30,9 +30,6 @@ def gen_static_expr_ir(scope, expr):
     elif expr_type is ArrayTypeNode:
         return gen_static_array_type_ir(scope, expr.length, expr.type)
 
-    elif expr_type is StringNode:
-        return gen_static_string_ir(scope, expr)
-
     elif issubclass(expr_type, UnaryExprNode):
         return gen_static_unary_expr_ir(scope, expr)
 
@@ -62,17 +59,33 @@ def gen_static_array_type_ir(scope, length, elem_type):
         gen_static_expr_ir(scope, elem_type)
     )
 
-def gen_static_string_ir(scope, expr):
-    value = [ ]
+def gen_string_ir(ctx, expr):
+    initializer = [ ]
 
     for c in expr.value:
-        value.append(ir.IntType(8)(ord(c)))
+        initializer.append(ir.IntType(8)(ord(c)))
 
-    value.append(ir.IntType(8)(0))
+    initializer.append(ir.IntType(8)(0))
 
-    return LlvmValue(
-        ArrayType(IntValue(AutoIntType(), len(value)), IntType(8, False)),
-        ir.Constant.literal_array(value)
+    ir_type = ArrayType(
+        IntValue(AutoIntType(), len(initializer)), IntType(8, False)
+    )
+    value = ir.GlobalVariable(
+        ctx.builder.module,
+        ir_type.get_llvm_value(),
+        ".str{}".format(ctx.const_string_counter)
+    )
+
+    value.linkage = "private"
+    value.global_constant = True
+    value.initializer = ir.Constant.literal_array(initializer)
+
+    ctx.const_string_counter += 1
+
+    return LlvmRef(
+        ctx,
+        ir_type,
+        value
     )
 
 def gen_expr_ir(ctx, expr):
@@ -110,6 +123,9 @@ def gen_expr_ir(ctx, expr):
 
     elif issubclass(expr_type, UnaryExprNode):
         return gen_unary_expr_ir(ctx, expr)
+
+    elif expr_type is StringNode:
+        return gen_string_ir(ctx, expr)
 
     else:
         return gen_static_expr_ir(ctx.scope, expr)
@@ -285,7 +301,16 @@ def gen_implicit_cast_ir(ctx, value, ir_as_type):
                         [ ir.IntType(32)(0), ir.IntType(32)(0) ]
                     )
                 )
+            elif issubclass(type(value), LlvmValue):
+                return LlvmValue(
+                    PtrType(value.type.elem_type),
+                    ctx.builder.gep(
+                        value.get_llvm_value(),
+                        [ ir.IntType(32)(0) ]
+                    )
+                )
             else:
+                print(value)
                 raise Todo()
 
         else:
