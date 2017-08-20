@@ -109,3 +109,82 @@ class MiscTests(unittest.TestCase):
                 """
             )
         )
+
+    def test_array(self):
+        self.assertEqual(
+            0,
+            run_test(
+                """
+                extern fun int test()
+                    value: [4]int()
+
+                    value[0] = 123
+                    value[1] = 321
+                    value[2] = 98
+                    value[3] = 1
+
+                    if value[0] != 123
+                        return 1
+                    if value[1] != 321
+                        return 2
+                    if value[2] != 98
+                        return 3
+                    if value[3] != 1
+                        return 4
+
+                    for i: 0 while i < 4
+                        value[i] = 12
+                    then i++
+
+                    if value[0] != 12
+                        return 5
+                    if value[1] != 12
+                        return 6
+                    if value[2] != 12
+                        return 7
+                    if value[3] != 12
+                        return 8
+
+                    return 0
+
+                return test()
+                """
+            )
+        )
+
+    def test_ptr_arithmetic(self):
+        self.assertEqual(
+            0,
+            run_test(
+                """
+                extern fun int test()
+                    array: [3]int()
+
+                    array[0] = 54
+                    array[1] = 43
+                    array[2] = 98
+
+                    ptr: array as *int
+
+                    if *(ptr + 0) != 54
+                        return 1
+                    elif *(ptr + 1) != 43
+                        return 2
+                    elif *(2 + ptr) != 98
+                        return 3
+
+                    ptr += 2
+
+                    if *(ptr - 0) != 98
+                        return 4
+                    elif *(ptr - 1) != 43
+                        return 5
+                    elif *(ptr - 2) != 54
+                        return 6
+
+                    return 0
+
+                return test()
+                """
+            )
+        )

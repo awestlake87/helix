@@ -27,6 +27,9 @@ def gen_static_expr_ir(scope, expr):
     elif expr_type is SymbolNode:
         return scope.resolve(expr.id).get_ir_value()
 
+    elif expr_type is ArrayTypeNode:
+        return gen_static_array_type_ir(scope, expr.length, expr.type)
+
     elif issubclass(expr_type, UnaryExprNode):
         return gen_static_unary_expr_ir(scope, expr)
 
@@ -49,6 +52,14 @@ def gen_static_ptr_expr_ir(scope, operand):
 
     else:
         raise Todo(operand)
+
+def gen_static_array_type_ir(scope, length, elem_type):
+    return ArrayType(
+        gen_static_expr_ir(scope, length),
+        gen_static_expr_ir(scope, elem_type)
+    )
+
+
 
 def gen_expr_ir(ctx, expr):
     expr_type = type(expr)
@@ -165,6 +176,12 @@ def gen_binary_expr_ir(ctx, expr):
         gen_assign_code(ctx, lhs, gen_bit_shr_ir(ctx, lhs, rhs))
         return lhs
 
+    elif expr_type is IndexExprNode:
+        return gen_index_expr_ir(ctx, lhs, rhs)
+
+    elif expr_type is AsNode:
+        return gen_implicit_cast_ir(ctx, lhs, rhs)
+
     else:
         return gen_static_expr_ir(ctx.scope, expr)
 
@@ -244,6 +261,22 @@ def gen_implicit_cast_ir(ctx, value, ir_as_type):
         else:
             raise Todo()
 
+    elif val_type is ArrayType and as_type is PtrType:
+        if value.type.elem_type == ir_as_type.pointee:
+            if issubclass(type(value), LlvmRef):
+                return LlvmValue(
+                    PtrType(value.type.elem_type),
+                    ctx.builder.gep(
+                        value.get_llvm_ptr(),
+                        [ ir.IntType(32)(0), ir.IntType(32)(0) ]
+                    )
+                )
+            else:
+                raise Todo()
+
+        else:
+            raise Todo("as is unsupported for this type")
+
     else:
         raise Todo(value)
 
@@ -282,6 +315,41 @@ def gen_dot_ir(ctx, expr):
 
     else:
         raise Todo()
+
+def gen_index_expr_ir(ctx, lhs, rhs):
+    if type(lhs.type) is ArrayType:
+        if issubclass(type(lhs), LlvmRef):
+            return LlvmRef(
+                ctx,
+                lhs.type.elem_type,
+                ctx.builder.gep(
+                    lhs.get_llvm_ptr(),
+                    [
+                        ir.IntType(32)(0),
+                        gen_implicit_cast_ir(
+                            ctx, rhs, lhs.type.elem_type
+                        ).get_llvm_value()
+                    ]
+                )
+            )
+
+        else:
+            raise Todo()
+    else:
+        raise Todo()
+
+def gen_ptr_add_ir(ctx, ptr, index):
+    return LlvmValue(
+        ptr.type,
+        ctx.builder.gep(
+            ptr.get_llvm_value(),
+            [
+                gen_implicit_cast_ir(
+                    ctx, index, IntType(32, True)
+                ).get_llvm_value()
+            ]
+        )
+    )
 
 def gen_ternary_conditional_ir(ctx, expr):
     tern_true = ctx.builder.append_basic_block("tern_true")
@@ -333,7 +401,9 @@ def gen_assign_code(ctx, lhs, rhs):
 def gen_call_ir(ctx, expr):
     lhs = gen_expr_ir(ctx, expr.lhs)
 
-    if type(lhs) is FunValue:
+    value_type = type(lhs)
+
+    if value_type is FunValue:
         if len(expr.args) != len(lhs.type.param_types):
             raise Todo("arg length mismatch")
 
@@ -351,7 +421,7 @@ def gen_call_ir(ctx, expr):
             lhs.type.ret_type, ctx.builder.call(lhs.get_llvm_value(), ir_args)
         )
 
-    elif type(lhs) is IntType:
+    elif value_type is IntType:
         if len(expr.args) == 0:
             return LlvmValue(lhs, lhs.get_llvm_value()(ir.Undefined))
 
@@ -363,21 +433,31 @@ def gen_call_ir(ctx, expr):
         else:
             raise Todo("int args")
 
-    elif type(lhs) is StructType:
+    elif value_type is StructType:
         if len(expr.args) == 0:
             return LlvmValue(lhs, lhs.get_llvm_value()(ir.Undefined))
 
         else:
             raise Todo("struct args")
 
-    elif type(lhs) is PtrType:
-        if len(expr.args) == 1:
+    elif value_type is PtrType:
+        if len(expr.args) == 0:
+            return LlvmValue(lhs, lhs.get_llvm_value()(ir.Undefined))
+
+        elif len(expr.args) == 1:
             return gen_implicit_cast_ir(
                 ctx, gen_expr_ir(ctx, expr.args[0]), lhs
             )
 
         else:
             raise Todo("ptr args")
+
+    elif value_type is ArrayType:
+        if len(expr.args) == 0:
+            return LlvmValue(lhs, lhs.get_llvm_value()(ir.Undefined))
+
+        else:
+            raise Todo("array args")
 
     else:
         raise Todo(lhs)
@@ -539,34 +619,72 @@ def gen_neg_ir(ctx, operand):
         raise Todo()
 
 def gen_add_ir(ctx, lhs, rhs):
-    common_type = get_concrete_type(get_common_type(lhs.type, rhs.type))
-
-    if type(common_type) is IntType:
-        return LlvmValue(
-            common_type,
-            ctx.builder.add(
-                gen_implicit_cast_ir(ctx, lhs, common_type).get_llvm_value(),
-                gen_implicit_cast_ir(ctx, rhs, common_type).get_llvm_value()
-            )
+    if (
+        type(lhs.type) is PtrType and (
+            type(rhs.type) is IntType or type(rhs.type) is AutoIntType
         )
+    ):
+        return gen_ptr_add_ir(ctx, lhs, rhs)
+
+    elif (
+        type(rhs.type) is PtrType and (
+            type(lhs.type) is IntType or type(lhs.type) is AutoIntType
+        )
+    ):
+        return gen_ptr_add_ir(ctx, rhs, lhs)
 
     else:
-        raise Todo()
+        common_type = get_concrete_type(get_common_type(lhs.type, rhs.type))
+
+        if type(common_type) is IntType:
+            return LlvmValue(
+                common_type,
+                ctx.builder.add(
+                    gen_implicit_cast_ir(
+                        ctx, lhs, common_type
+                    ).get_llvm_value(),
+                    gen_implicit_cast_ir(
+                        ctx, rhs, common_type
+                    ).get_llvm_value()
+                )
+            )
+
+        else:
+            raise Todo()
 
 def gen_sub_ir(ctx, lhs, rhs):
-    common_type = get_concrete_type(get_common_type(lhs.type, rhs.type))
-
-    if type(common_type) is IntType:
-        return LlvmValue(
-            common_type,
-            ctx.builder.sub(
-                gen_implicit_cast_ir(ctx, lhs, common_type).get_llvm_value(),
-                gen_implicit_cast_ir(ctx, rhs, common_type).get_llvm_value()
-            )
+    if (
+        type(lhs.type) is PtrType and (
+            type(rhs.type) is IntType or type(rhs.type) is AutoIntType
         )
+    ):
+        return gen_ptr_add_ir(ctx, lhs, gen_neg_ir(ctx, rhs))
+
+    elif (
+        type(rhs.type) is PtrType and (
+            type(lhs.type) is IntType or type(lhs.type) is AutoIntType
+        )
+    ):
+        return gen_ptr_add_ir(ctx, rhs, gen_neg_ir(ctx, lhs))
 
     else:
-        raise Todo()
+        common_type = get_concrete_type(get_common_type(lhs.type, rhs.type))
+
+        if type(common_type) is IntType:
+            return LlvmValue(
+                common_type,
+                ctx.builder.sub(
+                    gen_implicit_cast_ir(
+                        ctx, lhs, common_type
+                    ).get_llvm_value(),
+                    gen_implicit_cast_ir(
+                        ctx, rhs, common_type
+                    ).get_llvm_value()
+                )
+            )
+
+        else:
+            raise Todo()
 
 def gen_mul_ir(ctx, lhs, rhs):
     common_type = get_concrete_type(get_common_type(lhs.type, rhs.type))

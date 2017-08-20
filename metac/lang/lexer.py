@@ -208,6 +208,12 @@ class Lexer:
             return Token('(')
         elif _toss(')'):
             return Token(')')
+
+        elif _toss('['):
+            return Token('[')
+        elif _toss(']'):
+            return Token(']')
+
         elif _toss(','):
             return Token(',')
 
@@ -347,6 +353,9 @@ class Lexer:
             if _accept('n'):
                 if _accept('d'):
                     return _end_kw(Token.OP_AND)
+
+            elif _accept('s'):
+                return _end_kw(Token.OP_AS)
 
         elif _accept('b'):
             if _accept('i'):

@@ -55,6 +55,10 @@ def hoist_expr(unit, expr):
     elif expr_type is DotExprNode:
         pass
 
+    elif expr_type is ArrayTypeNode:
+        hoist_expr(unit, expr.length)
+        hoist_expr(unit, expr.type)
+
     elif expr_type is TernaryConditionalNode:
         hoist_ternary_conditional(unit, expr)
 
@@ -175,7 +179,7 @@ def hoist_switch_statement(unit, statement):
         for case_values, case_block in statement.case_branches:
             for value in case_values:
                 hoist_expr(unit, value)
-            
+
             hoist_block(unit, case_block)
 
         if statement.default_block is not None:

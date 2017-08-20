@@ -90,6 +90,8 @@ class Token:
     OP_OR               = "or"
     OP_NOT              = "not"
 
+    OP_AS               = "as"
+
     LT_INT_BIN          = "int_x2"
     LT_INT_DEC          = "int_x10"
     LT_INT_HEX          = "int_x16"

@@ -73,6 +73,12 @@ def gen_expr_deps(unit, expr):
     elif expr_type is IntTypeNode:
         return [ ]
 
+    elif expr_type is ArrayTypeNode:
+        return (
+            gen_expr_deps(unit, expr.length) +
+            gen_expr_deps(unit, expr.type)
+        )
+
     elif issubclass(expr_type, LiteralNode):
         return [ ]
 

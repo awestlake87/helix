@@ -10,6 +10,20 @@ class RefExprNode(UnaryExprNode):
 class DotExprNode(BinaryExprNode):
     pass
 
+class IndexExprNode(BinaryExprNode):
+    pass
+
+
+class AsNode(BinaryExprNode):
+    pass
+
+class CastNode(BinaryExprNode):
+    pass
+
+class BitcastNode(BinaryExprNode):
+    pass
+
+
 class InitExprNode(BinaryExprNode):
     pass
 
