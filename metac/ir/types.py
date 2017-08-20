@@ -56,13 +56,15 @@ class AutoIntType(Type):
         return type(other) is AutoIntType
 
 class FunType(Type):
-    def __init__(self, ret_type, param_types):
+    def __init__(self, ret_type, param_types, is_vargs=False):
         self.ret_type = ret_type
         self.param_types = param_types
+        self.is_vargs = is_vargs
 
         self._llvm_value = ir.FunctionType(
             self.ret_type.get_llvm_value(),
-            [ t.get_llvm_value() for t in self.param_types ]
+            [ t.get_llvm_value() for t in self.param_types ],
+            is_vargs
         )
 
     def get_llvm_value(self):

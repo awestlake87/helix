@@ -443,18 +443,45 @@ def gen_call_ir(ctx, expr):
     value_type = type(lhs)
 
     if value_type is FunValue:
-        if len(expr.args) != len(lhs.type.param_types):
-            raise Todo("arg length mismatch")
+        ir_args = [ ]
 
-        ir_args = [
-            (
-                gen_implicit_cast_ir(
-                    ctx, gen_expr_ir(ctx, arg_node), param_type
-                ).get_llvm_value()
-            )
-            for arg_node, param_type in
-            zip(expr.args, lhs.type.param_types)
-        ]
+        if lhs.type.is_vargs:
+            if len(expr.args) >= len(lhs.type.param_types):
+                num_params = len(lhs.type.param_types)
+
+                for i in range(0, len(expr.args)):
+                    if i < num_params:
+                        ir_args.append(
+                            gen_implicit_cast_ir(
+                                ctx,
+                                gen_expr_ir(ctx, expr.args[i]),
+                                lhs.type.param_types[i]
+                            ).get_llvm_value()
+                        )
+                    else:
+                        arg_value = gen_expr_ir(ctx, expr.args[i])
+                        concrete_type = get_concrete_type(arg_value.type)
+
+                        ir_args.append(
+                            gen_implicit_cast_ir(
+                                ctx,
+                                arg_value,
+                                concrete_type
+                            ).get_llvm_value()
+                        )
+
+            else:
+                raise Todo("minimum args for vargs function")
+
+        elif len(expr.args) == len(lhs.type.param_types):
+            for arg_node, param_type in zip(expr.args, lhs.type.param_types):
+                ir_args.append(
+                    gen_implicit_cast_ir(
+                        ctx, gen_expr_ir(ctx, arg_node), param_type
+                    ).get_llvm_value()
+                )
+        else:
+            raise Todo("arg length mismatch")
 
         return LlvmValue(
             lhs.type.ret_type, ctx.builder.call(lhs.get_llvm_value(), ir_args)

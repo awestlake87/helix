@@ -116,7 +116,7 @@ def hoist_struct(unit, s):
     unit.scope.insert(s.id, StructSymbol(unit, unit.scope, s))
 
 def hoist_fun(unit, f):
-    symbol = FunSymbol(unit, f, unit.scope)
+    symbol = FunSymbol(unit, f, unit.scope, is_vargs=f.is_vargs)
     unit.scope.insert(f.id, symbol)
 
     hoist_expr(unit, f.type)

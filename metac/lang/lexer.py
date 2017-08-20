@@ -213,7 +213,7 @@ class Lexer:
         else:
             value = c
 
-        
+
         if self._toss() != '\'':
             raise Todo(
                 "expected ' after char at line {}".format(self._line)
@@ -689,6 +689,13 @@ class Lexer:
                             if _accept('t'):
                                 return _end_kw(Token.KW_USHORT)
 
+        elif _accept('v'):
+            if _accept('a'):
+                if _accept('r'):
+                    if _accept('g'):
+                        if _accept('s'):
+                            return _end_kw(Token.KW_VARGS)
+            
         elif _accept('w'):
             if _accept('h'):
                 if _accept('i'):

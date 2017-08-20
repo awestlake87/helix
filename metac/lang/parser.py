@@ -177,36 +177,41 @@ class Parser:
 
         self._expect('(')
 
+        is_vargs = False
         param_types = [ ]
         param_ids = [ ]
 
         if not self._accept(')'):
             while True:
-                param_types.append(self._parse_expr())
-
-                self._expect(Token.ID)
-
-                param_ids.append(self._current.value)
-
-                if not self._accept(','):
+                if self._accept(Token.KW_VARGS):
+                    is_vargs = True
                     break
+
+                else:
+                    param_types.append(self._parse_expr())
+
+                    self._expect(Token.ID)
+
+                    param_ids.append(self._current.value)
+
+                    if not self._accept(','):
+                        break
 
             self._expect(')')
 
+
+        block = None
+
         if self._peek() == Token.INDENT:
-            return FunNode(
-                FunTypeNode(ret_type, param_types),
-                id,
-                param_ids,
-                self._parse_block()
-            )
-        else:
-            return FunNode(
-                FunTypeNode(ret_type, param_types),
-                id,
-                param_ids,
-                None
-            )
+            block = self._parse_block()
+            
+        return FunNode(
+            FunTypeNode(ret_type, param_types),
+            id,
+            param_ids,
+            block,
+            is_vargs=is_vargs
+        )
 
     def _parse_struct(self):
         self._expect(Token.KW_STRUCT)

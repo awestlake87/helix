@@ -5,9 +5,10 @@ from .gen_deps import gen_expr_deps, gen_block_deps
 from ..ir import FunType, FunValue, gen_static_expr_ir, gen_code
 
 class FunProtoTarget(Target):
-    def __init__(self, symbol, on_ir=lambda val: None):
+    def __init__(self, symbol, on_ir=lambda val: None, is_vargs=False):
         self.symbol = symbol
         self._on_ir = on_ir
+        self.is_vargs = is_vargs
 
         self.ir_value = None
 
@@ -25,7 +26,8 @@ class FunProtoTarget(Target):
                 gen_static_expr_ir(self.symbol.parent_scope, t)
                 for t in
                 self.symbol.ast.type.param_types
-            ]
+            ],
+            self.is_vargs
         )
 
         self.ir_value = FunValue(

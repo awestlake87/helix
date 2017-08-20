@@ -220,17 +220,42 @@ class MiscTests(unittest.TestCase):
         )
 
     def test_extern_symbol(self):
-        run_test(
-            """
-            extern fun uint strlen(*char s)
+        self.assertEqual(
+            0,
+            run_test(
+                """
+                extern fun uint strlen(*char s)
 
-            s: "lol"
+                s: "lol"
 
-            if strlen(s) != 3
-                return 1
-            elif strlen("hahhaa") != 6
-                return 2
+                if strlen(s) != 3
+                    return 1
+                elif strlen("hahhaa") != 6
+                    return 2
 
-            return 0
-            """
+                return 0
+                """
+            )
+        )
+
+    def test_vargs(self):
+        self.assertEqual(
+            0,
+            run_test(
+                """
+                extern fun int printf(*char format, vargs)
+                extern fun int snprintf(*char str, uint n, *char format, vargs)
+                extern fun int strcmp(*char a, *char b)
+
+                buffer: [50]char()
+                value: int(45)
+
+                snprintf(buffer, 50, "value: %d %s", value, "lol" as *char)
+
+                if strcmp(buffer, "value: 45 lol") != 0
+                    return 1
+
+                return 0
+                """
+            )
         )
