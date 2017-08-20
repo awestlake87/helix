@@ -90,3 +90,22 @@ class MiscTests(unittest.TestCase):
                 return 0
                 """
             )
+
+    def test_ref_and_deref(self):
+        self.assertEqual(
+            0,
+            run_test(
+                """
+                extern fun int test()
+                    value: 45
+                    ptr: *int(&value)
+
+                    if value != *ptr
+                        return 1
+
+                    return 0
+
+                return test()
+                """
+            )
+        )

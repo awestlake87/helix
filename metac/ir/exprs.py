@@ -9,10 +9,7 @@ from .values import *
 def gen_static_expr_ir(scope, expr):
     expr_type = type(expr)
 
-    if expr_type is PtrExprNode:
-        return gen_static_ptr_expr_ir(scope, expr)
-
-    elif expr_type is IntTypeNode:
+    if expr_type is IntTypeNode:
         return IntType(expr.num_bits, expr.is_signed)
 
     elif expr_type is AutoIntNode:
@@ -30,17 +27,28 @@ def gen_static_expr_ir(scope, expr):
     elif expr_type is SymbolNode:
         return scope.resolve(expr.id).get_ir_value()
 
+    elif issubclass(expr_type, UnaryExprNode):
+        return gen_static_unary_expr_ir(scope, expr)
+
     else:
         raise Todo(expr)
 
-def gen_static_ptr_expr_ir(scope, expr):
-    pointee = gen_static_expr_ir(scope, expr.operand)
+def gen_static_unary_expr_ir(scope, expr):
+    expr_type = type(expr)
+    operand = gen_static_expr_ir(scope, expr.operand)
 
-    if issubclass(type(pointee), Type):
-        return PtrType(pointee)
+    if expr_type is PtrExprNode:
+        return gen_static_ptr_expr_ir(scope, operand)
 
     else:
-        raise Todo(pointee)
+        raise Todo(expr)
+
+def gen_static_ptr_expr_ir(scope, operand):
+    if issubclass(type(operand), Type):
+        return PtrType(operand)
+
+    else:
+        raise Todo(operand)
 
 def gen_expr_ir(ctx, expr):
     expr_type = type(expr)
@@ -165,7 +173,12 @@ def gen_unary_expr_ir(ctx, expr):
 
     expr_type = type(expr)
 
-    if expr_type is PreIncExprNode:
+    if expr_type is PtrExprNode:
+        return gen_ptr_expr_ir(ctx, operand)
+    elif expr_type is RefExprNode:
+        return gen_ref_expr_ir(ctx, operand)
+
+    elif expr_type is PreIncExprNode:
         return gen_pre_inc_ir(ctx, operand)
     elif expr_type is PostIncExprNode:
         return gen_post_inc_ir(ctx, operand)
@@ -181,7 +194,7 @@ def gen_unary_expr_ir(ctx, expr):
         return gen_bit_not_ir(ctx, operand)
 
     else:
-        return gen_static_expr_ir(ctx.scope, expr)
+        raise Todo(expr)
 
 def gen_as_bit_ir(ctx, value):
     val_type = type(value.type)
@@ -194,6 +207,25 @@ def gen_as_bit_ir(ctx, value):
 
     else:
         raise Todo()
+
+def gen_ptr_expr_ir(ctx, value):
+    if issubclass(type(value), IrValue):
+        if type(value.type) is PtrType:
+            return LlvmValue(
+                value.type.pointee, ctx.builder.load(value.get_llvm_value())
+            )
+        else:
+            raise Todo(value)
+
+    else:
+        return gen_static_ptr_expr_ir(ctx.scope, value)
+
+def gen_ref_expr_ir(ctx, value):
+    if issubclass(type(value), LlvmRef):
+        return LlvmValue(PtrType(value.type), value.get_llvm_ptr())
+
+    else:
+        raise Todo(value_type)
 
 def gen_implicit_cast_ir(ctx, value, ir_as_type):
     val_type = type(value.type)
@@ -337,6 +369,15 @@ def gen_call_ir(ctx, expr):
 
         else:
             raise Todo("struct args")
+
+    elif type(lhs) is PtrType:
+        if len(expr.args) == 1:
+            return gen_implicit_cast_ir(
+                ctx, gen_expr_ir(ctx, expr.args[0]), lhs
+            )
+
+        else:
+            raise Todo("ptr args")
 
     else:
         raise Todo(lhs)

@@ -4,6 +4,8 @@ from ..expr_node import ExprNode, UnaryExprNode, BinaryExprNode
 class PtrExprNode(UnaryExprNode):
     pass
 
+class RefExprNode(UnaryExprNode):
+    pass
 
 class DotExprNode(BinaryExprNode):
     pass

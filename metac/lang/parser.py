@@ -571,6 +571,8 @@ class Parser:
         def _accept():
             if self._accept('*'):
                 return True
+            elif self._accept('&'):
+                return True
             elif self._accept('-'):
                 return True
             elif self._accept(Token.OP_INC):
@@ -587,6 +589,9 @@ class Parser:
 
             if id == '*':
                 return PtrExprNode(self._parse_expr_prec2())
+
+            elif id == '&':
+                return RefExprNode(self._parse_expr_prec2())
 
             elif id == '-':
                 return NegExprNode(self._parse_expr_prec2())

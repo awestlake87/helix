@@ -16,6 +16,13 @@ class PtrType(Type):
         else:
             self._llvm_value = self.pointee.get_llvm_value().as_pointer()
 
+    def __eq__(self, rhs):
+        if type(rhs) is PtrType and self.pointee == rhs.pointee:
+            return True
+
+        else:
+            return False
+
     def get_llvm_value(self):
         assert self._llvm_value is not None
 

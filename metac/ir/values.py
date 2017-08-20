@@ -3,8 +3,10 @@ from llvmlite import ir
 
 from .types import AutoIntType, AutoPtrType
 
+class IrValue:
+    pass
 
-class LlvmValue:
+class LlvmValue(IrValue):
     def __init__(self, ir_type, llvm_value):
         self.type = ir_type
         self._llvm_value = llvm_value
@@ -13,7 +15,7 @@ class LlvmValue:
         assert self._llvm_value is not None
         return self._llvm_value
 
-class LlvmRef:
+class LlvmRef(IrValue):
     def __init__(self, ctx, ir_type, llvm_ptr):
         self.ctx = ctx
         self.type = ir_type
