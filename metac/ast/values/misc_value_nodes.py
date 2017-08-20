@@ -14,9 +14,7 @@ class IntNode(LiteralNode):
         self._is_signed = is_signed
         self.value = str(value)
         self.radix = radix
-
-    def is_signed(self):
-        return self._is_signed
+        self.is_signed = is_signed
 
 class NilNode(LiteralNode):
     pass
@@ -24,3 +22,7 @@ class NilNode(LiteralNode):
 class SymbolNode(ExprNode):
     def __init__(self, id):
         self.id = id
+
+class StringNode(LiteralNode):
+    def __init__(self, value):
+        self.value = value

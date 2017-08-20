@@ -648,11 +648,17 @@ class Parser:
         elif _accept(Token.LT_NIL):
             return NilNode()
 
+        elif _accept(Token.LT_STRING):
+            return StringNode(self._current.value)
+
+        elif _accept(Token.LT_CHAR):
+            return IntNode(8, False, ord(self._current.value))
+
         elif _accept(Token.KW_BIT):
             return IntTypeNode(1, False)
 
         elif _accept(Token.KW_CHAR):
-            return IntTypeNode(8, True)
+            return IntTypeNode(8, False)
 
         elif _accept(Token.KW_BYTE):
             return IntTypeNode(8, True)

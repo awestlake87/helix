@@ -188,3 +188,33 @@ class MiscTests(unittest.TestCase):
                 """
             )
         )
+
+    def test_string(self):
+        self.assertEqual(
+            0,
+            run_test(
+                """
+                extern fun int test()
+                    str: "ab\\"c'\\n"
+
+                    if str[0] != 'a'
+                        return 1
+                    if str[1] != 'b'
+                        return 2
+                    if str[2] != '"'
+                        return 3
+                    if str[3] != 'c'
+                        return 4
+                    if str[4] != '\\''
+                        return 5
+                    if str[5] != '\\n'
+                        return 6
+                    if str[6] != 0
+                        return 7
+
+                    return 0
+
+                return test()
+                """
+            )
+        )

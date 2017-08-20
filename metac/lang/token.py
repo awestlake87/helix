@@ -96,6 +96,9 @@ class Token:
     LT_INT_DEC          = "int_x10"
     LT_INT_HEX          = "int_x16"
 
+    LT_CHAR             = "lt_char"
+    LT_STRING           = "lt_string"
+
     LT_TRUE             = "true"
     LT_FALSE            = "false"
     LT_NIL              = "nil"

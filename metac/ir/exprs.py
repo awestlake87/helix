@@ -30,6 +30,9 @@ def gen_static_expr_ir(scope, expr):
     elif expr_type is ArrayTypeNode:
         return gen_static_array_type_ir(scope, expr.length, expr.type)
 
+    elif expr_type is StringNode:
+        return gen_static_string_ir(scope, expr)
+
     elif issubclass(expr_type, UnaryExprNode):
         return gen_static_unary_expr_ir(scope, expr)
 
@@ -59,7 +62,18 @@ def gen_static_array_type_ir(scope, length, elem_type):
         gen_static_expr_ir(scope, elem_type)
     )
 
+def gen_static_string_ir(scope, expr):
+    value = [ ]
 
+    for c in expr.value:
+        value.append(ir.IntType(8)(ord(c)))
+
+    value.append(ir.IntType(8)(0))
+
+    return LlvmValue(
+        ArrayType(IntValue(AutoIntType(), len(value)), IntType(8, False)),
+        ir.Constant.literal_array(value)
+    )
 
 def gen_expr_ir(ctx, expr):
     expr_type = type(expr)

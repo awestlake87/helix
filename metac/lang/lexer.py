@@ -122,12 +122,108 @@ class Lexer:
         elif c == '@':
             return self._scan_attribute()
 
+        elif c == '"':
+            return self._scan_string()
+
+        elif c == '\'':
+            return self._scan_char()
+
         else:
             return self._scan_punct()
 
+    def _scan_string(self):
+        quote = self._toss()
+        assert quote == '"'
+
+        value = ""
+
+        while True:
+            c = self._toss()
+
+            if c == '"':
+                break
+
+            elif c == '\\':
+                c = self._toss()
+
+                if c == '\\':
+                    value += '\\'
+                elif c == '"':
+                    value += '"'
+                elif c == 'a':
+                    value += '\a'
+                elif c == 'b':
+                    value += '\b'
+                elif c == 'f':
+                    value += '\f'
+                elif c == 'n':
+                    value += '\n'
+                elif c == 'r':
+                    value += '\r'
+                elif c == 't':
+                    value += '\t'
+                elif c == 'v':
+                    value += '\v'
+                else:
+                    raise Todo()
+
+            elif c == '\n':
+                raise Todo("expected \"")
+            else:
+                value += c
+
+        return Token(Token.LT_STRING, value)
+
+    def _scan_char(self):
+        quote = self._toss()
+        assert quote == '\''
+
+        c = self._toss()
+        value = None
+
+        if c == '\'':
+            raise Todo("empty '' is not a valid char")
+
+        elif c == '\\':
+            c = self._toss()
+
+            if c == '\\':
+                value = '\\'
+            elif c == '\'':
+                value = '\''
+            elif c == 'a':
+                value = '\a'
+            elif c == 'b':
+                value = '\b'
+            elif c == 'f':
+                value = '\f'
+            elif c == 'n':
+                value = '\n'
+            elif c == 'r':
+                value = '\r'
+            elif c == 't':
+                value = '\t'
+            elif c == 'v':
+                value = '\v'
+            else:
+                raise Todo()
+
+        elif c == '\n':
+            raise Todo("unexpected end of line {}".format(self._line - 1))
+        else:
+            value = c
+
+        
+        if self._toss() != '\'':
+            raise Todo(
+                "expected ' after char at line {}".format(self._line)
+            )
+
+        return Token(Token.LT_CHAR, value)
 
     def _scan_attribute(self):
-        assert self._toss() == '@'
+        prefix = self._toss()
+        assert prefix == '@'
 
         c = self._peek()
 
