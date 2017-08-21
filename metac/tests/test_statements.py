@@ -9,7 +9,7 @@ class LoopTests(unittest.TestCase):
             6573,
             run_test(
                 """
-                extern fun int test()
+                cfun int test()
                     return 6573
 
                 return test()
@@ -22,16 +22,13 @@ class LoopTests(unittest.TestCase):
             9,
             run_test(
                 """
-                extern fun int test()
-                    val: 0
+                val: 0
 
-                    for i: 0 while i < 10
-                        val = i
-                    then i++
+                for i: 0 while i < 10
+                    val = i
+                then i++
 
-                    return val
-
-                return test()
+                return val
                 """
             )
         )
@@ -41,15 +38,12 @@ class LoopTests(unittest.TestCase):
             100,
             run_test(
                 """
-                extern fun int test()
-                    i: 1000
+                i: 1000
 
-                    while i != 100
-                        --i
+                while i != 100
+                    --i
 
-                    return i
-
-                return test()
+                return i
                 """
             )
         )
@@ -59,16 +53,13 @@ class LoopTests(unittest.TestCase):
             100,
             run_test(
                 """
-                extern fun int test()
-                    i: 0
+                i: 0
 
-                    loop
-                        ++i
-                    until i == 100
+                loop
+                    ++i
+                until i == 100
 
-                    return i
-
-                return test()
+                return i
                 """
             )
         )
@@ -78,25 +69,22 @@ class LoopTests(unittest.TestCase):
             0,
             run_test(
                 """
-                extern fun int test(int value)
-                    switch value
-                        case 1
-                            return 1
+                switch 6
+                    case 1
+                        return 1
 
-                        case 6
-                            switch 4
-                                case 5
-                                    return 2
+                    case 6
+                        switch 4
+                            case 5
+                                return 2
 
-                                default
-                                    return 0
-                        case 5
-                            return 3
+                            default
+                                return 0
+                    case 5
+                        return 3
 
-                        default
-                            return 4
-
-                return test(6)
+                    default
+                        return 4
                 """
             )
         )
@@ -106,28 +94,25 @@ class LoopTests(unittest.TestCase):
             0,
             run_test(
                 """
-                extern fun int test()
-                    switch 3
-                        case 0
-                        case 1
-                        case 2
-                            return 1
+                switch 3
+                    case 0
+                    case 1
+                    case 2
+                        return 1
 
-                        case 3
-                            switch 45
-                                case 1
-                                case 10
-                                case 45
-                                case 50
-                                    return 0
+                    case 3
+                        switch 45
+                            case 1
+                            case 10
+                            case 45
+                            case 50
+                                return 0
 
-                                default
-                                    return 2
+                            default
+                                return 2
 
-                        default
-                            return 3
-
-                return test()
+                    default
+                        return 3
                 """
             )
         )
@@ -137,21 +122,18 @@ class LoopTests(unittest.TestCase):
             0,
             run_test(
                 """
-                extern fun int test()
-                    if true
+                if true
+                    if false
+                        return 2
+                    else
                         if false
-                            return 2
+                            return 3
+                        elif true
+                            return 0
                         else
-                            if false
-                                return 3
-                            elif true
-                                return 0
-                            else
-                                return 4
+                            return 4
 
-                    return 1
-
-                return test()
+                return 1
                 """
             )
         )
@@ -161,42 +143,39 @@ class LoopTests(unittest.TestCase):
             0,
             run_test(
             """
-            extern fun int test()
-                n: 0
+            n: 0
 
-                while n < 12
-                    if n == 7
+            while n < 12
+                if n == 7
+                    break
+
+            then n++
+
+            if n != 7
+                return 1
+
+            for n = 0 while n < 10
+                if n < 5
+                    continue
+                else
+                    break
+            then n++
+
+            if n != 5
+                return 2
+
+
+            for n = 0 while n < 10
+                for i: 0
+                    if i == 10
                         break
+                then i++
+            then n++
 
-                then n++
+            if n != 10
+                return 3
 
-                if n != 7
-                    return 1
-
-                for n = 0 while n < 10
-                    if n < 5
-                        continue
-                    else
-                        break
-                then n++
-
-                if n != 5
-                    return 2
-
-
-                for n = 0 while n < 10
-                    for i: 0
-                        if i == 10
-                            break
-                    then i++
-                then n++
-
-                if n != 10
-                    return 3
-
-                return 0
-
-            return test()
+            return 0
             """
             )
         )

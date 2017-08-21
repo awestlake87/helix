@@ -10,13 +10,13 @@ class MiscExprTests(unittest.TestCase):
             43,
             run_test(
                 """
-                extern fun int test()
-                    extern fun int call_fun(int a, int b)
+                cfun int test()
+                    cfun int call_fun(int a, int b)
                         return return_43(a, b)
 
                     return call_fun(46, 3)
 
-                extern fun int return_43(int a, int b)
+                cfun int return_43(int a, int b)
                     return 43
 
                 return test()
@@ -29,10 +29,7 @@ class MiscExprTests(unittest.TestCase):
             123,
             run_test(
                 """
-                extern fun int test()
-                    return int(123)
-
-                return test()
+                return int(123)
                 """
             )
         )
@@ -40,7 +37,7 @@ class MiscExprTests(unittest.TestCase):
         with self.assertRaises(ReturnTypeMismatch):
             run_test(
                 """
-                extern fun int omg()
+                cfun int omg()
                     return short(123)
 
                 return omg()
@@ -52,11 +49,8 @@ class MiscExprTests(unittest.TestCase):
             1234,
             run_test(
                 """
-                extern fun int test()
-                    a: b: 1234
-                    return a
-
-                return test()
+                a: b: 1234
+                return a
                 """
             )
         )
@@ -66,20 +60,17 @@ class MiscExprTests(unittest.TestCase):
             0,
             run_test(
                 """
-                extern fun int test()
-                    a: 432 if true else 321
+                a: 432 if true else 321
 
-                    if a == 321
-                        return 1
+                if a == 321
+                    return 1
 
-                    a = 11 if false else 13
+                a = 11 if false else 13
 
-                    if a == 11
-                        return 2
+                if a == 11
+                    return 2
 
-                    return 0
-
-                return test()
+                return 0
                 """
             )
         )
@@ -97,25 +88,23 @@ class MiscExprTests(unittest.TestCase):
                     int @_b123_b
                     Lard @_lard
 
-                extern fun int test()
-                    blargh: Blargh()
 
-                    blargh.an_attr = 1
-                    blargh._b123_b = 2
-                    blargh._lard.fat = 5
+                blargh: Blargh()
 
-                    if blargh.an_attr != 1
-                        return 1
+                blargh.an_attr = 1
+                blargh._b123_b = 2
+                blargh._lard.fat = 5
 
-                    if blargh._b123_b != 2
-                        return 2
+                if blargh.an_attr != 1
+                    return 1
 
-                    if blargh._lard.fat != 5
-                        return 3
+                if blargh._b123_b != 2
+                    return 2
 
-                    return 0
+                if blargh._lard.fat != 5
+                    return 3
 
-                return test()
+                return 0
                 """
             )
         )

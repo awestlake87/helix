@@ -179,8 +179,7 @@ class Parser:
 
 
     def _parse_fun(self):
-        self._expect(Token.KW_EXTERN)
-        self._expect(Token.KW_FUN)
+        self._expect(Token.KW_CFUN)
 
         ret_type = self._parse_expr()
 
@@ -763,7 +762,7 @@ class Parser:
             if self._peek() == Token.KW_STRUCT:
                 return self._parse_struct()
 
-            elif self._peek() == Token.KW_EXTERN:
+            elif self._peek() == Token.KW_CFUN:
                 return self._parse_fun()
 
             else:

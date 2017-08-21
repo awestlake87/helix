@@ -11,7 +11,7 @@ class DepTests(unittest.TestCase):
                 struct Blargh
                     int @n
 
-                extern fun int c()
+                cfun int c()
                     struct Lalala
                         Blargh @b
 
@@ -23,7 +23,7 @@ class DepTests(unittest.TestCase):
                     return b(blargh)
 
 
-                extern fun int b(Blargh blargh)
+                cfun int b(Blargh blargh)
                     return blargh.n
 
                 return c()
@@ -36,13 +36,13 @@ class DepTests(unittest.TestCase):
             0,
             run_test(
                 """
-                extern fun int a(int n)
+                cfun int a(int n)
                     if n > 0
                         return b(n - 1)
                     else
                         return 0
 
-                extern fun int b(int n)
+                cfun int b(int n)
                     if n > 0
                         return a(n - 1)
                     else

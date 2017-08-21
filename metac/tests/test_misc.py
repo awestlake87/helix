@@ -10,8 +10,8 @@ class MiscTests(unittest.TestCase):
             5,
             run_test(
                 """
-                extern fun int test()
-                    extern fun int blargh(int a, int b)
+                cfun int test()
+                    cfun int blargh(int a, int b)
                         return 5
                     return blargh(1, 2)
 
@@ -23,9 +23,9 @@ class MiscTests(unittest.TestCase):
     def test_ptr_type(self):
         run_test(
             """
-            extern fun *int omg()
+            cfun *int omg()
                 return nil
-            extern fun ****int int_ptr_ptr_ptr_ptr()
+            cfun ****int int_ptr_ptr_ptr_ptr()
                 return nil
 
             if int_ptr_ptr_ptr_ptr() != nil
@@ -43,25 +43,25 @@ class MiscTests(unittest.TestCase):
     def test_int_types(self):
         run_test(
             """
-            extern fun bit get_bit()
+            cfun bit get_bit()
                 return 0
 
-            extern fun byte get_byte()
+            cfun byte get_byte()
                 return 0
-            extern fun short get_short()
+            cfun short get_short()
                 return 0
-            extern fun int get_int()
+            cfun int get_int()
                 return 0
-            extern fun long get_long()
+            cfun long get_long()
                 return 0
 
-            extern fun ubyte get_ubyte()
+            cfun ubyte get_ubyte()
                 return 0
-            extern fun ushort get_ushort()
+            cfun ushort get_ushort()
                 return 0
-            extern fun uint get_uint()
+            cfun uint get_uint()
                 return 0
-            extern fun ulong get_ulong()
+            cfun ulong get_ulong()
                 return 0
 
             get_bit()
@@ -83,7 +83,7 @@ class MiscTests(unittest.TestCase):
         with self.assertRaises(ReturnTypeMismatch):
             run_test(
                 """
-                extern fun *int ptr()
+                cfun *int ptr()
                     return 1
 
                 ptr()
@@ -212,7 +212,7 @@ class MiscTests(unittest.TestCase):
             0,
             run_test(
                 """
-                extern fun uint strlen(*char s)
+                cfun uint strlen(*char s)
 
                 s: "lol"
 
@@ -231,9 +231,9 @@ class MiscTests(unittest.TestCase):
             0,
             run_test(
                 """
-                extern fun int printf(*char format, vargs)
-                extern fun int snprintf(*char str, uint n, *char format, vargs)
-                extern fun int strcmp(*char a, *char b)
+                cfun int printf(*char format, vargs)
+                cfun int snprintf(*char str, uint n, *char format, vargs)
+                cfun int strcmp(*char a, *char b)
 
                 buffer: [50]char()
                 value: int(45)

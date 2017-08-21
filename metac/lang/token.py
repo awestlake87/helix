@@ -11,7 +11,7 @@ class Token:
     ID                  = "ID"
     ATTR_ID             = "ATTR_ID"
 
-    KW_EXTERN           = "extern"
+    KW_CFUN             = "cfun"
     KW_VARGS            = "vargs"
 
     KW_FUN              = "fun"

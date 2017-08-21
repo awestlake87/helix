@@ -488,6 +488,11 @@ class Lexer:
                         if _accept('h'):
                             return _end_kw(Token.KW_CATCH)
 
+            elif _accept('f'):
+                if _accept('u'):
+                    if _accept('n'):
+                        return _end_kw(Token.KW_CFUN)
+
             elif _accept('h'):
                 if _accept('a'):
                     if _accept('r'):
@@ -535,12 +540,6 @@ class Lexer:
                         if _accept('r'):
                             if _accept('t'):
                                 return _end_kw(Token.KW_EXPORT)
-
-                elif _accept('t'):
-                    if _accept('e'):
-                        if _accept('r'):
-                            if _accept('n'):
-                                return _end_kw(Token.KW_EXTERN)
         elif _accept('f'):
             if _accept('a'):
                 if _accept('l'):
