@@ -52,6 +52,9 @@ def gen_expr_deps(unit, expr):
     elif expr_type is CallExprNode:
         return gen_call_deps(unit, expr)
 
+    elif expr_type is EmbedCallExprNode:
+        return gen_call_deps(unit, expr)
+
     elif expr_type is DotExprNode:
         return [ ]
 
@@ -71,6 +74,9 @@ def gen_expr_deps(unit, expr):
         return gen_fun_type_deps(unit, expr)
 
     elif expr_type is IntTypeNode:
+        return [ ]
+
+    elif expr_type is AttrNode:
         return [ ]
 
     elif expr_type is ArrayTypeNode:

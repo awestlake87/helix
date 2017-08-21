@@ -30,6 +30,9 @@ def gen_static_expr_ir(scope, expr):
     elif expr_type is ArrayTypeNode:
         return gen_static_array_type_ir(scope, expr.length, expr.type)
 
+    elif expr_type is EmbedCallExprNode:
+        return gen_static_embed_call_ir(scope, expr)
+
     elif issubclass(expr_type, UnaryExprNode):
         return gen_static_unary_expr_ir(scope, expr)
 
@@ -58,6 +61,23 @@ def gen_static_array_type_ir(scope, length, elem_type):
         gen_static_expr_ir(scope, length),
         gen_static_expr_ir(scope, elem_type)
     )
+
+def gen_static_embed_call_ir(scope, expr):
+    lhs = gen_static_expr_ir(scope, expr.lhs)
+
+    if lhs == IntType(32, True):
+        if len(expr.args) == 1:
+            arg = gen_static_expr_ir(scope, expr.args[0])
+            if type(arg) != IntValue:
+                raise Todo("unexpected arg")
+            else:
+                return IntType(arg.value, True)
+
+        else:
+            raise Todo("embed int args")
+
+    else:
+        raise Todo(lhs)
 
 def gen_string_ir(ctx, expr):
     initializer = [ ]
@@ -114,6 +134,9 @@ def gen_expr_ir(ctx, expr):
 
     elif expr_type is DotExprNode:
         return gen_dot_ir(ctx, expr)
+
+    elif expr_type is OffsetofNode:
+        return gen_offsetof_ir(ctx, expr)
 
     elif expr_type is TernaryConditionalNode:
         return gen_ternary_conditional_ir(ctx, expr)
@@ -240,6 +263,9 @@ def gen_unary_expr_ir(ctx, expr):
     elif expr_type is BitNotExprNode:
         return gen_bit_not_ir(ctx, operand)
 
+    elif expr_type is SizeofNode:
+        return gen_sizeof_ir(ctx, operand)
+
     else:
         raise Todo(expr)
 
@@ -273,6 +299,48 @@ def gen_ref_expr_ir(ctx, value):
 
     else:
         raise Todo(value_type)
+
+def gen_sizeof_ir(ctx, value):
+    if issubclass(type(value), Type):
+        nil_value = NilValue(PtrType(value))
+        size_type = IntType(32, False)
+
+        return LlvmValue(
+            size_type,
+            ctx.builder.ptrtoint(
+                ctx.builder.gep(
+                    nil_value.get_llvm_value(),
+                    [ ir.IntType(32)(1) ]
+                ),
+                size_type.get_llvm_value()
+            )
+        )
+
+    else:
+        raise Todo()
+
+def gen_offsetof_ir(ctx, expr):
+    lhs = gen_expr_ir(ctx, expr.lhs)
+
+    if type(lhs) is StructType:
+        if type(expr.rhs) is AttrNode:
+            _, attr_index = lhs.get_attr_info(expr.rhs.id)
+            nil_value = NilValue(PtrType(lhs))
+            size_type = IntType(32, False)
+
+            return LlvmValue(
+                size_type,
+                ctx.builder.ptrtoint(
+                    ctx.builder.gep(
+                        nil_value.get_llvm_value(),
+                        [ ir.IntType(32)(0), ir.IntType(32)(attr_index) ]
+                    ),
+                    size_type.get_llvm_value()
+                )
+            )
+
+    else:
+        raise Todo(lhs)
 
 def gen_implicit_cast_ir(ctx, value, ir_as_type):
     val_type = type(value.type)

@@ -24,6 +24,15 @@ class BitcastNode(BinaryExprNode):
     pass
 
 
+class SizeofNode(UnaryExprNode):
+    pass
+
+class OffsetofNode(BinaryExprNode):
+    pass
+
+class TypeofNode(UnaryExprNode):
+    pass
+
 class InitExprNode(BinaryExprNode):
     pass
 
@@ -31,6 +40,11 @@ class AssignExprNode(BinaryExprNode):
     pass
 
 class CallExprNode(ExprNode):
+    def __init__(self, lhs, args):
+        self.lhs = lhs
+        self.args = args
+
+class EmbedCallExprNode(ExprNode):
     def __init__(self, lhs, args):
         self.lhs = lhs
         self.args = args

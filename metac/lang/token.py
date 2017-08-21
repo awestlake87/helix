@@ -92,6 +92,11 @@ class Token:
     OP_NOT              = "not"
 
     OP_AS               = "as"
+    OP_CAST             = "cast"
+    OP_BITCAST          = "bitcast"
+    OP_SIZEOF           = "sizeof"
+    OP_OFFSETOF         = "offsetof"
+    OP_TYPEOF           = "typeof"
 
     LT_INT_BIN          = "int_x2"
     LT_INT_DEC          = "int_x10"

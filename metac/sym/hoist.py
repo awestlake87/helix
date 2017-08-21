@@ -49,11 +49,17 @@ def hoist_expr(unit, expr):
     elif expr_type is CallExprNode:
         hoist_call(unit, expr)
 
+    elif expr_type is EmbedCallExprNode:
+        hoist_call(unit, expr)
+
     elif expr_type is InitExprNode:
         hoist_init(unit, expr)
 
     elif expr_type is DotExprNode:
         pass
+
+    elif expr_type is OffsetofNode:
+        hoist_expr(unit, expr.lhs)
 
     elif expr_type is ArrayTypeNode:
         hoist_expr(unit, expr.length)

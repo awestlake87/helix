@@ -456,7 +456,13 @@ class Lexer:
         elif _accept('b'):
             if _accept('i'):
                 if _accept('t'):
-                    return _end_kw(Token.KW_BIT)
+                    if _accept('c'):
+                        if _accept('a'):
+                            if _accept('s'):
+                                if _accept('t'):
+                                    return _end_kw(Token.OP_BITCAST)
+                    else:
+                        return _end_kw(Token.KW_BIT)
 
             elif _accept('r'):
                 if _accept('e'):
@@ -473,6 +479,9 @@ class Lexer:
                 if _accept('s'):
                     if _accept('e'):
                         return _end_kw(Token.KW_CASE)
+
+                    elif _accept('t'):
+                        return _end_kw(Token.KW_CAST)
 
                 elif _accept('t'):
                     if _accept('c'):
@@ -601,7 +610,16 @@ class Lexer:
                     return _end_kw(Token.OP_NOT)
 
         elif _accept('o'):
-            if _accept('r'):
+            if _accept('f'):
+                if _accept('f'):
+                    if _accept('s'):
+                        if _accept('e'):
+                            if _accept('t'):
+                                if _accept('o'):
+                                    if _accept('f'):
+                                        return _end_kw(Token.OP_OFFSETOF)
+
+            elif _accept('r'):
                 return _end_kw(Token.OP_OR)
 
         elif _accept('p'):
@@ -624,6 +642,13 @@ class Lexer:
                     if _accept('r'):
                         if _accept('t'):
                             return _end_kw(Token.KW_SHORT)
+
+            elif _accept('i'):
+                if _accept('z'):
+                    if _accept('e'):
+                        if _accept('o'):
+                            if _accept('f'):
+                                return _end_kw(Token.OP_SIZEOF)
 
             elif _accept('t'):
                 if _accept('r'):
@@ -657,6 +682,13 @@ class Lexer:
 
                 elif _accept('y'):
                     return _end_kw(Token.KW_TRY)
+
+            elif _accept('y'):
+                if _accept('p'):
+                    if _accept('e'):
+                        if _accept('o'):
+                            if _accept('f'):
+                                return _end_kw(Token.OP_TYPEOF)
 
         elif _accept('u'):
             if _accept('b'):
@@ -695,7 +727,7 @@ class Lexer:
                     if _accept('g'):
                         if _accept('s'):
                             return _end_kw(Token.KW_VARGS)
-            
+
         elif _accept('w'):
             if _accept('h'):
                 if _accept('i'):

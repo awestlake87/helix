@@ -178,7 +178,7 @@ class NilValue(LlvmValue):
 
         else:
             super().__init__(
-                ir_type, ir.IntType(32)(0).inttoptr(ir_type.get_llvm_value())
+                ir_type, ir_type.get_llvm_value()(None)
             )
 
 

@@ -11,6 +11,13 @@ class Parser:
         self._next = self._lexer.scan()
         self._ahead = self._lexer.scan()
 
+        self._scan_queue = [ ]
+
+    def _scan_next(self):
+        next_token = self._lexer.scan()
+        self._scan_queue.append(next_token)
+        return next_token.id
+
     def parse(self):
         block = self._parse_block()
 
@@ -32,7 +39,12 @@ class Parser:
         if self._peek() == id:
             self._current = self._next
             self._next = self._ahead
-            self._ahead = self._lexer.scan()
+
+            if len(self._scan_queue) == 0:
+                self._ahead = self._lexer.scan()
+            else:
+                self._ahead = self._scan_queue.pop(0)
+
             return True
         else:
             return False
@@ -204,7 +216,7 @@ class Parser:
 
         if self._peek() == Token.INDENT:
             block = self._parse_block()
-            
+
         return FunNode(
             FunTypeNode(ret_type, param_types),
             id,
@@ -520,20 +532,41 @@ class Parser:
         def _accept():
             if self._accept(Token.OP_AS):
                 return True
+            elif self._accept(Token.OP_CAST):
+                return True
+            elif self._accept(Token.OP_BITCAST):
+                return True
+            elif self._accept(Token.OP_OFFSETOF):
+                return True
             else:
                 return False
 
-        lhs = self._parse_expr_prec4()
+        lhs = self._parse_expr_prec5_placeholder()
 
         while _accept():
             id = self._current.id
 
             if id == Token.OP_AS:
-                lhs = AsNode(lhs, self._parse_expr_prec4())
+                lhs = AsNode(lhs, self._parse_expr_prec5_placeholder())
+            elif id == Token.OP_CAST:
+                lhs = CastNode(lhs, self._parse_expr_prec5_placeholder())
+            elif id == Token.OP_BITCAST:
+                lhs = BitcastNode(lhs, self._parse_expr_prec5_placeholder())
+
+            elif id == Token.OP_OFFSETOF:
+                lhs = OffsetofNode(lhs, self._parse_expr_prec5_placeholder())
+
             else:
                 raise CompilerBug("$_#")
 
         return lhs
+
+    def _parse_expr_prec5_placeholder(self):
+        if self._accept(Token.OP_SIZEOF):
+            return SizeofNode(self._parse_expr_prec5_placeholder())
+
+        else:
+            return self._parse_expr_prec4()
 
     def _parse_expr_prec4(self):
         def _accept():
@@ -559,6 +592,27 @@ class Parser:
                 return True
             elif self._accept('['):
                 return True
+            elif self._peek() == '<':
+                # TODO: MAKE THIS BETTER
+                # look ahead to determine whether it's a condition or
+                # embed call
+
+                if self._peek_ahead() == '>':
+                    self._accept('<')
+                    return True
+
+                # need a scan expr fun for this
+                elif self._peek_ahead() == Token.LT_INT_DEC:
+                    if self._scan_next() == '>':
+                        self._accept('<')
+                        return True
+
+                    else:
+                        return False
+
+                else:
+                    return False
+
             elif self._accept(Token.OP_INC):
                 return True
             elif self._accept(Token.OP_DEC):
@@ -589,6 +643,18 @@ class Parser:
                 self._expect(']')
 
                 lhs = IndexExprNode(lhs, expr)
+
+            elif id == '<':
+                args = [ ]
+
+                if not self._accept('>'):
+                    while True:
+                        args.append(self._parse_expr())
+                        if not self._accept(','):
+                            self._expect('>')
+                            break
+
+                lhs = EmbedCallExprNode(lhs, args)
 
             elif id == Token.OP_INC:
                 lhs = PostIncExprNode(lhs)
@@ -689,6 +755,9 @@ class Parser:
 
         elif _accept(Token.KW_ULONG):
             return IntTypeNode(64, False)
+
+        elif _accept(Token.ATTR_ID):
+            return AttrNode(self._current.value)
 
         else:
             if self._peek() == Token.KW_STRUCT:

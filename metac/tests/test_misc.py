@@ -96,16 +96,13 @@ class MiscTests(unittest.TestCase):
             0,
             run_test(
                 """
-                extern fun int test()
-                    value: 45
-                    ptr: *int(&value)
+                value: 45
+                ptr: *int(&value)
 
-                    if value != *ptr
-                        return 1
+                if value != *ptr
+                    return 1
 
-                    return 0
-
-                return test()
+                return 0
                 """
             )
         )
@@ -115,39 +112,36 @@ class MiscTests(unittest.TestCase):
             0,
             run_test(
                 """
-                extern fun int test()
-                    value: [4]int()
+                value: [4]int()
 
-                    value[0] = 123
-                    value[1] = 321
-                    value[2] = 98
-                    value[3] = 1
+                value[0] = 123
+                value[1] = 321
+                value[2] = 98
+                value[3] = 1
 
-                    if value[0] != 123
-                        return 1
-                    if value[1] != 321
-                        return 2
-                    if value[2] != 98
-                        return 3
-                    if value[3] != 1
-                        return 4
+                if value[0] != 123
+                    return 1
+                if value[1] != 321
+                    return 2
+                if value[2] != 98
+                    return 3
+                if value[3] != 1
+                    return 4
 
-                    for i: 0 while i < 4
-                        value[i] = 12
-                    then i++
+                for i: 0 while i < 4
+                    value[i] = 12
+                then i++
 
-                    if value[0] != 12
-                        return 5
-                    if value[1] != 12
-                        return 6
-                    if value[2] != 12
-                        return 7
-                    if value[3] != 12
-                        return 8
+                if value[0] != 12
+                    return 5
+                if value[1] != 12
+                    return 6
+                if value[2] != 12
+                    return 7
+                if value[3] != 12
+                    return 8
 
-                    return 0
-
-                return test()
+                return 0
                 """
             )
         )
@@ -157,34 +151,31 @@ class MiscTests(unittest.TestCase):
             0,
             run_test(
                 """
-                extern fun int test()
-                    array: [3]int()
+                array: [3]int()
 
-                    array[0] = 54
-                    array[1] = 43
-                    array[2] = 98
+                array[0] = 54
+                array[1] = 43
+                array[2] = 98
 
-                    ptr: array as *int
+                ptr: array as *int
 
-                    if *(ptr + 0) != 54
-                        return 1
-                    elif *(ptr + 1) != 43
-                        return 2
-                    elif *(2 + ptr) != 98
-                        return 3
+                if *(ptr + 0) != 54
+                    return 1
+                elif *(ptr + 1) != 43
+                    return 2
+                elif *(2 + ptr) != 98
+                    return 3
 
-                    ptr += 2
+                ptr += 2
 
-                    if *(ptr - 0) != 98
-                        return 4
-                    elif *(ptr - 1) != 43
-                        return 5
-                    elif *(ptr - 2) != 54
-                        return 6
+                if *(ptr - 0) != 98
+                    return 4
+                elif *(ptr - 1) != 43
+                    return 5
+                elif *(ptr - 2) != 54
+                    return 6
 
-                    return 0
-
-                return test()
+                return 0
                 """
             )
         )
@@ -194,27 +185,24 @@ class MiscTests(unittest.TestCase):
             0,
             run_test(
                 """
-                extern fun int test()
-                    str: "ab\\"c'\\n"
+                str: "ab\\"c'\\n"
 
-                    if str[0] != 'a'
-                        return 1
-                    if str[1] != 'b'
-                        return 2
-                    if str[2] != '"'
-                        return 3
-                    if str[3] != 'c'
-                        return 4
-                    if str[4] != '\\''
-                        return 5
-                    if str[5] != '\\n'
-                        return 6
-                    if str[6] != 0
-                        return 7
+                if str[0] != 'a'
+                    return 1
+                if str[1] != 'b'
+                    return 2
+                if str[2] != '"'
+                    return 3
+                if str[3] != 'c'
+                    return 4
+                if str[4] != '\\''
+                    return 5
+                if str[5] != '\\n'
+                    return 6
+                if str[6] != 0
+                    return 7
 
-                    return 0
-
-                return test()
+                return 0
                 """
             )
         )
@@ -254,6 +242,29 @@ class MiscTests(unittest.TestCase):
 
                 if strcmp(buffer, "value: 45 lol") != 0
                     return 1
+
+                return 0
+                """
+            )
+        )
+
+    def test_sizeof_offsetof(self):
+        self.assertEqual(
+            0,
+            run_test(
+                """
+                struct Blargh
+                    int<32> @a
+                    int<32> @b
+
+                if sizeof Blargh != 8
+                    return 1
+
+                if Blargh offsetof @a != 0
+                    return 2
+
+                if Blargh offsetof @b != 4
+                    return 3
 
                 return 0
                 """
