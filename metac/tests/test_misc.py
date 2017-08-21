@@ -266,6 +266,11 @@ class MiscTests(unittest.TestCase):
                 if Blargh offsetof @b != 4
                     return 3
 
+                blargh: Blargh()
+
+                if sizeof blargh.a != 4
+                    return 4
+
                 return 0
                 """
             )

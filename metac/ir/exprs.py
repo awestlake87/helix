@@ -301,23 +301,26 @@ def gen_ref_expr_ir(ctx, value):
         raise Todo(value_type)
 
 def gen_sizeof_ir(ctx, value):
+    operand = None
     if issubclass(type(value), Type):
-        nil_value = NilValue(PtrType(value))
-        size_type = IntType(32, False)
-
-        return LlvmValue(
-            size_type,
-            ctx.builder.ptrtoint(
-                ctx.builder.gep(
-                    nil_value.get_llvm_value(),
-                    [ ir.IntType(32)(1) ]
-                ),
-                size_type.get_llvm_value()
-            )
-        )
-
+        operand = value
     else:
-        raise Todo()
+        operand = value.type
+
+
+    nil_value = NilValue(PtrType(operand))
+    size_type = IntType(32, False)
+
+    return LlvmValue(
+        size_type,
+        ctx.builder.ptrtoint(
+            ctx.builder.gep(
+                nil_value.get_llvm_value(),
+                [ ir.IntType(32)(1) ]
+            ),
+            size_type.get_llvm_value()
+        )
+    )
 
 def gen_offsetof_ir(ctx, expr):
     lhs = gen_expr_ir(ctx, expr.lhs)
