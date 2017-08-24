@@ -14,3 +14,6 @@ class ArrayTypeNode(ExprNode):
     def __init__(self, length, type_expr):
         self.length = length
         self.type = type_expr
+
+class VoidTypeNode(ExprNode):
+    pass

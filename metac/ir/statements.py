@@ -13,6 +13,7 @@ def gen_code(fun, scope, ast):
 
             self.const_string_counter = 0
             self.loop_context = None
+            self.try_context = None
 
             self.entry = self.fun.get_llvm_value().append_basic_block("entry")
             self.builder = ir.IRBuilder(self.entry)
@@ -20,6 +21,31 @@ def gen_code(fun, scope, ast):
             self.body = self.builder.append_basic_block("body")
             self.builder.branch(self.body)
             self.builder.position_at_end(self.body)
+
+            self._unreachable = None
+
+            self._cleanup_blocks = [ ]
+
+            self._return_value = StackValue(
+                self, self.fun.type.ret_type
+            )
+
+            self._return_block = self.builder.append_basic_block("return")
+
+            with self.builder.goto_block(self._return_block):
+                self.builder.ret(self._return_value.get_llvm_value())
+
+        @property
+        def unreachable(self):
+            if self._unreachable is None:
+                self._unreachable = self.builder.append_basic_block(
+                    "unreachable"
+                )
+
+                with self.builder.goto_block(self._unreachable):
+                    self.builder.unreachable()
+
+            return self._unreachable
 
         @contextmanager
         def use_scope(self, scope):
@@ -43,6 +69,50 @@ def gen_code(fun, scope, ast):
             yield
 
             self.loop_context = old_ctx
+
+
+        @contextmanager
+        def use_try_context(self, unwind_to):
+            class TryContext:
+                def __init__(self, unwind_to):
+                    self.unwind_to = unwind_to
+
+            old_ctx = self.try_context
+            self.try_context = TryContext(unwind_to)
+
+            yield
+
+            self.try_context = old_ctx
+
+
+        @contextmanager
+        def push_cleanup(self, create_cleanup_block):
+            self._cleanup_blocks.append(
+                create_cleanup_block(
+                    self._cleanup_blocks[-1]
+                    if self._cleanup_blocks else
+                    self._return_block
+                )
+            )
+
+            yield
+
+            self._cleanup_blocks.pop()
+
+
+        def create_return(self, value = None):
+            self.builder.store(
+                gen_implicit_cast_ir(
+                    self, value, self._return_value.type
+                ).get_llvm_value(),
+                self._return_value.get_llvm_ptr()
+            )
+
+            self.builder.branch(
+                self._cleanup_blocks[-1]
+                if self._cleanup_blocks else
+                self._return_block
+            )
 
     ctx = Context(fun, scope, ast)
 
@@ -81,6 +151,12 @@ def gen_statement_code(ctx, statement):
     elif statement_type is SwitchStatementNode:
         gen_switch_statement_code(ctx, statement)
 
+    elif statement_type is TryStatementNode:
+        gen_try_statement_code(ctx, statement)
+
+    elif statement_type is ThrowStatementNode:
+        gen_throw_statement_code(ctx, statement)
+
     elif statement_type is BreakNode:
         gen_break_statement_code(ctx, statement)
 
@@ -101,11 +177,7 @@ def gen_return_statement_code(ctx, statement):
     value = gen_expr_ir(ctx, statement.expr)
 
     try:
-        ctx.builder.ret(
-            gen_implicit_cast_ir(
-                ctx, value, ctx.fun.type.ret_type
-            ).get_llvm_value()
-        )
+        ctx.create_return(value)
 
     except Exception as e:
         raise ReturnTypeMismatch()
@@ -169,7 +241,7 @@ def gen_if_statement_code(ctx, statement):
         ctx.builder.position_at_start(end_if)
 
         if all_paths_return:
-            ctx.builder.unreachable()
+            ctx.builder.branch(ctx.unreachable)
 
 def gen_loop_statement_code(ctx, statement):
     assert statement.scope is not None
@@ -280,3 +352,265 @@ def gen_switch_statement_code(ctx, statement):
 
         else:
             raise Todo("non-integer switches")
+
+def gen_try_statement_code(ctx, statement):
+    lpad_block = ctx.builder.append_basic_block("lpad")
+    try_end = ctx.builder.append_basic_block("try_end")
+
+    all_paths_return = True
+
+    with ctx.use_try_context(lpad_block):
+        gen_block_code(ctx, statement.try_block)
+
+        if not ctx.builder.block.is_terminated:
+            ctx.builder.branch(try_end)
+            all_paths_return = False
+
+
+    personality = None
+
+    try:
+        personality = ctx.builder.module.get_global("__gxx_personality_v0")
+
+    except KeyError as e:
+        personality = ir.Function(
+            ctx.builder.module,
+            ir.FunctionType(ir.IntType(32), [ ], True),
+            "__gxx_personality_v0"
+        )
+
+    ctx.builder.function.attributes.personality = personality
+
+    eh_for_intrinsic = None
+
+    try:
+        eh_for_intrinsic = ctx.builder.module.get_global(
+            "llvm.eh.typeid.for"
+        )
+    except KeyError as e:
+        eh_for_intrinsic = ir.Function(
+            ctx.builder.module,
+            ir.FunctionType(
+                ir.IntType(32),
+                [ ir.IntType(8).as_pointer() ]
+            ),
+            "llvm.eh.typeid.for"
+        )
+
+    begin_catch = None
+    end_catch = None
+
+    try:
+        begin_catch = ctx.builder.module.get_global(
+            "__cxa_begin_catch"
+        )
+
+    except KeyError as e:
+        begin_catch = ir.Function(
+            ctx.builder.module,
+            ir.FunctionType(
+                ir.IntType(8).as_pointer(),
+                [ ir.IntType(8).as_pointer() ]
+            ),
+            "__cxa_begin_catch"
+        )
+
+    try:
+        end_catch = ctx.builder.module.get_global(
+            "__cxa_end_catch"
+        )
+
+    except KeyError as e:
+        end_catch = ir.Function(
+            ctx.builder.module,
+            ir.FunctionType(ir.VoidType(), [ ]),
+            "__cxa_end_catch"
+        )
+
+    ctx.builder.position_at_start(lpad_block)
+    lpad = ctx.builder.landingpad(
+        ir.LiteralStructType(
+            [ ir.IntType(8).as_pointer(), ir.IntType(32) ]
+        )
+    )
+    lpad_value = ctx.builder.extract_value(lpad, 1)
+
+    lpad_elif_block = None
+
+    def create_cleanup_block(next_block):
+        nonlocal ctx
+        nonlocal end_catch
+
+        block = ctx.builder.append_basic_block("catch_cleanup")
+
+        with ctx.builder.goto_block(block):
+            ctx.builder.call(end_catch, [ ])
+            ctx.builder.branch(next_block)
+
+        return block
+
+    for clause in statement.catch_clauses:
+        catch_type = gen_expr_ir(ctx, clause.type)
+        type_info = None
+
+        if type(catch_type) is PtrType:
+            type_info = get_rtti_info(ctx, catch_type.pointee)
+
+        else:
+            raise Todo(catch_type)
+
+        lpad.add_clause(ir.CatchClause(type_info))
+
+        cmp_value = ctx.builder.call(
+            eh_for_intrinsic,
+            [
+                ctx.builder.bitcast(
+                    type_info, ir.IntType(8).as_pointer()
+                )
+            ]
+        )
+
+        catch_block = ctx.builder.append_basic_block("catch")
+        lpad_elif_block = ctx.builder.append_basic_block("lpad_elif")
+
+        ctx.builder.cbranch(
+            ctx.builder.icmp_unsigned("==", lpad_value, cmp_value),
+            catch_block,
+            lpad_elif_block
+        )
+
+        with ctx.builder.goto_block(catch_block):
+            assert clause.scope is not None
+
+            e_value = ctx.builder.extract_value(lpad, 0)
+
+            e_ptr = ctx.builder.call(
+                begin_catch, [ e_value ]
+            )
+
+            if type(catch_type) is PtrType:
+                clause.scope.resolve(clause.id).set_ir_value(
+                    LlvmValue(
+                        catch_type,
+                        ctx.builder.bitcast(
+                            e_ptr, catch_type.get_llvm_value()
+                        )
+                    )
+                )
+
+            with ctx.use_scope(clause.scope):
+                with ctx.push_cleanup(create_cleanup_block):
+                    gen_block_code(ctx, clause.block)
+
+                if not ctx.builder.block.is_terminated:
+                    ctx.builder.branch(try_end)
+                    all_paths_return = False
+
+
+        ctx.builder.position_at_start(lpad_elif_block)
+
+    if statement.default_catch is not None:
+        lpad.add_clause(ir.CatchClause(ir.IntType(8).as_pointer()(None)))
+
+        e_value = ctx.builder.extract_value(lpad, 0)
+        e_ptr = ctx.builder.call(
+            begin_catch, [ e_value ]
+        )
+
+        with ctx.push_cleanup(create_cleanup_block):
+            gen_block_code(ctx, statement.default_catch)
+
+        if not ctx.builder.block.is_terminated:
+            ctx.builder.branch(try_end)
+            all_paths_return = False
+
+    else:
+        ctx.builder.resume(lpad)
+
+    ctx.builder.position_at_start(try_end)
+
+    if all_paths_return:
+        ctx.builder.unreachable()
+
+
+def gen_throw_statement_code(ctx, statement):
+    throw_value = gen_expr_ir(ctx, statement.expr)
+    throw_value = gen_implicit_cast_ir(
+        ctx, throw_value, get_concrete_type(throw_value.type)
+    )
+
+    alloc_exception = None
+    throw_exception = None
+
+    try:
+        alloc_exception = ctx.builder.module.get_global(
+            "__cxa_allocate_exception"
+        )
+
+    except KeyError as e:
+        alloc_exception = ir.Function(
+            ctx.builder.module,
+            ir.FunctionType(
+                ir.IntType(8).as_pointer(),
+                [ ir.IntType(64) ]
+            ),
+            "__cxa_allocate_exception"
+        )
+
+    try:
+        throw_exception = ctx.builder.module.get_global(
+            "__cxa_throw"
+        )
+
+    except KeyError as e:
+        throw_exception = ir.Function(
+            ctx.builder.module,
+            ir.FunctionType(
+                ir.VoidType(),
+                [
+                    ir.IntType(8).as_pointer(),
+                    ir.IntType(8).as_pointer(),
+                    ir.IntType(8).as_pointer()
+                ]
+            ),
+            "__cxa_throw"
+        )
+
+    type_info = get_rtti_info(ctx, throw_value.type)
+    exception_buffer = ctx.builder.call(
+        alloc_exception,
+        [
+            gen_cast_ir(
+                ctx,
+                gen_sizeof_ir(ctx, throw_value), IntType(64)
+            ).get_llvm_value()
+        ]
+    )
+
+    ctx.builder.store(
+        throw_value.get_llvm_value(),
+        ctx.builder.bitcast(
+            exception_buffer, PtrType(throw_value.type).get_llvm_value()
+        )
+    )
+
+
+    assert type_info is not None
+    assert exception_buffer is not None
+
+    throw_args = [
+        exception_buffer,
+        ctx.builder.bitcast(type_info, ir.IntType(8).as_pointer()),
+        ir.IntType(8).as_pointer()(None)
+    ]
+
+    if ctx.try_context is not None:
+        ctx.builder.invoke(
+            throw_exception,
+            throw_args,
+            ctx.unreachable,
+            ctx.try_context.unwind_to
+        )
+
+    else:
+        ctx.builder.call(throw_exception, throw_args)

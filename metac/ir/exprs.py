@@ -12,6 +12,9 @@ def gen_static_expr_ir(scope, expr):
     if expr_type is IntTypeNode:
         return IntType(expr.num_bits, expr.is_signed)
 
+    elif expr_type is VoidTypeNode:
+        return VoidType()
+
     elif expr_type is AutoIntNode:
         return IntValue(AutoIntType(), int(str(expr.value), expr.radix))
 
@@ -141,6 +144,9 @@ def gen_expr_ir(ctx, expr):
     elif expr_type is TernaryConditionalNode:
         return gen_ternary_conditional_ir(ctx, expr)
 
+    elif expr_type is CGlobalVariable:
+        return gen_cglobal_ir(ctx, expr)
+
     elif issubclass(expr_type, BinaryExprNode):
         return gen_binary_expr_ir(ctx, expr)
 
@@ -235,6 +241,9 @@ def gen_binary_expr_ir(ctx, expr):
     elif expr_type is AsNode:
         return gen_implicit_cast_ir(ctx, lhs, rhs)
 
+    elif expr_type is CastNode:
+        return gen_cast_ir(ctx, lhs, rhs)
+
     else:
         return gen_static_expr_ir(ctx.scope, expr)
 
@@ -269,6 +278,21 @@ def gen_unary_expr_ir(ctx, expr):
     else:
         raise Todo(expr)
 
+
+def gen_cglobal_ir(ctx, expr):
+    ir_type = gen_expr_ir(ctx, expr.type)
+
+    llvm_value = ir.GlobalVariable(
+        ctx.builder.module, ir_type.get_llvm_value(), expr.id
+    )
+    llvm_value.global_constant = True
+
+    value = LlvmRef(ctx, ir_type, llvm_value)
+
+    ctx.scope.resolve(expr.id).set_ir_value(value)
+
+    return value
+
 def gen_as_bit_ir(ctx, value):
     val_type = type(value.type)
 
@@ -284,8 +308,10 @@ def gen_as_bit_ir(ctx, value):
 def gen_ptr_expr_ir(ctx, value):
     if issubclass(type(value), IrValue):
         if type(value.type) is PtrType:
-            return LlvmValue(
-                value.type.pointee, ctx.builder.load(value.get_llvm_value())
+            return LlvmRef(
+                ctx,
+                value.type.pointee,
+                value.get_llvm_value()
             )
         else:
             raise Todo(value)
@@ -388,7 +414,43 @@ def gen_implicit_cast_ir(ctx, value, ir_as_type):
             raise Todo("as is unsupported for this type")
 
     else:
-        raise Todo(value)
+        raise Todo(ir_as_type)
+
+def gen_cast_ir(ctx, value, ir_as_type):
+    val_type = type(value.type)
+    as_type = type(ir_as_type)
+
+    if value.type is ir_as_type or value.type == ir_as_type:
+        return value
+
+    elif val_type is PtrType and as_type is PtrType:
+        return LlvmValue(
+            ir_as_type,
+            ctx.builder.bitcast(
+                value.get_llvm_value(),
+                ir_as_type.get_llvm_value()
+            )
+        )
+
+    elif val_type is IntType and as_type is IntType:
+        if value.type.num_bits < ir_as_type.num_bits:
+            if not value.type.is_signed and not value.type.is_signed:
+                return LlvmValue(
+                    ir_as_type,
+                    ctx.builder.zext(
+                        value.get_llvm_value(),
+                        ir_as_type.get_llvm_value()
+                    )
+                )
+            else:
+                raise Todo()
+
+        else:
+            raise Todo()
+
+
+    else:
+        raise Todo()
 
 def gen_init_ir(ctx, expr):
     rhs = gen_expr_ir(ctx, expr.rhs)

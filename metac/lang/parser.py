@@ -95,6 +95,12 @@ class Parser:
         elif id == Token.KW_LOOP:
             return self._parse_loop()
 
+        elif id == Token.KW_TRY:
+            return self._parse_try()
+
+        elif self._accept(Token.KW_THROW):
+            return ThrowStatementNode(self._parse_expr())
+
         elif self._accept(Token.KW_BREAK):
             return BreakNode()
 
@@ -178,7 +184,7 @@ class Parser:
             return IfStatementNode(if_branches)
 
 
-    def _parse_fun(self):
+    def _parse_cfun(self):
         self._expect(Token.KW_CFUN)
 
         ret_type = self._parse_expr()
@@ -251,6 +257,16 @@ class Parser:
 
             return StructNode(id, attrs)
 
+    def _parse_cglobal(self):
+        self._expect(Token.KW_CGLOBAL)
+
+        type_expr = self._parse_expr()
+        self._expect(Token.ID)
+
+        id = self._current.value
+
+        return CGlobalVariable(type_expr, id)
+
     def _parse_loop(self):
         for_clause = None
         each_clause = None
@@ -295,6 +311,38 @@ class Parser:
             then_clause,
             until_clause
         )
+
+    def _parse_try(self):
+        self._expect(Token.KW_TRY)
+
+        try_block = self._parse_block()
+
+        catch_clauses = [ ]
+        default_catch = None
+
+        self._expect(Token.NODENT)
+
+        while self._accept(Token.KW_CATCH):
+            if self._peek() == Token.INDENT:
+                default_catch = self._parse_block()
+                break
+
+            else:
+                type_expr = self._parse_expr()
+                self._expect(Token.ID)
+                id = self._current.value
+                block = self._parse_block()
+
+                catch_clauses.append(CatchClauseNode(type_expr, id, block))
+
+            if self._peek_ahead() == Token.KW_CATCH:
+                self._expect(Token.NODENT)
+
+        if len(catch_clauses) == 0 and default_catch is None:
+            raise Todo("try must have at least one catch")
+
+        return TryStatementNode(try_block, catch_clauses, default_catch)
+
 
     def _parse_condition(self):
         return self._parse_condition_prec6()
@@ -755,6 +803,9 @@ class Parser:
         elif _accept(Token.KW_ULONG):
             return IntTypeNode(64, False)
 
+        elif _accept(Token.KW_VOID):
+            return VoidTypeNode()
+
         elif _accept(Token.ATTR_ID):
             return AttrNode(self._current.value)
 
@@ -763,7 +814,10 @@ class Parser:
                 return self._parse_struct()
 
             elif self._peek() == Token.KW_CFUN:
-                return self._parse_fun()
+                return self._parse_cfun()
+
+            elif self._peek() == Token.KW_CGLOBAL:
+                return self._parse_cglobal()
 
             else:
                 raise UnexpectedToken(self._next)

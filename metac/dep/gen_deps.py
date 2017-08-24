@@ -27,6 +27,12 @@ def gen_statement_deps(unit, statement):
     elif statement_type is SwitchStatementNode:
         return gen_switch_statement_deps(unit, statement)
 
+    elif statement_type is TryStatementNode:
+        return gen_try_statement_deps(unit, statement)
+
+    elif statement_type is ThrowStatementNode:
+        return gen_expr_deps(unit, statement.expr)
+
     elif statement_type is BreakNode or statement_type is ContinueNode:
         return [ ]
 
@@ -79,11 +85,17 @@ def gen_expr_deps(unit, expr):
     elif expr_type is AttrNode:
         return [ ]
 
+    elif expr_type is VoidTypeNode:
+        return [ ]
+
     elif expr_type is ArrayTypeNode:
         return (
             gen_expr_deps(unit, expr.length) +
             gen_expr_deps(unit, expr.type)
         )
+
+    elif expr_type is CGlobalVariable:
+        return gen_expr_deps(unit, expr.type)
 
     elif issubclass(expr_type, LiteralNode):
         return [ ]
@@ -177,5 +189,20 @@ def gen_switch_statement_deps(unit, statement):
 
         if statement.default_block is not None:
             deps += gen_block_deps(unit, statement.default_block)
+
+    return deps
+
+def gen_try_statement_deps(unit, statement):
+    deps = gen_block_deps(unit, statement.try_block)
+
+    for clause in statement.catch_clauses:
+        assert clause.scope is not None
+
+        with unit.use_scope(clause.scope):
+            deps += gen_expr_deps(unit, clause.type)
+            deps += gen_block_deps(unit, clause.block)
+
+    if statement.default_catch is not None:
+        deps += gen_block_deps(unit, statement.default_catch)
 
     return deps

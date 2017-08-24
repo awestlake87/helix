@@ -31,6 +31,12 @@ def hoist_block(unit, block):
             elif statement_type is ReturnNode:
                 hoist_return_statement(unit, statement)
 
+            elif statement_type is TryStatementNode:
+                hoist_try_statement(unit, statement)
+
+            elif statement_type is ThrowStatementNode:
+                hoist_expr(unit, statement.expr)
+
             elif statement_type is BreakNode or statement_type is ContinueNode:
                 pass
 
@@ -68,6 +74,9 @@ def hoist_expr(unit, expr):
     elif expr_type is TernaryConditionalNode:
         hoist_ternary_conditional(unit, expr)
 
+    elif expr_type is CGlobalVariable:
+        hoist_cglobal_expr(unit, expr)
+
     elif issubclass(expr_type, UnaryExprNode):
         hoist_unary_expr(unit, expr)
 
@@ -85,12 +94,19 @@ def hoist_expr(unit, expr):
         # just stock integer types
         pass
 
+    elif expr_type is VoidTypeNode:
+        pass
+
     elif issubclass(expr_type, LiteralNode):
         # meta literals don't need hoisting
         pass
 
     else:
         raise Todo(repr(expr))
+
+def hoist_cglobal_expr(unit, expr):
+    hoist_expr(unit, expr.type)
+    unit.scope.insert(expr.id, VarSymbol())
 
 def hoist_unary_expr(unit, expr):
     hoist_expr(unit, expr.operand)
@@ -195,3 +211,21 @@ def hoist_switch_statement(unit, statement):
 
 def hoist_return_statement(unit, statement):
     hoist_expr(unit, statement.expr)
+
+def hoist_try_statement(unit, statement):
+    hoist_block(unit, statement.try_block)
+
+    for clause in statement.catch_clauses:
+        assert clause.scope is None
+
+        clause.scope = Scope(unit.scope)
+
+        with unit.use_scope(clause.scope):
+            hoist_expr(unit, clause.type)
+
+            unit.scope.insert(clause.id, VarSymbol())
+
+            hoist_block(unit, clause.block)
+
+    if statement.default_catch is not None:
+        hoist_block(unit, statement.default_catch)

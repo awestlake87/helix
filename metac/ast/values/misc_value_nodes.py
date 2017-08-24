@@ -26,7 +26,12 @@ class SymbolNode(ExprNode):
 class AttrNode(ExprNode):
     def __init__(self, id):
         self.id = id
-        
+
 class StringNode(LiteralNode):
     def __init__(self, value):
         self.value = value
+
+class CGlobalVariable(ExprNode):
+    def __init__(self, type_expr, id):
+        self.type = type_expr
+        self.id = id

@@ -481,7 +481,7 @@ class Lexer:
                         return _end_kw(Token.KW_CASE)
 
                     elif _accept('t'):
-                        return _end_kw(Token.KW_CAST)
+                        return _end_kw(Token.OP_CAST)
 
                 elif _accept('t'):
                     if _accept('c'):
@@ -492,6 +492,14 @@ class Lexer:
                 if _accept('u'):
                     if _accept('n'):
                         return _end_kw(Token.KW_CFUN)
+
+            elif _accept('g'):
+                if _accept('l'):
+                    if _accept('o'):
+                        if _accept('b'):
+                            if _accept('a'):
+                                if _accept('l'):
+                                    return _end_kw(Token.KW_CGLOBAL)
 
             elif _accept('h'):
                 if _accept('a'):
@@ -726,6 +734,10 @@ class Lexer:
                     if _accept('g'):
                         if _accept('s'):
                             return _end_kw(Token.KW_VARGS)
+            elif _accept('o'):
+                if _accept('i'):
+                    if _accept('d'):
+                        return _end_kw(Token.KW_VOID)
 
         elif _accept('w'):
             if _accept('h'):

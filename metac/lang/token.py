@@ -12,6 +12,7 @@ class Token:
     ATTR_ID             = "ATTR_ID"
 
     KW_CFUN             = "cfun"
+    KW_CGLOBAL          = "cglobal"
     KW_VARGS            = "vargs"
 
     KW_FUN              = "fun"
@@ -38,6 +39,8 @@ class Token:
     KW_TRY              = "try"
     KW_CATCH            = "catch"
     KW_THROW            = "throw"
+    KW_EXCEPT           = "except"
+    KW_NOTHROW          = "nothrow"
 
     KW_IMPORT           = "import"
     KW_EXPORT           = "export"
@@ -48,6 +51,8 @@ class Token:
     KW_RETURN           = "return"
 
     KW_DO               = "do"
+
+    KW_VOID             = "void"
 
     KW_BIT              = "bit"
     KW_CHAR             = "char"
