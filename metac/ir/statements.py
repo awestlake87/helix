@@ -4,6 +4,76 @@ from .exprs import *
 
 from ..err import ReturnTypeMismatch
 
+class ControlPath:
+    def __init__(self, parent=None):
+        self.parent = parent
+        self.children = [ ]
+
+        self.cleanup_creators = [ ]
+
+        self._is_terminated = False
+
+    def fork(self):
+        child = ControlPath(self)
+        self.children.append(child)
+        return child
+
+    @property
+    def is_terminated(self):
+        if self._is_terminated:
+            return True
+
+        elif self.children:
+            for child in self.children:
+                if not child.is_terminated:
+                    return False
+
+            return True
+
+        else:
+            return False
+
+    @is_terminated.setter
+    def is_terminated(self, flag):
+        self._is_terminated = flag
+
+    @property
+    def needs_cleanup(self):
+        if self.is_terminated:
+            return False
+
+        elif self.cleanup_creators:
+            return True
+
+        else:
+            return False
+
+    def push_cleanup(self, create_cleanup):
+        self.cleanup_creators.append(create_cleanup)
+
+    def gen_cleanup(self, ctx, next_block):
+        next_cleanup = next_block
+
+        for creator in self.cleanup_creators:
+            next_cleanup = creator(ctx, next_cleanup)
+
+        return next_cleanup
+
+    def gen_unwind_cleanup(self, ctx, next_block, until_control_path=None):
+        if self.parent is until_control_path:
+            return self.gen_cleanup(ctx, next_block)
+
+        elif self.parent is None:
+            raise Todo("unable to unwind to control path")
+
+        else:
+            return self.gen_cleanup(
+                ctx,
+                self.parent.gen_unwind_cleanup(
+                    ctx, next_block, until_control_path
+                )
+            )
+
 def gen_code(fun, scope, ast):
     class Context:
         def __init__(self, fun, scope, ast):
@@ -34,6 +104,8 @@ def gen_code(fun, scope, ast):
 
             with self.builder.goto_block(self._return_block):
                 self.builder.ret(self._return_value.get_llvm_value())
+
+            self.control_path = ControlPath()
 
         @property
         def unreachable(self):
@@ -99,6 +171,23 @@ def gen_code(fun, scope, ast):
 
             self._cleanup_blocks.pop()
 
+        @contextmanager
+        def use_control_path(self, control_path):
+            old_control_path = self.control_path
+            self.control_path = control_path
+
+            yield
+
+            if self.control_path.needs_cleanup:
+                continue_block = ctx.builder.append_basic_block("continue")
+
+                self.control_path.gen_cleanup(self, continue_block)
+
+                ctx.builder.branch(continue_block)
+                ctx.builder.position_at_start(continue_block)
+
+            self.control_path = old_control_path
+
 
         def create_return(self, value = None):
             self.builder.store(
@@ -109,9 +198,7 @@ def gen_code(fun, scope, ast):
             )
 
             self.builder.branch(
-                self._cleanup_blocks[-1]
-                if self._cleanup_blocks else
-                self._return_block
+                self.control_path.gen_unwind_cleanup(self, self._return_block)
             )
 
     ctx = Context(fun, scope, ast)
@@ -132,9 +219,13 @@ def gen_code(fun, scope, ast):
 def gen_block_code(ctx, block):
     assert block.scope is not None
 
-    with ctx.use_scope(block.scope):
-        for statement in block.statements:
-            gen_statement_code(ctx, statement)
+    control_path = ctx.control_path.fork()
+
+    with ctx.use_control_path(control_path):
+        with ctx.use_scope(block.scope):
+            for statement in block.statements:
+                gen_statement_code(ctx, statement)
+
 
 def gen_statement_code(ctx, statement):
     statement_type = type(statement)
@@ -182,125 +273,125 @@ def gen_return_statement_code(ctx, statement):
     except Exception as e:
         raise ReturnTypeMismatch()
 
+    ctx.control_path.is_terminated = True
+
 def gen_if_statement_code(ctx, statement):
     assert statement.scope is not None
 
-    with ctx.use_scope(statement.scope):
-        assert len(statement.if_branches) >= 1
+    if_control_path = ctx.control_path.fork()
 
-        end_if = ctx.builder.append_basic_block("end_if")
-        then_block = ctx.builder.append_basic_block("then")
-        else_block = ctx.builder.append_basic_block("else")
+    with ctx.use_control_path(if_control_path):
+        with ctx.use_scope(statement.scope):
+            assert len(statement.if_branches) >= 1
 
-        num = len(statement.if_branches)
+            end_if = ctx.builder.append_basic_block("end_if")
+            then_block = ctx.builder.append_basic_block("then")
+            else_block = ctx.builder.append_basic_block("else")
 
-        all_paths_return = True
+            num = len(statement.if_branches)
 
-        for branch in statement.if_branches:
-            condition, block = branch
+            for branch in statement.if_branches:
+                condition, block = branch
 
-            ctx.builder.cbranch(
-                gen_as_bit_ir(
-                    ctx, gen_expr_ir(ctx, condition)
-                ).get_llvm_value(),
-                then_block,
-                else_block
-            )
+                ctx.builder.cbranch(
+                    gen_as_bit_ir(
+                        ctx, gen_expr_ir(ctx, condition)
+                    ).get_llvm_value(),
+                    then_block,
+                    else_block
+                )
 
-            with ctx.builder.goto_block(then_block):
+                ctx.builder.position_at_start(then_block)
                 gen_block_code(ctx, block)
 
                 if not ctx.builder.block.is_terminated:
                     ctx.builder.branch(end_if)
-                    all_paths_return = False
 
-            assert then_block.is_terminated
+                ctx.builder.position_at_start(else_block)
+
+                if branch is not statement.if_branches[-1]:
+                    then_block = ctx.builder.append_basic_block("then")
+                    else_block = ctx.builder.append_basic_block("else")
 
             ctx.builder.position_at_start(else_block)
 
-            if branch is not statement.if_branches[-1]:
-                then_block = ctx.builder.append_basic_block("then")
-                else_block = ctx.builder.append_basic_block("else")
-
-
-        with ctx.builder.goto_block(else_block):
             if statement.else_block is not None:
                 gen_block_code(ctx, statement.else_block)
 
-                if not ctx.builder.block.is_terminated:
-                    ctx.builder.branch(end_if)
-                    all_paths_return = False
-
             else:
-                ctx.builder.branch(end_if)
-                all_paths_return = False
+                # need empty control path so parent control path knows it
+                # didn't terminate
+                ctx.control_path.fork()
 
-        assert else_block.is_terminated
-        assert not end_if.is_terminated
+            if not ctx.builder.block.is_terminated:
+                ctx.builder.branch(end_if)
 
         ctx.builder.position_at_start(end_if)
 
-        if all_paths_return:
-            ctx.builder.branch(ctx.unreachable)
+    if if_control_path.is_terminated:
+        ctx.builder.branch(ctx.unreachable)
 
 def gen_loop_statement_code(ctx, statement):
     assert statement.scope is not None
 
-    with ctx.use_scope(statement.scope):
-        if statement.for_clause is not None:
-            gen_expr_ir(ctx, statement.for_clause)
+    control_path = ctx.control_path.fork()
 
-        if statement.each_clause is not None:
-            raise Todo("each clause")
+    with ctx.use_control_path(control_path):
+        with ctx.use_scope(statement.scope):
+            if statement.for_clause is not None:
+                gen_expr_ir(ctx, statement.for_clause)
 
-        loop_head = None
-        loop_body = ctx.builder.append_basic_block("loop_body")
-        loop_then = ctx.builder.append_basic_block("loop_then")
-        loop_exit = ctx.builder.append_basic_block("loop_exit")
+            if statement.each_clause is not None:
+                raise Todo("each clause")
 
-        if statement.while_clause is not None:
-            loop_head = ctx.builder.append_basic_block("loop_head")
+            loop_head = None
+            loop_body = ctx.builder.append_basic_block("loop_body")
+            loop_then = ctx.builder.append_basic_block("loop_then")
+            loop_exit = ctx.builder.append_basic_block("loop_exit")
 
-            with ctx.builder.goto_block(loop_head):
-                ctx.builder.cbranch(
-                    gen_as_bit_ir(
-                        ctx, gen_expr_ir(ctx, statement.while_clause)
-                    ).get_llvm_value(),
-                    loop_body,
-                    loop_exit
-                )
-        else:
-            loop_head = loop_body
+            if statement.while_clause is not None:
+                loop_head = ctx.builder.append_basic_block("loop_head")
 
-        ctx.builder.branch(loop_head)
-
-        ctx.builder.position_at_start(loop_body)
-        with ctx.use_loop_context(loop_then, loop_exit):
-            gen_block_code(ctx, statement.loop_body)
-
-        if not ctx.builder.block.is_terminated:
-            ctx.builder.branch(loop_then)
-
-
-        with ctx.builder.goto_block(loop_then):
-            if statement.then_clause is not None:
-                gen_expr_ir(ctx, statement.then_clause)
-
-            if statement.until_clause is not None:
-                ctx.builder.cbranch(
-                    gen_as_bit_ir(
-                        ctx, gen_expr_ir(ctx, statement.until_clause)
-                    ).get_llvm_value(),
-                    loop_exit,
-                    loop_head
-                )
+                with ctx.builder.goto_block(loop_head):
+                    ctx.builder.cbranch(
+                        gen_as_bit_ir(
+                            ctx, gen_expr_ir(ctx, statement.while_clause)
+                        ).get_llvm_value(),
+                        loop_body,
+                        loop_exit
+                    )
             else:
-                ctx.builder.branch(loop_head)
+                loop_head = loop_body
 
-            if not loop_then.is_terminated:
-                ctx.builder.branch(loop_exit)
+            ctx.builder.branch(loop_head)
 
-        ctx.builder.position_at_start(loop_exit)
+            ctx.builder.position_at_start(loop_body)
+            with ctx.use_loop_context(loop_then, loop_exit):
+                gen_block_code(ctx, statement.loop_body)
+
+            if not ctx.builder.block.is_terminated:
+                ctx.builder.branch(loop_then)
+
+
+            with ctx.builder.goto_block(loop_then):
+                if statement.then_clause is not None:
+                    gen_expr_ir(ctx, statement.then_clause)
+
+                if statement.until_clause is not None:
+                    ctx.builder.cbranch(
+                        gen_as_bit_ir(
+                            ctx, gen_expr_ir(ctx, statement.until_clause)
+                        ).get_llvm_value(),
+                        loop_exit,
+                        loop_head
+                    )
+                else:
+                    ctx.builder.branch(loop_head)
+
+                if not loop_then.is_terminated:
+                    ctx.builder.branch(loop_exit)
+
+            ctx.builder.position_at_start(loop_exit)
 
 def gen_break_statement_code(ctx, _):
     if ctx.loop_context is None:
@@ -317,169 +408,170 @@ def gen_continue_statement_code(ctx, _):
 def gen_switch_statement_code(ctx, statement):
     assert statement.scope is not None
 
-    with ctx.use_scope(statement.scope):
-        value = gen_expr_ir(ctx, statement.value)
-        concrete_type = get_concrete_type(value.type)
+    control_path = ctx.control_path.fork()
 
-        if type(concrete_type) is IntType:
-            default_block = ctx.builder.append_basic_block("default")
+    with ctx.use_control_path(control_path):
+        with ctx.use_scope(statement.scope):
+            value = gen_expr_ir(ctx, statement.value)
+            concrete_type = get_concrete_type(value.type)
 
-            inst = ctx.builder.switch(
-                gen_implicit_cast_ir(
-                    ctx, value, concrete_type
-                ).get_llvm_value(),
-                default_block
-            )
+            if type(concrete_type) is IntType:
+                default_block = ctx.builder.append_basic_block("default")
 
-            for case_values, case_block in statement.case_branches:
-                block = ctx.builder.append_basic_block("case")
+                inst = ctx.builder.switch(
+                    gen_implicit_cast_ir(
+                        ctx, value, concrete_type
+                    ).get_llvm_value(),
+                    default_block
+                )
 
-                for expr in case_values:
-                    value = gen_implicit_cast_ir(
-                        ctx, gen_expr_ir(ctx, expr), concrete_type
-                    )
+                for case_values, case_block in statement.case_branches:
+                    block = ctx.builder.append_basic_block("case")
 
-                    inst.add_case(
-                        value.get_llvm_value(),
-                        block
-                    )
+                    for expr in case_values:
+                        value = gen_implicit_cast_ir(
+                            ctx, gen_expr_ir(ctx, expr), concrete_type
+                        )
 
-                with ctx.builder.goto_block(block):
-                    gen_block_code(ctx, case_block)
+                        inst.add_case(
+                            value.get_llvm_value(),
+                            block
+                        )
 
-            with ctx.builder.goto_block(default_block):
-                gen_block_code(ctx, statement.default_block)
+                    with ctx.builder.goto_block(block):
+                        gen_block_code(ctx, case_block)
 
-        else:
-            raise Todo("non-integer switches")
+                with ctx.builder.goto_block(default_block):
+                    gen_block_code(ctx, statement.default_block)
+
+            else:
+                raise Todo("non-integer switches")
 
 def gen_try_statement_code(ctx, statement):
     lpad_block = ctx.builder.append_basic_block("lpad")
     try_end = ctx.builder.append_basic_block("try_end")
 
-    all_paths_return = True
+    try_control_path = ctx.control_path.fork()
 
-    with ctx.use_try_context(lpad_block):
-        gen_block_code(ctx, statement.try_block)
+    with ctx.use_control_path(try_control_path):
+        with ctx.use_try_context(lpad_block):
+            gen_block_code(ctx, statement.try_block)
 
-        if not ctx.builder.block.is_terminated:
-            ctx.builder.branch(try_end)
-            all_paths_return = False
+            if not ctx.builder.block.is_terminated:
+                ctx.builder.branch(try_end)
 
+        personality = None
 
-    personality = None
+        try:
+            personality = ctx.builder.module.get_global("__gxx_personality_v0")
 
-    try:
-        personality = ctx.builder.module.get_global("__gxx_personality_v0")
+        except KeyError as e:
+            personality = ir.Function(
+                ctx.builder.module,
+                ir.FunctionType(ir.IntType(32), [ ], True),
+                "__gxx_personality_v0"
+            )
 
-    except KeyError as e:
-        personality = ir.Function(
-            ctx.builder.module,
-            ir.FunctionType(ir.IntType(32), [ ], True),
-            "__gxx_personality_v0"
+        ctx.builder.function.attributes.personality = personality
+
+        eh_for_intrinsic = None
+
+        try:
+            eh_for_intrinsic = ctx.builder.module.get_global(
+                "llvm.eh.typeid.for"
+            )
+        except KeyError as e:
+            eh_for_intrinsic = ir.Function(
+                ctx.builder.module,
+                ir.FunctionType(
+                    ir.IntType(32),
+                    [ ir.IntType(8).as_pointer() ]
+                ),
+                "llvm.eh.typeid.for"
+            )
+
+        begin_catch = None
+
+        try:
+            begin_catch = ctx.builder.module.get_global(
+                "__cxa_begin_catch"
+            )
+
+        except KeyError as e:
+            begin_catch = ir.Function(
+                ctx.builder.module,
+                ir.FunctionType(
+                    ir.IntType(8).as_pointer(),
+                    [ ir.IntType(8).as_pointer() ]
+                ),
+                "__cxa_begin_catch"
+            )
+
+        ctx.builder.position_at_start(lpad_block)
+        lpad = ctx.builder.landingpad(
+            ir.LiteralStructType(
+                [ ir.IntType(8).as_pointer(), ir.IntType(32) ]
+            )
         )
+        lpad_value = ctx.builder.extract_value(lpad, 1)
 
-    ctx.builder.function.attributes.personality = personality
+        lpad_elif_block = None
 
-    eh_for_intrinsic = None
+        def create_cleanup_block(ctx, next_block):
+            end_catch = None
 
-    try:
-        eh_for_intrinsic = ctx.builder.module.get_global(
-            "llvm.eh.typeid.for"
-        )
-    except KeyError as e:
-        eh_for_intrinsic = ir.Function(
-            ctx.builder.module,
-            ir.FunctionType(
-                ir.IntType(32),
-                [ ir.IntType(8).as_pointer() ]
-            ),
-            "llvm.eh.typeid.for"
-        )
-
-    begin_catch = None
-    end_catch = None
-
-    try:
-        begin_catch = ctx.builder.module.get_global(
-            "__cxa_begin_catch"
-        )
-
-    except KeyError as e:
-        begin_catch = ir.Function(
-            ctx.builder.module,
-            ir.FunctionType(
-                ir.IntType(8).as_pointer(),
-                [ ir.IntType(8).as_pointer() ]
-            ),
-            "__cxa_begin_catch"
-        )
-
-    try:
-        end_catch = ctx.builder.module.get_global(
-            "__cxa_end_catch"
-        )
-
-    except KeyError as e:
-        end_catch = ir.Function(
-            ctx.builder.module,
-            ir.FunctionType(ir.VoidType(), [ ]),
-            "__cxa_end_catch"
-        )
-
-    ctx.builder.position_at_start(lpad_block)
-    lpad = ctx.builder.landingpad(
-        ir.LiteralStructType(
-            [ ir.IntType(8).as_pointer(), ir.IntType(32) ]
-        )
-    )
-    lpad_value = ctx.builder.extract_value(lpad, 1)
-
-    lpad_elif_block = None
-
-    def create_cleanup_block(next_block):
-        nonlocal ctx
-        nonlocal end_catch
-
-        block = ctx.builder.append_basic_block("catch_cleanup")
-
-        with ctx.builder.goto_block(block):
-            ctx.builder.call(end_catch, [ ])
-            ctx.builder.branch(next_block)
-
-        return block
-
-    for clause in statement.catch_clauses:
-        catch_type = gen_expr_ir(ctx, clause.type)
-        type_info = None
-
-        if type(catch_type) is PtrType:
-            type_info = get_rtti_info(ctx, catch_type.pointee)
-
-        else:
-            raise Todo(catch_type)
-
-        lpad.add_clause(ir.CatchClause(type_info))
-
-        cmp_value = ctx.builder.call(
-            eh_for_intrinsic,
-            [
-                ctx.builder.bitcast(
-                    type_info, ir.IntType(8).as_pointer()
+            try:
+                end_catch = ctx.builder.module.get_global(
+                    "__cxa_end_catch"
                 )
-            ]
-        )
 
-        catch_block = ctx.builder.append_basic_block("catch")
-        lpad_elif_block = ctx.builder.append_basic_block("lpad_elif")
+            except KeyError as e:
+                end_catch = ir.Function(
+                    ctx.builder.module,
+                    ir.FunctionType(ir.VoidType(), [ ]),
+                    "__cxa_end_catch"
+                )
 
-        ctx.builder.cbranch(
-            ctx.builder.icmp_unsigned("==", lpad_value, cmp_value),
-            catch_block,
-            lpad_elif_block
-        )
+            block = ctx.builder.append_basic_block("catch_cleanup")
 
-        with ctx.builder.goto_block(catch_block):
+            with ctx.builder.goto_block(block):
+                ctx.builder.call(end_catch, [ ])
+                ctx.builder.branch(next_block)
+
+            return block
+
+        for clause in statement.catch_clauses:
+            catch_type = gen_expr_ir(ctx, clause.type)
+            type_info = None
+
+            if type(catch_type) is PtrType:
+                type_info = get_rtti_info(ctx, catch_type.pointee)
+
+            else:
+                raise Todo(catch_type)
+
+            lpad.add_clause(ir.CatchClause(type_info))
+
+            cmp_value = ctx.builder.call(
+                eh_for_intrinsic,
+                [
+                    ctx.builder.bitcast(
+                        type_info, ir.IntType(8).as_pointer()
+                    )
+                ]
+            )
+
+            catch_block = ctx.builder.append_basic_block("catch")
+            lpad_elif_block = ctx.builder.append_basic_block("lpad_elif")
+
+            ctx.builder.cbranch(
+                ctx.builder.icmp_unsigned("==", lpad_value, cmp_value),
+                catch_block,
+                lpad_elif_block
+            )
+
+            ctx.builder.position_at_start(catch_block)
+
             assert clause.scope is not None
 
             e_value = ctx.builder.extract_value(lpad, 0)
@@ -498,39 +590,43 @@ def gen_try_statement_code(ctx, statement):
                     )
                 )
 
-            with ctx.use_scope(clause.scope):
-                with ctx.push_cleanup(create_cleanup_block):
+            catch_control_path = ctx.control_path.fork()
+
+            catch_control_path.push_cleanup(create_cleanup_block)
+
+            with ctx.use_control_path(catch_control_path):
+                with ctx.use_scope(clause.scope):
                     gen_block_code(ctx, clause.block)
 
-                if not ctx.builder.block.is_terminated:
-                    ctx.builder.branch(try_end)
-                    all_paths_return = False
+            if not catch_control_path.is_terminated:
+                ctx.builder.branch(try_end)
 
 
-        ctx.builder.position_at_start(lpad_elif_block)
+            ctx.builder.position_at_start(lpad_elif_block)
 
-    if statement.default_catch is not None:
-        lpad.add_clause(ir.CatchClause(ir.IntType(8).as_pointer()(None)))
+        if statement.default_catch is not None:
+            lpad.add_clause(ir.CatchClause(ir.IntType(8).as_pointer()(None)))
 
-        e_value = ctx.builder.extract_value(lpad, 0)
-        e_ptr = ctx.builder.call(
-            begin_catch, [ e_value ]
-        )
+            e_value = ctx.builder.extract_value(lpad, 0)
+            e_ptr = ctx.builder.call(
+                begin_catch, [ e_value ]
+            )
 
-        with ctx.push_cleanup(create_cleanup_block):
-            gen_block_code(ctx, statement.default_catch)
+            catch_control_path = ctx.control_path.fork()
 
-        if not ctx.builder.block.is_terminated:
-            ctx.builder.branch(try_end)
-            all_paths_return = False
+            with ctx.use_control_path(catch_control_path):
+                gen_block_code(ctx, statement.default_catch)
 
-    else:
-        ctx.builder.resume(lpad)
+            if not catch_control_path.is_terminated:
+                ctx.builder.branch(try_end)
 
-    ctx.builder.position_at_start(try_end)
+        else:
+            ctx.builder.resume(lpad)
 
-    if all_paths_return:
-        ctx.builder.unreachable()
+        ctx.builder.position_at_start(try_end)
+
+    if try_control_path.is_terminated:
+        ctx.builder.branch(ctx.unreachable)
 
 
 def gen_throw_statement_code(ctx, statement):
@@ -614,3 +710,5 @@ def gen_throw_statement_code(ctx, statement):
 
     else:
         ctx.builder.call(throw_exception, throw_args)
+
+    ctx.control_path.is_terminated = True

@@ -227,7 +227,6 @@ def get_rtti_info(ctx, t):
             type_info = ir.GlobalVariable(
                 ctx.builder.module, ir.IntType(8).as_pointer(), name
             )
-            type_info.global_constant = True
 
             return type_info
 
@@ -237,7 +236,7 @@ def get_rtti_info(ctx, t):
                 return get_extern_rtti_var("_ZTIi")
             else:
                 return get_extern_rtti_var("_ZTIj")
-                
+
         elif t.num_bits == 8:
             if t.is_signed:
                 return get_extern_rtti_var("_ZTIa")
