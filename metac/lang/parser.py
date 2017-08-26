@@ -185,18 +185,29 @@ class Parser:
 
 
     def _parse_cfun(self):
-        self._expect(Token.KW_CFUN)
+        is_cfun = False
+        is_vargs = False
+        is_attr = False
+        param_types = [ ]
+        param_ids = [ ]
+
+        if self._accept(Token.KW_CFUN):
+            is_cfun = True
+
+        else:
+            self._expect(Token.KW_FUN)
 
         ret_type = self._parse_expr()
 
-        self._expect(Token.ID)
+        if self._accept(Token.ATTR_ID):
+            is_attr = True
+
+        else:
+            self._expect(Token.ID)
+            
         id = self._current.value
 
         self._expect('(')
-
-        is_vargs = False
-        param_types = [ ]
-        param_ids = [ ]
 
         if not self._accept(')'):
             while True:
@@ -227,7 +238,9 @@ class Parser:
             id,
             param_ids,
             block,
-            is_vargs=is_vargs
+            is_cfun=is_cfun,
+            is_vargs=is_vargs,
+            is_attr=is_attr
         )
 
     def _parse_struct(self):
