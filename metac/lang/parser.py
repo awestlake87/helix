@@ -1,20 +1,20 @@
-from .lexer import Lexer
+from .lexer import scan_tokens
 from .token import Token
 
 from ..ast import *
 from ..err import Todo, ExpectedToken, UnexpectedToken, CompilerBug
 
 class Parser:
-    def __init__(self, str):
-        self._lexer = Lexer(str)
+    def __init__(self, code):
+        self.scanner = scan_tokens(code)
         self._current = Token(Token.NONE)
-        self._next = self._lexer.scan()
-        self._ahead = self._lexer.scan()
+        self._next = next(self.scanner)
+        self._ahead = next(self.scanner)
 
         self._scan_queue = [ ]
 
     def _scan_next(self):
-        next_token = self._lexer.scan()
+        next_token = next(self.scanner)
         self._scan_queue.append(next_token)
         return next_token.id
 
@@ -41,7 +41,7 @@ class Parser:
             self._next = self._ahead
 
             if len(self._scan_queue) == 0:
-                self._ahead = self._lexer.scan()
+                self._ahead = next(self.scanner)
             else:
                 self._ahead = self._scan_queue.pop(0)
 
