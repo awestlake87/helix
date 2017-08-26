@@ -1,6 +1,37 @@
-from ..types import *
+from llvmlite import ir
 
+from ..types import *
 from ...ast import *
+
+def get_rtti_info(ctx, t):
+    def get_extern_rtti_var(name):
+        try:
+            return ctx.builder.module.get_global(name)
+
+        except KeyError as e:
+            type_info = ir.GlobalVariable(
+                ctx.builder.module, ir.IntType(8).as_pointer(), name
+            )
+
+            return type_info
+
+    if type(t) is IntType:
+        if t.num_bits == 32:
+            if t.is_signed:
+                return get_extern_rtti_var("_ZTIi")
+            else:
+                return get_extern_rtti_var("_ZTIj")
+
+        elif t.num_bits == 8:
+            if t.is_signed:
+                return get_extern_rtti_var("_ZTIa")
+            else:
+                return get_extern_rtti_var("_ZTIh")
+
+        else:
+            raise Todo(t)
+    else:
+        raise Todo(t)
 
 def gen_sizeof_ir(ctx, value):
     operand = None
