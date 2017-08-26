@@ -192,32 +192,6 @@ class NilValue(LlvmValue):
             )
 
 
-def get_common_type(a, b):
-    if a is b or a == b:
-        return a
-
-    elif type(a) is IntType and type(b) is AutoIntType:
-        return a
-
-    elif type(a) is AutoIntType and type(b) is IntType:
-        return b
-
-    elif type(a) is PtrType and type(b) is AutoPtrType:
-        return a
-
-    elif type(a) is AutoPtrType and type(b) is PtrType:
-        return b
-
-    else:
-        raise Todo()
-
-def get_concrete_type(t):
-    if type(t) is AutoIntType:
-        return IntType()
-    else:
-        return t
-
-
 def get_rtti_info(ctx, t):
     def get_extern_rtti_var(name):
         try:

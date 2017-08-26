@@ -76,3 +76,28 @@ class ExceptionTests(unittest.TestCase):
                 """
             )
         )
+
+    def test_nested_try(self):
+        self.assertEqual(
+            0,
+            run_test(
+                """
+                try
+                    try
+                        throw 13
+
+                    catch *int e
+                        if *e == 13
+                            throw *e
+
+                        else
+                            return 1
+
+                catch *int e
+                    if *e != 13
+                        return 2
+
+                return 0
+                """
+            )
+        )

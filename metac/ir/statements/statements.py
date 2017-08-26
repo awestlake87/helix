@@ -1,8 +1,8 @@
 from contextlib import contextmanager
 
-from .exprs import *
+from ..exprs import *
 
-from ..err import ReturnTypeMismatch
+from ...err import ReturnTypeMismatch
 
 class ControlPath:
     def __init__(self, parent=None):
@@ -12,6 +12,7 @@ class ControlPath:
         self.cleanup_creators = [ ]
 
         self._is_terminated = False
+        self.will_need_cleanup = False
 
     def fork(self):
         child = ControlPath(self)
@@ -181,9 +182,9 @@ def gen_code(fun, scope, ast):
             if self.control_path.needs_cleanup:
                 continue_block = ctx.builder.append_basic_block("continue")
 
-                self.control_path.gen_cleanup(self, continue_block)
+                cleanup = self.control_path.gen_cleanup(self, continue_block)
 
-                ctx.builder.branch(continue_block)
+                ctx.builder.branch(cleanup)
                 ctx.builder.position_at_start(continue_block)
 
             self.control_path = old_control_path
@@ -591,6 +592,7 @@ def gen_try_statement_code(ctx, statement):
                 )
 
             catch_control_path = ctx.control_path.fork()
+            catch_control_path.will_need_cleanup = True
 
             catch_control_path.push_cleanup(create_cleanup_block)
 
@@ -613,6 +615,9 @@ def gen_try_statement_code(ctx, statement):
             )
 
             catch_control_path = ctx.control_path.fork()
+            catch_control_path.will_need_cleanup = True
+
+            catch_control_path.push_cleanup(create_cleanup_block)
 
             with ctx.use_control_path(catch_control_path):
                 gen_block_code(ctx, statement.default_catch)
