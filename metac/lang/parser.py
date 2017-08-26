@@ -1,20 +1,20 @@
-from .lexer import Lexer
+from .lexer import scan_tokens
 from .token import Token
 
 from ..ast import *
 from ..err import Todo, ExpectedToken, UnexpectedToken, CompilerBug
 
 class Parser:
-    def __init__(self, str):
-        self._lexer = Lexer(str)
+    def __init__(self, code):
+        self.scanner = scan_tokens(code)
         self._current = Token(Token.NONE)
-        self._next = self._lexer.scan()
-        self._ahead = self._lexer.scan()
+        self._next = next(self.scanner)
+        self._ahead = next(self.scanner)
 
         self._scan_queue = [ ]
 
     def _scan_next(self):
-        next_token = self._lexer.scan()
+        next_token = next(self.scanner)
         self._scan_queue.append(next_token)
         return next_token.id
 
@@ -41,7 +41,7 @@ class Parser:
             self._next = self._ahead
 
             if len(self._scan_queue) == 0:
-                self._ahead = self._lexer.scan()
+                self._ahead = next(self.scanner)
             else:
                 self._ahead = self._scan_queue.pop(0)
 
@@ -185,18 +185,29 @@ class Parser:
 
 
     def _parse_cfun(self):
-        self._expect(Token.KW_CFUN)
+        is_cfun = False
+        is_vargs = False
+        is_attr = False
+        param_types = [ ]
+        param_ids = [ ]
+
+        if self._accept(Token.KW_CFUN):
+            is_cfun = True
+
+        else:
+            self._expect(Token.KW_FUN)
 
         ret_type = self._parse_expr()
 
-        self._expect(Token.ID)
+        if self._accept(Token.ATTR_ID):
+            is_attr = True
+
+        else:
+            self._expect(Token.ID)
+            
         id = self._current.value
 
         self._expect('(')
-
-        is_vargs = False
-        param_types = [ ]
-        param_ids = [ ]
 
         if not self._accept(')'):
             while True:
@@ -227,7 +238,9 @@ class Parser:
             id,
             param_ids,
             block,
-            is_vargs=is_vargs
+            is_cfun=is_cfun,
+            is_vargs=is_vargs,
+            is_attr=is_attr
         )
 
     def _parse_struct(self):

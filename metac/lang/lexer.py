@@ -2,6 +2,18 @@
 from .token import Token
 from ..err import UnexpectedChar, Todo
 
+def scan_tokens(code):
+    lexer = Lexer(code)
+    token = lexer.scan()
+
+    while token != Token.END:
+        yield token
+        token = lexer.scan()
+
+    # keep yielding END tokens
+    while True:
+        yield token
+
 class Lexer:
     NORMAL              = 0
     DEDENTING           = 1
