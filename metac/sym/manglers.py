@@ -46,7 +46,12 @@ def mangle_scoped_name(name_list, prefix="_M"):
         mangled_part = ""
 
         for c in part:
-            if c >= 'a' and c <= 'z' or c >= 'A' and c <= 'Z':
+            if (
+                c >= 'a' and c <= 'z' or
+                c >= 'A' and c <= 'Z' or
+                c >= '0' and c <= '9' or
+                c == '_'
+            ):
                 mangled_part += c
 
             else:
@@ -92,7 +97,12 @@ def demangle_scoped_name(name, prefix="_M"):
         demangled_part = ""
 
         for c in part:
-            if c >= 'a' and c <= 'z' or c >= 'A' and c <= 'Z':
+            if (
+                c >= 'a' and c <= 'z' or
+                c >= 'A' and c <= 'Z' or
+                c >= '0' and c <= '9' or
+                c == '_'
+            ):
                 demangled_part += c
 
         return demangled_part

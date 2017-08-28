@@ -14,6 +14,11 @@ class FunSymbol:
         self.scope = Scope(parent_scope)
         self.is_vargs = ast.is_vargs
 
+        if self.ast.is_cfun:
+            self.scoped_id = None
+        else:
+            self.scoped_id = [ unit.id, self.ast.id ]
+
         self._target = None
         self._ir_prototype = None
 
@@ -44,6 +49,11 @@ class AttrFunSymbol:
         self.ast = ast
         self.parent_scope = parent_scope
         self.scope = Scope(parent_scope)
+
+        if self.ast.is_cfun:
+            self.scoped_id = None
+        else:
+            self.scoped_id = [ unit.id, struct.id, self.ast.id ]
 
         self._target = None
         self._ir_prototype = None

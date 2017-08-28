@@ -18,6 +18,8 @@ class FunProtoTarget(Target):
             )
 
     def _build_target(self):
+        from ..sym import mangle_name
+
         fun_type = FunType(
             gen_static_expr_ir(
                 self.symbol.parent_scope, self.symbol.ast.type.ret_type
@@ -30,8 +32,18 @@ class FunProtoTarget(Target):
             self.is_vargs
         )
 
+        id = ""
+
+        if self.symbol.ast.is_cfun:
+            id = self.symbol.ast.id
+
+        else:
+            id = mangle_name(self.symbol.scoped_id)
+
+        print(id)
+
         self.ir_value = FunValue(
-            self.symbol.unit, self.symbol.ast.id, fun_type
+            self.symbol.unit, id, fun_type
         )
 
         if self.symbol.ast.body is not None:
@@ -54,6 +66,8 @@ class AttrFunProtoTarget(Target):
             )
 
     def _build_target(self):
+        from ..sym import mangle_name
+        
         fun_type = FunType(
             gen_static_expr_ir(
                 self.symbol.parent_scope, self.symbol.ast.type.ret_type
@@ -65,8 +79,18 @@ class AttrFunProtoTarget(Target):
             ]
         )
 
+        id = ""
+
+        if self.symbol.ast.is_cfun:
+            id = self.symbol.ast.id
+
+        else:
+            id = mangle_name(self.symbol.scoped_id)
+
+        print(id)
+
         self.ir_value = FunValue(
-            self.symbol.unit, self.symbol.ast.id, fun_type
+            self.symbol.unit, id, fun_type
         )
 
         if self.symbol.ast.body is not None:

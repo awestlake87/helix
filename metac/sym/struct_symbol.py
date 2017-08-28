@@ -7,7 +7,6 @@ from ..dep import StructTarget
 from ..ast import DataAttr, FunNode, StructNode
 from .fun_symbol import FunSymbol, AttrFunSymbol
 
-
 class DataAttrSymbol:
     def __init__(self, ast, index):
         self.ast = ast
@@ -34,6 +33,8 @@ class StructSymbol:
         self.scope = Scope(parent_scope)
         self.ast = ast
         self.attrs = [ ]
+
+        self.id = self.ast.id
 
         ids = { }
 
