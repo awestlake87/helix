@@ -9,8 +9,6 @@ class TestStructs(unittest.TestCase):
             0,
             run_test(
                 """
-                cfun int printf(*char fmt, vargs)
-
                 struct Object
                     int @a
 
@@ -25,6 +23,31 @@ class TestStructs(unittest.TestCase):
 
                 if obj.a != 12
                     return 1
+
+                return 0
+                """
+            )
+        )
+
+    def test_attr_fun_uniqueness(self):
+        self.assertEqual(
+            0,
+            run_test(
+                """
+                struct Object
+                    fun int @do_something(int a)
+                        return a
+
+                fun int do_something(int a)
+                    return 1
+
+                obj: Object()
+
+                if obj.do_something(43) != 43
+                    return 1
+
+                if do_something(12) != 1
+                    return 2
 
                 return 0
                 """
