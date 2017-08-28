@@ -3,17 +3,20 @@ from ..ast import *
 from ..err import *
 
 def get_expr_sym(unit, expr):
-    from ..sym import StructSymbol, VarSymbol
+    from ..sym import StructSymbol, VarSymbol, GlobalSymbol
 
     expr_type = type(expr)
 
     if expr_type is SymbolNode:
         return unit.scope.resolve(expr.id)
 
+    elif expr_type is GlobalNode:
+        return unit.scope.resolve(expr.id)
+
     elif expr_type is DotExprNode:
         lhs = get_expr_sym(unit, expr.lhs)
 
-        if type(lhs) is VarSymbol:
+        if type(lhs) is VarSymbol or type(lhs) is GlobalSymbol:
             if type(lhs.type) is StructSymbol:
                 if type(expr.rhs) is SymbolNode:
                     sym = lhs.type.get_attr_symbol(expr.rhs.id)
@@ -129,6 +132,9 @@ def gen_expr_deps(unit, expr):
     elif expr_type is VoidTypeNode:
         return [ ]
 
+    elif expr_type is AutoTypeNode:
+        return [ ]
+
     elif expr_type is ArrayTypeNode:
         return (
             gen_expr_deps(unit, expr.length) +
@@ -151,7 +157,7 @@ def gen_binary_expr_deps(unit, expr):
     return gen_expr_deps(unit, expr.lhs) + gen_expr_deps(unit, expr.rhs)
 
 def gen_dot_expr_deps(unit, expr):
-    from ..sym import AttrFunSymbol
+    from ..sym import AttrFunSymbol, GlobalSymbol
 
     sym = get_expr_sym(unit, expr)
 
@@ -160,10 +166,13 @@ def gen_dot_expr_deps(unit, expr):
     if type(sym) is AttrFunSymbol:
         deps.append(sym.get_target())
 
+    elif type(sym) is GlobalSymbol:
+        deps.append(sym.get_target())
+
     return deps
 
 def gen_init_expr_deps(unit, expr):
-    from ..sym import VarSymbol
+    from ..sym import VarSymbol, GlobalSymbol
 
     deps = gen_expr_deps(unit, expr.lhs) + gen_expr_deps(unit, expr.rhs)
 
@@ -171,6 +180,9 @@ def gen_init_expr_deps(unit, expr):
     rhs = get_expr_sym(unit, expr.rhs)
 
     if type(rhs) is VarSymbol:
+        lhs.type = rhs.type
+
+    elif type(rhs) is GlobalSymbol:
         lhs.type = rhs.type
 
     return deps

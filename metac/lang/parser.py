@@ -293,12 +293,24 @@ class Parser:
         else:
             self._expect(Token.KW_GLOBAL)
 
-        type_expr = self._parse_expr()
-        self._expect(Token.ID)
+        expr = self._parse_expr()
 
-        id = self._current.value
+        if self._accept(Token.ID):
+            id = self._current.value
+            return GlobalNode(expr, id, is_cglobal=is_cglobal)
 
-        return GlobalNode(type_expr, id, is_cglobal=is_cglobal)
+        elif type(expr) is InitExprNode:
+            if type(expr.lhs) is SymbolNode:
+                id = expr.lhs.id
+                return InitExprNode(
+                    GlobalNode(AutoTypeNode(), id, is_cglobal=is_cglobal),
+                    expr.rhs
+                )
+            else:
+                raise Todo(expr.lhs)
+
+        else:
+            raise Todo(expr)
 
     def _parse_loop(self):
         for_clause = None
@@ -838,6 +850,9 @@ class Parser:
 
         elif _accept(Token.KW_VOID):
             return VoidTypeNode()
+
+        elif _accept(Token.KW_AUTO):
+            return AutoTypeNode()
 
         elif _accept(Token.ATTR_ID):
             return AttrNode(self._current.value)

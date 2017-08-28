@@ -6,6 +6,11 @@ from llvmlite import ir
 class Type:
     pass
 
+
+class AutoType(Type):
+    def __eq__(self, other):
+        return type(other) is AutoType
+
 class PtrType(Type):
     def __init__(self, pointee):
         self.pointee = pointee

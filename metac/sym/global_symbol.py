@@ -20,6 +20,7 @@ class GlobalSymbol:
         self._target = None
         self._ir_value = None
 
+        self.type = None
         self.init_expr = None
 
     def _on_ir(self, value):

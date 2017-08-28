@@ -98,6 +98,9 @@ def hoist_expr(unit, expr):
     elif expr_type is VoidTypeNode:
         pass
 
+    elif expr_type is AutoTypeNode:
+        pass
+
     elif issubclass(expr_type, LiteralNode):
         # meta literals don't need hoisting
         pass
