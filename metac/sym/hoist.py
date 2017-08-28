@@ -86,7 +86,7 @@ def hoist_expr(unit, expr):
     elif expr_type is FunTypeNode:
         hoist_fun_type(unit, expr)
 
-    elif expr_type is SymbolNode:
+    elif expr_type is SymbolNode or expr_type is AttrNode:
         # outside of the proper context, these are just refs
         pass
 
@@ -135,10 +135,33 @@ def hoist_ternary_conditional(unit, expr):
     hoist_expr(unit, expr.rhs)
 
 def hoist_struct(unit, s):
-    unit.scope.insert(s.id, StructSymbol(unit, unit.scope, s))
+    symbol = StructSymbol(unit, unit.scope, s)
+    unit.scope.insert(s.id, symbol)
+
+    with unit.use_scope(symbol.scope):
+        for attr_id, attr_symbol in symbol.attrs:
+            if type(attr_symbol) is AttrFunSymbol:
+                hoist_expr(unit, attr_symbol.ast.type)
+
+                for param in attr_symbol.ast.param_ids:
+                    attr_symbol.scope.insert(param, VarSymbol())
+
+                if attr_symbol.ast.body is not None:
+                    with unit.use_scope(attr_symbol.scope):
+                        hoist_block(unit, attr_symbol.ast.body)
+
+            elif type(attr_symbol) is FunSymbol:
+                hoist_fun(unit, attr_symbol)
+
+            elif type(attr_symbol) is DataAttrSymbol:
+                pass
+
+            else:
+                raise Todo(attr_symbol)
+
 
 def hoist_fun(unit, f):
-    symbol = FunSymbol(unit, f, unit.scope, is_vargs=f.is_vargs)
+    symbol = FunSymbol(unit, f, unit.scope)
     unit.scope.insert(f.id, symbol)
 
     hoist_expr(unit, f.type)

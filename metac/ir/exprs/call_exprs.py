@@ -54,6 +54,26 @@ def gen_call_ir(ctx, expr):
             lhs.type.ret_type, ctx.builder.call(lhs.get_llvm_value(), ir_args)
         )
 
+    elif value_type is BoundAttrFunValue:
+        ir_args = [ lhs.instance.get_llvm_ptr() ]
+
+        # add 1 for instance
+        if len(expr.args) + 1 == len(lhs.type.param_types):
+            for arg_node, param_type in zip(
+                expr.args, lhs.type.param_types[1:]
+            ):
+                ir_args.append(
+                    gen_implicit_cast_ir(
+                        ctx, gen_expr_ir(ctx, arg_node), param_type
+                    ).get_llvm_value()
+                )
+        else:
+            raise Todo("arg length mismatch")
+
+        return LlvmValue(
+            lhs.type.ret_type, ctx.builder.call(lhs.get_llvm_value(), ir_args)
+        )
+
     elif value_type is IntType:
         if len(expr.args) == 0:
             return LlvmValue(lhs, lhs.get_llvm_value()(ir.Undefined))

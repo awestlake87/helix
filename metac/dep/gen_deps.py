@@ -2,6 +2,44 @@
 from ..ast import *
 from ..err import *
 
+def get_expr_sym(unit, expr):
+    from ..sym import StructSymbol, VarSymbol
+
+    expr_type = type(expr)
+
+    if expr_type is SymbolNode:
+        return unit.scope.resolve(expr.id)
+
+    elif expr_type is DotExprNode:
+        lhs = get_expr_sym(unit, expr.lhs)
+
+        if type(lhs) is VarSymbol:
+            if type(lhs.type) is StructSymbol:
+                if type(expr.rhs) is SymbolNode:
+                    sym = lhs.type.get_attr_symbol(expr.rhs.id)
+
+                    if type(sym) is StructSymbol:
+                        return VarSymbol(sym)
+
+                    else:
+                        return sym
+
+                else:
+                    raise Todo()
+
+    elif expr_type is CallExprNode:
+        lhs = get_expr_sym(unit, expr.lhs)
+
+        if type(lhs) is StructSymbol:
+            return VarSymbol(lhs)
+
+        else:
+            return None
+
+    else:
+        return None
+
+
 def gen_block_deps(unit, block):
     assert block.scope is not None
 
@@ -62,7 +100,10 @@ def gen_expr_deps(unit, expr):
         return gen_call_deps(unit, expr)
 
     elif expr_type is DotExprNode:
-        return [ ]
+        return gen_dot_expr_deps(unit, expr)
+
+    elif expr_type is InitExprNode:
+        return gen_init_expr_deps(unit, expr)
 
     elif expr_type is TernaryConditionalNode:
         return gen_ternary_conditional_deps(unit, expr)
@@ -108,6 +149,31 @@ def gen_unary_expr_deps(unit, expr):
 
 def gen_binary_expr_deps(unit, expr):
     return gen_expr_deps(unit, expr.lhs) + gen_expr_deps(unit, expr.rhs)
+
+def gen_dot_expr_deps(unit, expr):
+    from ..sym import AttrFunSymbol
+
+    sym = get_expr_sym(unit, expr)
+
+    deps = [ ]
+
+    if type(sym) is AttrFunSymbol:
+        deps.append(sym.get_target())
+
+    return deps
+
+def gen_init_expr_deps(unit, expr):
+    from ..sym import VarSymbol
+
+    deps = gen_expr_deps(unit, expr.lhs) + gen_expr_deps(unit, expr.rhs)
+
+    lhs = get_expr_sym(unit, expr.lhs)
+    rhs = get_expr_sym(unit, expr.rhs)
+
+    if type(rhs) is VarSymbol:
+        lhs.type = rhs.type
+
+    return deps
 
 def gen_ternary_conditional_deps(unit, expr):
     return (

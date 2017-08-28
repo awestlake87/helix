@@ -3,9 +3,11 @@ from ..err import Todo
 from ..dep import VarTarget
 
 class VarSymbol:
-    def __init__(self):
+    def __init__(self, sym_type=None):
         self._target = None
         self._ir_value = None
+
+        self.type = sym_type
 
     def get_target(self):
         if self._target is None:

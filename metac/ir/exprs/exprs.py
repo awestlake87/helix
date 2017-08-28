@@ -28,6 +28,9 @@ def gen_expr_ir(ctx, expr):
     elif expr_type is SymbolNode:
         return ctx.scope.resolve(expr.id).get_ir_value()
 
+    elif expr_type is AttrNode:
+        return gen_access_ir(ctx, ctx.instance, expr.id)
+
     elif expr_type is AndNode:
         return gen_and_ir(ctx, expr)
 

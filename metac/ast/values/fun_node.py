@@ -1,6 +1,8 @@
 
 from ..expr_node import ExprNode
 
+from ...err import Todo
+
 class FunNode(ExprNode):
     def __init__(
         self,
@@ -23,8 +25,8 @@ class FunNode(ExprNode):
 
         if self.is_cfun:
             if self.is_attr:
-                raise Todo()
+                raise Todo("cfuns cannot be attr funs")
 
         else:
             if self.is_vargs:
-                raise Todo()
+                raise Todo("vargs is only applicable to cfuns")
