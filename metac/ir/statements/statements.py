@@ -89,6 +89,7 @@ def gen_code(fun, scope, ast):
             self.const_string_counter = 0
             self.loop_context = None
             self.try_context = None
+            self.instance = None
 
             self.entry = self.fun.get_llvm_value().append_basic_block("entry")
             self.builder = ir.IRBuilder(self.entry)
@@ -208,11 +209,30 @@ def gen_code(fun, scope, ast):
 
     ctx = Context(fun, scope, ast)
 
-    for arg, param_type, param_id in zip(
-        ctx.fun.get_llvm_value().args,
-        ctx.fun.type.param_types,
-        ctx.ast.param_ids
-    ):
+    params = None
+
+    if ast.is_attr:
+        ctx.instance = LlvmRef(
+            ctx,
+            ctx.fun.type.param_types[0].pointee,
+            ctx.fun.get_llvm_value().args[0]
+        )
+
+        params = zip(
+            ctx.fun.get_llvm_value().args[1:],
+            ctx.fun.type.param_types[1:],
+            ctx.ast.param_ids
+        )
+
+    else:
+        params = zip(
+            ctx.fun.get_llvm_value().args,
+            ctx.fun.type.param_types,
+            ctx.ast.param_ids
+        )
+
+
+    for arg, param_type, param_id in params:
         value = StackValue(ctx, param_type)
 
         gen_assign_code(ctx, value, LlvmValue(param_type, arg))

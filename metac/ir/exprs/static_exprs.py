@@ -12,6 +12,9 @@ def gen_static_expr_ir(scope, expr):
     elif expr_type is VoidTypeNode:
         return VoidType()
 
+    elif expr_type is AutoTypeNode:
+        return AutoType()
+
     elif expr_type is AutoIntNode:
         return IntValue(AutoIntType(), int(str(expr.value), expr.radix))
 
@@ -32,6 +35,9 @@ def gen_static_expr_ir(scope, expr):
 
     elif expr_type is EmbedCallExprNode:
         return gen_static_embed_call_ir(scope, expr)
+
+    elif expr_type is CallExprNode:
+        return gen_static_call_ir(scope, expr)
 
     elif issubclass(expr_type, UnaryExprNode):
         return gen_static_unary_expr_ir(scope, expr)
@@ -76,6 +82,54 @@ def gen_static_embed_call_ir(scope, expr):
 
         else:
             raise Todo("embed int args")
+
+    else:
+        raise Todo(lhs)
+
+def gen_static_call_ir(scope, expr):
+    from .cast_exprs import gen_static_as_ir
+    
+    lhs = gen_static_expr_ir(scope, expr.lhs)
+
+    value_type = type(lhs)
+
+    if value_type is IntType:
+        if len(expr.args) == 0:
+            return LlvmValue(lhs, lhs.get_llvm_value()(ir.Undefined))
+
+        elif len(expr.args) == 1:
+            return gen_static_as_ir(
+                scope, gen_static_expr_ir(ctx, expr.args[0]), lhs
+            )
+
+        else:
+            raise Todo("int args")
+
+    elif value_type is StructType:
+        if len(expr.args) == 0:
+            return LlvmValue(lhs, lhs.get_llvm_value()(ir.Undefined))
+
+        else:
+            raise Todo("struct args")
+
+    elif value_type is PtrType:
+        if len(expr.args) == 0:
+            return LlvmValue(lhs, lhs.get_llvm_value()(ir.Undefined))
+
+        elif len(expr.args) == 1:
+            return gen_static_as_ir(
+                ctx, gen_static_expr_ir(ctx, expr.args[0]), lhs
+            )
+
+        else:
+            raise Todo("ptr args")
+
+    elif value_type is ArrayType:
+        if len(expr.args) == 0:
+            return LlvmValue(lhs, lhs.get_llvm_value()(ir.Undefined))
+
+        else:
+            raise Todo("array args")
 
     else:
         raise Todo(lhs)

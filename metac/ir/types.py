@@ -6,6 +6,11 @@ from llvmlite import ir
 class Type:
     pass
 
+
+class AutoType(Type):
+    def __eq__(self, other):
+        return type(other) is AutoType
+
 class PtrType(Type):
     def __init__(self, pointee):
         self.pointee = pointee
@@ -81,25 +86,26 @@ class FunType(Type):
         return self._llvm_value
 
 class StructType(Type):
-    def __init__(self, attrs=[]):
+    def __init__(self, attrs, data):
         self.attrs = attrs
+        self.data = data
         self._llvm_value = ir.LiteralStructType(
-            [ t.get_llvm_value() for t, _ in self.attrs ]
+            [ t.get_llvm_value() for t, _ in self.data ]
         )
 
     def get_llvm_value(self):
         return self._llvm_value
 
-    def get_attr_info(self, id):
-        for i in range(0, len(self.attrs)):
-            attr_type, attr_id = self.attrs[i]
+    def get_attr_symbol(self, id):
+        if id in self.attrs:
+            return self.attrs[id]
 
-            if attr_id == id:
-                return (attr_type, i)
-
-        raise Todo(
-            "make a \"unable to resolve struct attr '{}'\" error".format(id)
-        )
+        else:
+            raise Todo(
+                "make a \"unable to resolve struct attr '{}'\" error".format(
+                    id
+                )
+            )
 
 class ArrayType(Type):
     def __init__(self, length, elem_type):
@@ -144,6 +150,28 @@ class LlvmRef(IrValue):
     def get_llvm_value(self):
         return self.ctx.builder.load(self.get_llvm_ptr())
 
+class GlobalValue(IrValue):
+    def __init__(self, unit, id, ir_type, ir_initializer, is_const=False):
+        self.unit = unit
+        self.id = id
+        self.type = ir_type
+        self.is_const = is_const
+
+        self._llvm_global = ir.GlobalVariable(
+            self.unit.get_ir_value().get_llvm_value(),
+            self.type.get_llvm_value(),
+            self.id
+        )
+
+        if ir_initializer is not None:
+            self._llvm_global.initializer = ir_initializer.get_llvm_value()
+
+        self._llvm_global.global_constant = self.is_const
+
+    def get_llvm_ptr(self):
+        assert self._llvm_global is not None
+        return self._llvm_global
+
 class UnitValue(LlvmValue):
     def __init__(self, id):
         self.id = id
@@ -163,6 +191,12 @@ class FunValue(LlvmValue):
                 self.id
             )
         )
+
+class BoundAttrFunValue(LlvmValue):
+    def __init__(self, instance, attr_fun):
+        self.instance = instance
+
+        super().__init__(attr_fun.type, attr_fun.get_llvm_value())
 
 class StackValue(LlvmRef):
     def __init__(self, ctx, ir_type):

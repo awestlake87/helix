@@ -1,6 +1,6 @@
 from ..types import *
 
-from ...ast import SymbolNode
+from ...ast import SymbolNode, GlobalNode
 
 from .cast_exprs import gen_implicit_cast_ir, get_concrete_type
 
@@ -8,10 +8,18 @@ def gen_init_ir(ctx, expr):
     from .exprs import gen_expr_ir
 
     rhs = gen_expr_ir(ctx, expr.rhs)
-    lhs = StackValue(ctx, get_concrete_type(rhs.type))
 
     if type(expr.lhs) is SymbolNode:
+        lhs = StackValue(ctx, get_concrete_type(rhs.type))
+
         ctx.scope.resolve(expr.lhs.id).set_ir_value(lhs)
+
+        gen_assign_code(ctx, lhs, rhs)
+
+        return lhs
+
+    elif type(expr.lhs) is GlobalNode:
+        lhs = gen_expr_ir(ctx, expr.lhs)
 
         gen_assign_code(ctx, lhs, rhs)
 

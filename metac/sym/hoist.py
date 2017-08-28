@@ -4,6 +4,7 @@ from .scope import Scope
 from .fun_symbol import *
 from .struct_symbol import *
 from .var_symbol import *
+from .global_symbol import GlobalSymbol
 
 from ..err import Todo
 
@@ -74,8 +75,8 @@ def hoist_expr(unit, expr):
     elif expr_type is TernaryConditionalNode:
         hoist_ternary_conditional(unit, expr)
 
-    elif expr_type is CGlobalVariable:
-        hoist_cglobal_expr(unit, expr)
+    elif expr_type is GlobalNode:
+        hoist_global_expr(unit, expr)
 
     elif issubclass(expr_type, UnaryExprNode):
         hoist_unary_expr(unit, expr)
@@ -86,7 +87,7 @@ def hoist_expr(unit, expr):
     elif expr_type is FunTypeNode:
         hoist_fun_type(unit, expr)
 
-    elif expr_type is SymbolNode:
+    elif expr_type is SymbolNode or expr_type is AttrNode:
         # outside of the proper context, these are just refs
         pass
 
@@ -97,6 +98,9 @@ def hoist_expr(unit, expr):
     elif expr_type is VoidTypeNode:
         pass
 
+    elif expr_type is AutoTypeNode:
+        pass
+
     elif issubclass(expr_type, LiteralNode):
         # meta literals don't need hoisting
         pass
@@ -104,9 +108,9 @@ def hoist_expr(unit, expr):
     else:
         raise Todo(repr(expr))
 
-def hoist_cglobal_expr(unit, expr):
+def hoist_global_expr(unit, expr):
     hoist_expr(unit, expr.type)
-    unit.scope.insert(expr.id, VarSymbol())
+    unit.scope.insert(expr.id, GlobalSymbol(unit, expr, unit.scope))
 
 def hoist_unary_expr(unit, expr):
     hoist_expr(unit, expr.operand)
@@ -126,6 +130,11 @@ def hoist_init(unit, expr):
         hoist_expr(unit, expr.rhs)
         unit.scope.insert(expr.lhs.id, VarSymbol())
 
+    elif type(expr.lhs) is GlobalNode:
+        hoist_expr(unit, expr.lhs)
+        hoist_expr(unit, expr.rhs)
+        unit.scope.resolve(expr.lhs.id).init_expr = expr.rhs
+
     else:
         raise Todo()
 
@@ -135,10 +144,33 @@ def hoist_ternary_conditional(unit, expr):
     hoist_expr(unit, expr.rhs)
 
 def hoist_struct(unit, s):
-    unit.scope.insert(s.id, StructSymbol(unit, unit.scope, s))
+    symbol = StructSymbol(unit, unit.scope, s)
+    unit.scope.insert(s.id, symbol)
+
+    with unit.use_scope(symbol.scope):
+        for attr_id, attr_symbol in symbol.attrs:
+            if type(attr_symbol) is AttrFunSymbol:
+                hoist_expr(unit, attr_symbol.ast.type)
+
+                for param in attr_symbol.ast.param_ids:
+                    attr_symbol.scope.insert(param, VarSymbol())
+
+                if attr_symbol.ast.body is not None:
+                    with unit.use_scope(attr_symbol.scope):
+                        hoist_block(unit, attr_symbol.ast.body)
+
+            elif type(attr_symbol) is FunSymbol:
+                hoist_fun(unit, attr_symbol.ast)
+
+            elif type(attr_symbol) is DataAttrSymbol:
+                pass
+
+            else:
+                raise Todo(attr_symbol)
+
 
 def hoist_fun(unit, f):
-    symbol = FunSymbol(unit, f, unit.scope, is_vargs=f.is_vargs)
+    symbol = FunSymbol(unit, f, unit.scope)
     unit.scope.insert(f.id, symbol)
 
     hoist_expr(unit, f.type)

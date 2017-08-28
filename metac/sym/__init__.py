@@ -1,5 +1,6 @@
 
 from .fun_symbol import *
+from .global_symbol import *
 from .hoist import *
 from .manglers import *
 from .scope import *

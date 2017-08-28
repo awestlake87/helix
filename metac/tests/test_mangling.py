@@ -4,8 +4,8 @@ from ..sym.manglers import *
 
 class TestManglers(unittest.TestCase):
     def test_basic_mangling(self):
-        scoped_name = [ "module", "unit", "Type", "function" ]
-        mangled_name = "_M6module4unit4Type8function"
+        scoped_name = [ "module", "unit", "Type12", "a_function" ]
+        mangled_name = "_M6module4unit6Type1210a_function"
 
         self.assertEqual(
             mangled_name,

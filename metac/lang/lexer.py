@@ -465,6 +465,11 @@ class Lexer:
             elif _accept('s'):
                 return _end_kw(Token.OP_AS)
 
+            elif _accept('u'):
+                if _accept('t'):
+                    if _accept('o'):
+                        return _end_kw(Token.KW_AUTO)
+
         elif _accept('b'):
             if _accept('i'):
                 if _accept('t'):

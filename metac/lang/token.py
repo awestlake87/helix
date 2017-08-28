@@ -53,6 +53,7 @@ class Token:
     KW_DO               = "do"
 
     KW_VOID             = "void"
+    KW_AUTO             = "auto"
 
     KW_BIT              = "bit"
     KW_CHAR             = "char"

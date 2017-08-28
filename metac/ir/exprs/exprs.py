@@ -26,7 +26,14 @@ def gen_expr_ir(ctx, expr):
         return gen_call_ir(ctx, expr)
 
     elif expr_type is SymbolNode:
-        return ctx.scope.resolve(expr.id).get_ir_value()
+        value = ctx.scope.resolve(expr.id).get_ir_value()
+        if type(value) is GlobalValue:
+            return LlvmRef(ctx, value.type, value.get_llvm_ptr())
+        else:
+            return value
+
+    elif expr_type is AttrNode:
+        return gen_access_ir(ctx, ctx.instance, expr.id)
 
     elif expr_type is AndNode:
         return gen_and_ir(ctx, expr)
@@ -52,8 +59,11 @@ def gen_expr_ir(ctx, expr):
     elif expr_type is TernaryConditionalNode:
         return gen_ternary_conditional_ir(ctx, expr)
 
-    elif expr_type is CGlobalVariable:
-        return gen_cglobal_ir(ctx, expr)
+    elif expr_type is GlobalNode:
+        value = ctx.scope.resolve(expr.id).get_ir_value()
+        return LlvmRef(
+            ctx, value.type, value.get_llvm_ptr()
+        )
 
     elif issubclass(expr_type, BinaryExprNode):
         return gen_binary_expr_ir(ctx, expr)

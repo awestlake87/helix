@@ -31,7 +31,8 @@ class StringNode(LiteralNode):
     def __init__(self, value):
         self.value = value
 
-class CGlobalVariable(ExprNode):
-    def __init__(self, type_expr, id):
+class GlobalNode(ExprNode):
+    def __init__(self, type_expr, id, is_cglobal=False):
         self.type = type_expr
         self.id = id
+        self.is_cglobal = is_cglobal

@@ -22,13 +22,17 @@ class JitTarget(Target):
         self._jit_fun = None
 
     def _build_target(self):
+        from ..sym import mangle_name
+        
         for unit in self.units:
             self._llvm_engine.add_module(unit.get_llvm_module())
 
         self._llvm_engine.finalize_object()
 
         self._jit_fun = CFUNCTYPE(c_int)(
-            self._llvm_engine.get_function_address("__jit__")
+            self._llvm_engine.get_function_address(
+                mangle_name([ self.units[0].id, "__jit__" ])
+            )
         )
 
     def run(self):

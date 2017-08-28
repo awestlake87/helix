@@ -184,7 +184,7 @@ class Parser:
             return IfStatementNode(if_branches)
 
 
-    def _parse_cfun(self):
+    def _parse_fun(self):
         is_cfun = False
         is_vargs = False
         is_attr = False
@@ -204,7 +204,7 @@ class Parser:
 
         else:
             self._expect(Token.ID)
-            
+
         id = self._current.value
 
         self._expect('(')
@@ -259,26 +259,58 @@ class Parser:
             attrs = [ ]
 
             while not self._accept(Token.DEDENT):
-                attr_type = self._parse_expr()
+                if (
+                    self._peek() == Token.KW_FUN or
+                    self._peek() == Token.KW_CFUN
+                ):
+                    fun = self._parse_fun()
 
-                self._expect(Token.ATTR_ID)
-                attr_id = self._current.value
+                    if fun.id and fun.id not in attrs:
+                        attrs.append((fun.id, fun))
 
-                attrs.append((attr_type, attr_id))
+                    else:
+                        raise Todo()
+
+                else:
+                    attr_type = self._parse_expr()
+
+                    self._expect(Token.ATTR_ID)
+                    attr_id = self._current.value
+
+                    if attr_id and attr_id not in attrs:
+                        attrs.append((attr_id, DataAttr(attr_type, attr_id)))
 
                 self._accept(Token.NODENT)
 
             return StructNode(id, attrs)
 
-    def _parse_cglobal(self):
-        self._expect(Token.KW_CGLOBAL)
+    def _parse_global(self):
+        is_cglobal = False
 
-        type_expr = self._parse_expr()
-        self._expect(Token.ID)
+        if self._accept(Token.KW_CGLOBAL):
+            is_cglobal = True
 
-        id = self._current.value
+        else:
+            self._expect(Token.KW_GLOBAL)
 
-        return CGlobalVariable(type_expr, id)
+        expr = self._parse_expr()
+
+        if self._accept(Token.ID):
+            id = self._current.value
+            return GlobalNode(expr, id, is_cglobal=is_cglobal)
+
+        elif type(expr) is InitExprNode:
+            if type(expr.lhs) is SymbolNode:
+                id = expr.lhs.id
+                return InitExprNode(
+                    GlobalNode(AutoTypeNode(), id, is_cglobal=is_cglobal),
+                    expr.rhs
+                )
+            else:
+                raise Todo(expr.lhs)
+
+        else:
+            raise Todo(expr)
 
     def _parse_loop(self):
         for_clause = None
@@ -630,24 +662,6 @@ class Parser:
 
     def _parse_expr_prec4(self):
         def _accept():
-            if self._accept('.'): return True
-            else:
-                return False
-
-        lhs = self._parse_expr_prec3()
-
-        while _accept():
-            id = self._current.id
-
-            if id == '.':
-                lhs = DotExprNode(lhs, self._parse_expr_prec3())
-            else:
-                raise CompilerBug("%.%")
-
-        return lhs
-
-    def _parse_expr_prec3(self):
-        def _accept():
             if self._accept('('):
                 return True
             elif self._accept('['):
@@ -680,7 +694,7 @@ class Parser:
             else:
                 return False
 
-        lhs = self._parse_expr_prec2()
+        lhs = self._parse_expr_prec3()
 
         while _accept():
             id = self._current.id
@@ -727,32 +741,50 @@ class Parser:
 
         return lhs
 
-    def _parse_expr_prec2(self):
+    def _parse_expr_prec3(self):
         if self._accept('*'):
-            return PtrExprNode(self._parse_expr_prec2())
+            return PtrExprNode(self._parse_expr_prec3())
 
         elif self._accept('&'):
-            return RefExprNode(self._parse_expr_prec2())
+            return RefExprNode(self._parse_expr_prec3())
 
         elif self._accept('-'):
-            return NegExprNode(self._parse_expr_prec2())
+            return NegExprNode(self._parse_expr_prec3())
 
         elif self._accept(Token.OP_INC):
-            return PreIncExprNode(self._parse_expr_prec2())
+            return PreIncExprNode(self._parse_expr_prec3())
 
         elif self._accept(Token.OP_DEC):
-            return PreDecExprNode(self._parse_expr_prec2())
+            return PreDecExprNode(self._parse_expr_prec3())
 
         elif self._accept('~'):
-            return BitNotExprNode(self._parse_expr_prec2())
+            return BitNotExprNode(self._parse_expr_prec3())
 
         elif self._accept('['):
             length = self._parse_expr()
             self._expect(']')
-            return ArrayTypeNode(length, self._parse_expr_prec2())
+            return ArrayTypeNode(length, self._parse_expr_prec3())
 
         else:
-            return self._parse_expr_prec1()
+            return self._parse_expr_prec2()
+
+    def _parse_expr_prec2(self):
+        def _accept():
+            if self._accept('.'): return True
+            else:
+                return False
+
+        lhs = self._parse_expr_prec1()
+
+        while _accept():
+            id = self._current.id
+
+            if id == '.':
+                lhs = DotExprNode(lhs, self._parse_expr_prec1())
+            else:
+                raise CompilerBug("%.%")
+
+        return lhs
 
     def _parse_expr_prec1(self):
         _accept = self._accept
@@ -819,6 +851,9 @@ class Parser:
         elif _accept(Token.KW_VOID):
             return VoidTypeNode()
 
+        elif _accept(Token.KW_AUTO):
+            return AutoTypeNode()
+
         elif _accept(Token.ATTR_ID):
             return AttrNode(self._current.value)
 
@@ -826,11 +861,14 @@ class Parser:
             if self._peek() == Token.KW_STRUCT:
                 return self._parse_struct()
 
-            elif self._peek() == Token.KW_CFUN:
-                return self._parse_cfun()
+            elif self._peek() == Token.KW_FUN or self._peek() == Token.KW_CFUN:
+                return self._parse_fun()
 
-            elif self._peek() == Token.KW_CGLOBAL:
-                return self._parse_cglobal()
+            elif (
+                self._peek() == Token.KW_CGLOBAL or
+                self._peek() == Token.KW_GLOBAL
+            ):
+                return self._parse_global()
 
             else:
                 raise UnexpectedToken(self._next)

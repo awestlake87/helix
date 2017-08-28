@@ -17,3 +17,6 @@ class ArrayTypeNode(ExprNode):
 
 class VoidTypeNode(ExprNode):
     pass
+
+class AutoTypeNode(ExprNode):
+    pass

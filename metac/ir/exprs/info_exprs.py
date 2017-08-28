@@ -56,26 +56,31 @@ def gen_sizeof_ir(ctx, value):
     )
 
 def gen_offsetof_ir(ctx, expr):
+    from ...sym import DataAttrSymbol
     from .exprs import gen_expr_ir
 
     lhs = gen_expr_ir(ctx, expr.lhs)
 
     if type(lhs) is StructType:
         if type(expr.rhs) is AttrNode:
-            _, attr_index = lhs.get_attr_info(expr.rhs.id)
-            nil_value = NilValue(PtrType(lhs))
-            size_type = IntType(32, False)
+            symbol = lhs.get_attr_symbol(expr.rhs.id)
 
-            return LlvmValue(
-                size_type,
-                ctx.builder.ptrtoint(
-                    ctx.builder.gep(
-                        nil_value.get_llvm_value(),
-                        [ ir.IntType(32)(0), ir.IntType(32)(attr_index) ]
-                    ),
-                    size_type.get_llvm_value()
+            if type(symbol) is DataAttrSymbol:
+                nil_value = NilValue(PtrType(lhs))
+                size_type = IntType(32, False)
+
+                return LlvmValue(
+                    size_type,
+                    ctx.builder.ptrtoint(
+                        ctx.builder.gep(
+                            nil_value.get_llvm_value(),
+                            [ ir.IntType(32)(0), ir.IntType(32)(symbol.index) ]
+                        ),
+                        size_type.get_llvm_value()
+                    )
                 )
-            )
+            else:
+                raise("offsetof is only for data attrs")
 
     else:
         raise Todo(lhs)
