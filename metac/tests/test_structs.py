@@ -53,3 +53,35 @@ class TestStructs(unittest.TestCase):
                 """
             )
         )
+
+    def test_nested_structs(self):
+        self.assertEqual(
+            0,
+            run_test(
+                """
+                struct A
+                    fun int @do_it()
+                        return 568
+
+                struct B
+                    A @a
+
+                    fun int @tell_a_to_do_it()
+                        return @a.do_it()
+
+                a: A()
+                b: B()
+
+                if a.do_it() != 568
+                    return 1
+
+                if b.a.do_it() != 568
+                    return 2
+
+                if b.tell_a_to_do_it() != 568
+                    return 3
+
+                return 0
+                """
+            )
+        )

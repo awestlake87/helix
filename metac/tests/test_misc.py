@@ -275,3 +275,29 @@ class MiscTests(unittest.TestCase):
                 """
             )
         )
+
+    def test_global(self):
+        self.assertEqual(
+            0,
+            run_test(
+                """
+                global int a_global: 45
+
+                fun int set_a_global(int value)
+                    a_global = value
+
+                    return 0
+
+                if a_global != 45
+                    return 1
+
+                if set_a_global(128) != 0
+                    return 2
+
+                if a_global != 128
+                    return 3
+
+                return 0
+                """
+            )
+        )

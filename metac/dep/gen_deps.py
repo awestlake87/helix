@@ -135,8 +135,8 @@ def gen_expr_deps(unit, expr):
             gen_expr_deps(unit, expr.type)
         )
 
-    elif expr_type is CGlobalVariable:
-        return gen_expr_deps(unit, expr.type)
+    elif expr_type is GlobalNode:
+        return [ unit.scope.resolve(expr.id).get_target() ]
 
     elif issubclass(expr_type, LiteralNode):
         return [ ]

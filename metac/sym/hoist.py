@@ -4,6 +4,7 @@ from .scope import Scope
 from .fun_symbol import *
 from .struct_symbol import *
 from .var_symbol import *
+from .global_symbol import GlobalSymbol
 
 from ..err import Todo
 
@@ -74,8 +75,8 @@ def hoist_expr(unit, expr):
     elif expr_type is TernaryConditionalNode:
         hoist_ternary_conditional(unit, expr)
 
-    elif expr_type is CGlobalVariable:
-        hoist_cglobal_expr(unit, expr)
+    elif expr_type is GlobalNode:
+        hoist_global_expr(unit, expr)
 
     elif issubclass(expr_type, UnaryExprNode):
         hoist_unary_expr(unit, expr)
@@ -104,9 +105,9 @@ def hoist_expr(unit, expr):
     else:
         raise Todo(repr(expr))
 
-def hoist_cglobal_expr(unit, expr):
+def hoist_global_expr(unit, expr):
     hoist_expr(unit, expr.type)
-    unit.scope.insert(expr.id, VarSymbol())
+    unit.scope.insert(expr.id, GlobalSymbol(unit, expr, unit.scope))
 
 def hoist_unary_expr(unit, expr):
     hoist_expr(unit, expr.operand)
@@ -125,6 +126,11 @@ def hoist_init(unit, expr):
     if type(expr.lhs) is SymbolNode:
         hoist_expr(unit, expr.rhs)
         unit.scope.insert(expr.lhs.id, VarSymbol())
+
+    elif type(expr.lhs) is GlobalNode:
+        hoist_expr(unit, expr.lhs)
+        hoist_expr(unit, expr.rhs)
+        unit.scope.resolve(expr.lhs.id).init_expr = expr.rhs
 
     else:
         raise Todo()
@@ -151,7 +157,7 @@ def hoist_struct(unit, s):
                         hoist_block(unit, attr_symbol.ast.body)
 
             elif type(attr_symbol) is FunSymbol:
-                hoist_fun(unit, attr_symbol)
+                hoist_fun(unit, attr_symbol.ast)
 
             elif type(attr_symbol) is DataAttrSymbol:
                 pass

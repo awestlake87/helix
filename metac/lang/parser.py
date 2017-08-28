@@ -284,15 +284,21 @@ class Parser:
 
             return StructNode(id, attrs)
 
-    def _parse_cglobal(self):
-        self._expect(Token.KW_CGLOBAL)
+    def _parse_global(self):
+        is_cglobal = False
+
+        if self._accept(Token.KW_CGLOBAL):
+            is_cglobal = True
+
+        else:
+            self._expect(Token.KW_GLOBAL)
 
         type_expr = self._parse_expr()
         self._expect(Token.ID)
 
         id = self._current.value
 
-        return CGlobalVariable(type_expr, id)
+        return GlobalNode(type_expr, id, is_cglobal=is_cglobal)
 
     def _parse_loop(self):
         for_clause = None
@@ -843,8 +849,11 @@ class Parser:
             elif self._peek() == Token.KW_FUN or self._peek() == Token.KW_CFUN:
                 return self._parse_fun()
 
-            elif self._peek() == Token.KW_CGLOBAL:
-                return self._parse_cglobal()
+            elif (
+                self._peek() == Token.KW_CGLOBAL or
+                self._peek() == Token.KW_GLOBAL
+            ):
+                return self._parse_global()
 
             else:
                 raise UnexpectedToken(self._next)
