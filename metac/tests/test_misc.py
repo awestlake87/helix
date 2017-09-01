@@ -275,3 +275,38 @@ class MiscTests(unittest.TestCase):
                 """
             )
         )
+
+    def test_void_fun(self):
+        self.assertEqual(
+            0,
+            run_test(
+                """
+                fun void a_void_fun(*int a, int b)
+                    if b == 3
+                        *a = b
+                        return
+                    else
+                        *a = 1
+
+                    *a = 2
+                    return
+
+                a: 0
+                b: 3
+
+                a_void_fun(&a, b)
+
+                if a != 3
+                    return 1
+
+                a_void_fun(&a, 4)
+
+                if a == 1
+                    return 2
+                elif a != 2
+                    return 3
+
+                return 0
+                """
+            )
+        )

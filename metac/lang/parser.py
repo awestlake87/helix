@@ -113,7 +113,11 @@ class Parser:
     def _parse_return_statement(self):
         self._expect(Token.KW_RETURN)
 
-        return ReturnNode(self._parse_expr())
+        if self._peek() != Token.NODENT and self._peek() != Token.DEDENT:
+            return ReturnNode(self._parse_expr())
+
+        else:
+            return ReturnNode()
 
     def _parse_switch_statement(self):
         self._expect(Token.KW_SWITCH)
