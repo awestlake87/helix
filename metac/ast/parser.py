@@ -1,7 +1,12 @@
 from .lexer import scan_tokens
 from .token import Token
 
-from ..ast import *
+from .exprs import *
+from .statements import *
+from .types import *
+from .values import *
+from .condition_nodes import *
+
 from ..err import Todo, ExpectedToken, UnexpectedToken, CompilerBug
 
 class Parser:

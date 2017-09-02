@@ -1,4 +1,4 @@
-from ..lang import Parser
+from ..ast import Parser
 from ..sym import UnitSymbol
 from ..dep import JitTarget
 
