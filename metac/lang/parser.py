@@ -247,6 +247,46 @@ class Parser:
             is_attr=is_attr
         )
 
+    def _parse_oper(self):
+        def parse_params():
+            param_types = [ ]
+            param_ids = [ ]
+
+            self._expect('(')
+
+            if not self._accept(')'):
+                while True:
+                    param_types.append(self._parse_expr())
+
+                    self._expect(Token.ID)
+
+                    param_ids.append(self._current.value)
+
+                    if not self._accept(','):
+                        break
+
+                self._expect(')')
+
+            return (param_types, param_ids)
+
+        self._expect(Token.KW_OPER)
+
+        if self._accept(Token.OP_CONSTRUCT):
+            param_types, param_ids = parse_params()
+            block = self._parse_block()
+
+            return ConstructOperNode(param_types, param_ids, block)
+
+        elif self._accept(Token.OP_DESTRUCT):
+            self._expect('(')
+            self._expect(')')
+            block = self._parse_block()
+
+            return DestructOperNode(block)
+
+        else:
+            raise Todo()
+
     def _parse_struct(self):
         self._expect(Token.KW_STRUCT)
 
@@ -269,11 +309,12 @@ class Parser:
                 ):
                     fun = self._parse_fun()
 
-                    if fun.id and fun.id not in attrs:
-                        attrs.append((fun.id, fun))
+                    attrs.append((fun.id, fun))
 
-                    else:
-                        raise Todo()
+                elif self._peek() == Token.KW_OPER:
+                    oper = self._parse_oper()
+
+                    attrs.append((oper.id, oper))
 
                 else:
                     attr_type = self._parse_expr()
@@ -867,6 +908,9 @@ class Parser:
 
             elif self._peek() == Token.KW_FUN or self._peek() == Token.KW_CFUN:
                 return self._parse_fun()
+
+            elif self._peek() == Token.KW_OPER:
+                return self._parse_oper()
 
             elif (
                 self._peek() == Token.KW_CGLOBAL or

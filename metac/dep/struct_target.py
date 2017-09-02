@@ -7,7 +7,12 @@ from ..ir import StructType, gen_static_expr_ir
 
 class StructTarget(Target):
     def __init__(self, symbol, on_ir=lambda val: None):
-        from ..sym import DataAttrSymbol, AttrFunSymbol
+        from ..sym import (
+            DataAttrSymbol,
+            AttrFunSymbol,
+            ConstructOperSymbol,
+            DestructOperSymbol
+        )
 
         self.symbol = symbol
         self.attrs = { }
@@ -26,8 +31,11 @@ class StructTarget(Target):
                     )
                     self.attrs[attr_id] = attr_symbol
 
-                elif attr_type is AttrFunSymbol:
+                elif issubclass(attr_type, AttrFunSymbol):
                     self.attrs[attr_id] = attr_symbol
+                    
+                else:
+                    raise Todo()
 
         super().__init__(deps)
 

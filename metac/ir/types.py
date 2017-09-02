@@ -96,6 +96,20 @@ class StructType(Type):
     def get_llvm_value(self):
         return self._llvm_value
 
+    def get_ctor_symbol(self):
+        if "construct" in self.attrs:
+            return self.attrs["construct"]
+
+        else:
+            return None
+
+    def get_dtor_symbol(self):
+        if "destruct" in self.attrs:
+            return self.attrs["destruct"]
+
+        else:
+            return None
+
     def get_attr_symbol(self, id):
         if id in self.attrs:
             return self.attrs[id]

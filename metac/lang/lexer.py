@@ -237,26 +237,59 @@ class Lexer:
         prefix = self._toss()
         assert prefix == '@'
 
-        c = self._peek()
-
-        if c >= 'a' and c <= 'z' or c >= 'A' and c <= 'Z' or c == '_':
-            self._take()
-
-        else:
-            raise UnexpectedChar(c)
-
-        c = self._peek()
-
-        while (
-            c >= 'a' and c <= 'z' or
-            c >= 'A' and c <= 'Z' or
-            c >= '0' and c <= '9' or
-            c == '_'
-        ):
-            self._take()
+        def end_id():
             c = self._peek()
+            while (
+                c >= 'a' and c <= 'z' or
+                c >= 'A' and c <= 'Z' or
+                c >= '0' and c <= '9' or
+                c == '_'
+            ):
+                self._take()
+                c = self._peek()
 
-        return Token(Token.ATTR_ID, self._token)
+            return Token(Token.ATTR_ID, self._token)
+
+        def end_kw(id):
+            c = self._peek()
+            if (
+                c >= 'a' and c <= 'z' or
+                c >= 'A' and c <= 'Z' or
+                c >= '0' and c <= '9' or
+                c == '_'
+            ):
+                return end_id()
+
+            else:
+                return Token(id)
+
+
+        accept = self._accept
+
+        c = self._peek()
+
+        if accept('c'):
+            if accept('o'):
+                if accept('n'):
+                    if accept('s'):
+                        if accept('t'):
+                            if accept('r'):
+                                if accept('u'):
+                                    if accept('c'):
+                                        if accept('t'):
+                                            return end_kw(Token.OP_CONSTRUCT)
+        elif accept('d'):
+            if accept('e'):
+                if accept('s'):
+                    if accept('t'):
+                        if accept('r'):
+                            if accept('u'):
+                                if accept('c'):
+                                    if accept('t'):
+                                        return end_kw(Token.OP_DESTRUCT)
+
+
+        return end_id()
 
     def _scan_num(self):
         def _accept_dec_digits():
@@ -642,6 +675,11 @@ class Lexer:
                                 if _accept('o'):
                                     if _accept('f'):
                                         return _end_kw(Token.OP_OFFSETOF)
+
+            elif _accept('p'):
+                if _accept('e'):
+                    if _accept('r'):
+                        return _end_kw(Token.KW_OPER)
 
             elif _accept('r'):
                 return _end_kw(Token.OP_OR)

@@ -4,8 +4,12 @@ from .scope import Scope
 from ..err import Todo
 from ..dep import StructTarget
 
-from ..ast import DataAttr, FunNode, StructNode
+from ..ast import (
+    DataAttr, FunNode, StructNode, ConstructOperNode, DestructOperNode
+)
+
 from .fun_symbol import FunSymbol, AttrFunSymbol
+from .oper_symbol import ConstructOperSymbol, DestructOperSymbol
 
 class DataAttrSymbol:
     def __init__(self, ast, index):
@@ -71,12 +75,44 @@ class StructSymbol:
                 )
                 attr_index += 1
 
+            elif attr_type is ConstructOperNode:
+                self.attrs.append(
+                    (
+                        attr_id,
+                        ConstructOperSymbol(unit, self, attr_node, self.scope)
+                    )
+                )
+
+            elif attr_type is DestructOperNode:
+                self.attrs.append(
+                    (
+                        attr_id,
+                        DestructOperSymbol(unit, self, attr_node, self.scope)
+                    )
+                )
+
             else:
                 raise Todo()
 
 
         self._target = None
         self._ir_value = None
+
+    def get_ctor_symbol(self):
+        for attr_id, attr_symbol in self.attrs:
+            if attr_id == "construct":
+                if type(attr_symbol) is ConstructOperSymbol:
+                    return attr_symbol
+
+        return None
+
+    def get_dtor_symbol(self):
+        for attr_id, attr_symbol in self.attrs:
+            if attr_id == "destruct":
+                if type(attr_symbol) is DestructOperSymbol:
+                    return attr_symbol
+
+        return None
 
     def get_attr_symbol(self, id):
         for attr_id, attr_symbol in self.attrs:

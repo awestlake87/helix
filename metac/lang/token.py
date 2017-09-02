@@ -16,6 +16,7 @@ class Token:
     KW_VARGS            = "vargs"
 
     KW_FUN              = "fun"
+    KW_OPER             = "oper"
     KW_GLOBAL           = "global"
     KW_STRUCT           = "struct"
 
@@ -103,6 +104,9 @@ class Token:
     OP_SIZEOF           = "sizeof"
     OP_OFFSETOF         = "offsetof"
     OP_TYPEOF           = "typeof"
+
+    OP_CONSTRUCT        = "@construct"
+    OP_DESTRUCT         = "@destruct"
 
     LT_INT_BIN          = "int_x2"
     LT_INT_DEC          = "int_x10"

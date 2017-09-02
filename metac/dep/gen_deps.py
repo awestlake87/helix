@@ -84,6 +84,9 @@ def gen_statement_deps(unit, statement):
     elif issubclass(statement_type, ExprNode):
         return gen_expr_deps(unit, statement)
 
+    elif statement_type is BlockNode:
+        return gen_block_deps(unit, statement)
+
     else:
         raise Todo(repr(statement))
 
@@ -195,7 +198,21 @@ def gen_ternary_conditional_deps(unit, expr):
     )
 
 def gen_call_deps(unit, expr):
+    from ..sym import StructSymbol
+
     deps = gen_expr_deps(unit, expr.lhs)
+
+    lhs = gen_expr_sym(unit, expr.lhs)
+
+    if type(lhs) is StructSymbol:
+        ctor = lhs.get_ctor_symbol()
+        dtor = lhs.get_dtor_symbol()
+
+        if ctor is not None:
+            deps.append(ctor.get_target())
+
+        if dtor is not None:
+            deps.append(dtor.get_target())
 
     for arg in expr.args:
         deps += gen_expr_deps(unit, arg)

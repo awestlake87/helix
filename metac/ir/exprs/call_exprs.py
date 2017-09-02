@@ -87,11 +87,38 @@ def gen_call_ir(ctx, expr):
             raise Todo("int args")
 
     elif value_type is StructType:
-        if len(expr.args) == 0:
-            return LlvmValue(lhs, lhs.get_llvm_value()(ir.Undefined))
+        ctor = lhs.get_ctor_symbol()
+
+        if ctor is not None:
+            ctor_fun = ctor.get_ir_value()
+            value = StackValue(ctx, lhs)
+
+            ir_args = [ value.get_llvm_ptr() ]
+
+            # add 1 for instance
+            if len(expr.args) == len(ctor_fun.type.param_types) - 1:
+                for arg_node, param_type in zip(
+                    expr.args, ctor_fun.type.param_types[1:]
+                ):
+                    ir_args.append(
+                        gen_implicit_cast_ir(
+                            ctx, gen_expr_ir(ctx, arg_node), param_type
+                        ).get_llvm_value()
+                    )
+
+            else:
+                raise Todo("arg length mismatch")
+
+            ctx.builder.call(ctor_fun.get_llvm_value(), ir_args)
+
+            return value
 
         else:
-            raise Todo("struct args")
+            if len(expr.args) == 0:
+                return LlvmValue(lhs, lhs.get_llvm_value()(ir.Undefined))
+
+            else:
+                raise Todo("struct args")
 
     elif value_type is PtrType:
         if len(expr.args) == 0:

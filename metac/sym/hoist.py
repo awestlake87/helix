@@ -41,8 +41,11 @@ def hoist_block(unit, block):
             elif statement_type is BreakNode or statement_type is ContinueNode:
                 pass
 
+            elif statement_type is BlockNode:
+                hoist_block(unit, statement)
+
             else:
-                raise Todo()
+                raise Todo(statement_type)
 
 def hoist_expr(unit, expr):
     expr_type = type(expr)
@@ -149,7 +152,7 @@ def hoist_struct(unit, s):
 
     with unit.use_scope(symbol.scope):
         for attr_id, attr_symbol in symbol.attrs:
-            if type(attr_symbol) is AttrFunSymbol:
+            if issubclass(type(attr_symbol), AttrFunSymbol):
                 hoist_expr(unit, attr_symbol.ast.type)
 
                 for param in attr_symbol.ast.param_ids:

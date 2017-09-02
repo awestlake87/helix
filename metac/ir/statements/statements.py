@@ -116,7 +116,7 @@ def gen_code(fun, scope, ast):
                     self.builder.ret(self._return_value.get_llvm_value())
                 else:
                     self.builder.ret_void()
-                
+
             self.control_path = ControlPath()
 
         @property
@@ -294,6 +294,9 @@ def gen_statement_code(ctx, statement):
 
     elif issubclass(statement_type, ExprNode):
         gen_expr_ir(ctx, statement)
+
+    elif statement_type is BlockNode:
+        gen_block_code(ctx, statement)
 
     else:
         raise Todo(statement)

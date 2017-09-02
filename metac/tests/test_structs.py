@@ -85,3 +85,50 @@ class TestStructs(unittest.TestCase):
                 """
             )
         )
+
+    def test_ctor_and_dtor(self):
+        self.assertEqual(
+            0,
+            run_test(
+                """
+                global int value: 0
+
+                struct Object
+                    int @a
+                    int @b
+
+                    oper @construct(int a, int b)
+                        @a = a
+                        @b = b
+
+                        value = 1
+
+                        return
+
+                    oper @destruct()
+                        value = 2
+                        
+                        return
+
+                if value != 0
+                    return 1
+
+                do
+                    obj: Object(1, 2)
+
+                    if value != 1
+                        return 2
+
+                    if obj.a != 1
+                        return 3
+
+                    if obj.b != 2
+                        return 4
+
+                if value != 2
+                    return 5
+
+                return 0
+                """
+            )
+        )
