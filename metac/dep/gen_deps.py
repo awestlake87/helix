@@ -2,7 +2,7 @@
 from ..ast import *
 from ..err import *
 
-def get_expr_sym(unit, expr):
+def gen_expr_sym(unit, expr):
     from ..sym import StructSymbol, VarSymbol, GlobalSymbol
 
     expr_type = type(expr)
@@ -14,7 +14,7 @@ def get_expr_sym(unit, expr):
         return unit.scope.resolve(expr.id)
 
     elif expr_type is DotExprNode:
-        lhs = get_expr_sym(unit, expr.lhs)
+        lhs = gen_expr_sym(unit, expr.lhs)
 
         if type(lhs) is VarSymbol or type(lhs) is GlobalSymbol:
             if type(lhs.type) is StructSymbol:
@@ -31,7 +31,7 @@ def get_expr_sym(unit, expr):
                     raise Todo()
 
     elif expr_type is CallExprNode:
-        lhs = get_expr_sym(unit, expr.lhs)
+        lhs = gen_expr_sym(unit, expr.lhs)
 
         if type(lhs) is StructSymbol:
             return VarSymbol(lhs)
@@ -159,7 +159,7 @@ def gen_binary_expr_deps(unit, expr):
 def gen_dot_expr_deps(unit, expr):
     from ..sym import AttrFunSymbol, GlobalSymbol
 
-    sym = get_expr_sym(unit, expr)
+    sym = gen_expr_sym(unit, expr)
 
     deps = [ ]
 
@@ -176,8 +176,8 @@ def gen_init_expr_deps(unit, expr):
 
     deps = gen_expr_deps(unit, expr.lhs) + gen_expr_deps(unit, expr.rhs)
 
-    lhs = get_expr_sym(unit, expr.lhs)
-    rhs = get_expr_sym(unit, expr.rhs)
+    lhs = gen_expr_sym(unit, expr.lhs)
+    rhs = gen_expr_sym(unit, expr.rhs)
 
     if type(rhs) is VarSymbol:
         lhs.type = rhs.type
@@ -211,7 +211,11 @@ def gen_fun_type_deps(unit, fun_type):
     return deps
 
 def gen_return_deps(unit, statement):
-    return gen_expr_deps(unit, statement.expr)
+    if statement.expr is not None:
+        return gen_expr_deps(unit, statement.expr)
+
+    else:
+        return [ ]
 
 def gen_if_statement_deps(unit, statement):
     assert statement.scope is not None

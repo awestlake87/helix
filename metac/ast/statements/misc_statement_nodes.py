@@ -1,7 +1,7 @@
 from ..statement_node import StatementNode
 
 class ReturnNode(StatementNode):
-    def __init__(self, expr):
+    def __init__(self, expr = None):
         self.expr = expr
 
 class BreakNode(StatementNode):

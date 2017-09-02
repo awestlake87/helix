@@ -102,15 +102,21 @@ def gen_code(fun, scope, ast):
 
             self._cleanup_blocks = [ ]
 
-            self._return_value = StackValue(
-                self, self.fun.type.ret_type
-            )
+            if type(self.fun.type.ret_type) is not VoidType:
+                self._return_value = StackValue(
+                    self, self.fun.type.ret_type
+                )
+            else:
+                self._return_value = None
 
             self._return_block = self.builder.append_basic_block("return")
 
             with self.builder.goto_block(self._return_block):
-                self.builder.ret(self._return_value.get_llvm_value())
-
+                if self._return_value is not None:
+                    self.builder.ret(self._return_value.get_llvm_value())
+                else:
+                    self.builder.ret_void()
+                
             self.control_path = ControlPath()
 
         @property
@@ -196,12 +202,15 @@ def gen_code(fun, scope, ast):
 
 
         def create_return(self, value = None):
-            self.builder.store(
-                gen_implicit_cast_ir(
-                    self, value, self._return_value.type
-                ).get_llvm_value(),
-                self._return_value.get_llvm_ptr()
-            )
+            if self._return_value is not None:
+                self.builder.store(
+                    gen_implicit_cast_ir(
+                        self, value, self._return_value.type
+                    ).get_llvm_value(),
+                    self._return_value.get_llvm_ptr()
+                )
+            elif value is not None:
+                raise Todo("attempting to return value in void fun")
 
             self.builder.branch(
                 self.control_path.gen_unwind_cleanup(self, self._return_block)

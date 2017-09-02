@@ -242,7 +242,8 @@ def hoist_switch_statement(unit, statement):
 
 
 def hoist_return_statement(unit, statement):
-    hoist_expr(unit, statement.expr)
+    if statement.expr is not None:
+        hoist_expr(unit, statement.expr)
 
 def hoist_try_statement(unit, statement):
     hoist_block(unit, statement.try_block)

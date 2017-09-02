@@ -12,9 +12,9 @@ class TestStructs(unittest.TestCase):
                 struct Object
                     int @a
 
-                    fun int @set_a(int val)
+                    fun void @set_a(int val)
                         @a = val
-                        return 0
+                        return
 
                 obj: Object()
 
