@@ -1,11 +1,10 @@
-from ..ast import Parser
+from ..ast import parse_unit
 from ..sym import UnitSymbol
 from ..dep import JitTarget
 
 def run_test(code, emit_ir=False):
-    parser = Parser(code)
-
-    unit = UnitSymbol("test", parser.parse())
+    unit = UnitSymbol("test", parse_unit(code))
+    
     jit_target = JitTarget([ unit ])
 
     jit_target.build()

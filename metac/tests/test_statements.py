@@ -4,6 +4,7 @@ import unittest
 from .utils import run_test
 
 class LoopTests(unittest.TestCase):
+
     def test_return(self):
         self.assertEqual(
             6573,

@@ -69,6 +69,9 @@ class Token:
     KW_UINT             = "uint"
     KW_ULONG            = "ulong"
 
+    OP_L_EMBED          = "embed_<"
+    OP_R_EMBED          = "embed_>"
+
     OP_RANGE            = ".."
     OP_SPREAD           = "..."
 
