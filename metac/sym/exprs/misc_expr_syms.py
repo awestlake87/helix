@@ -61,6 +61,23 @@ class PostDecSym(UnarySym):
 
 
 
+class AddSym(BinarySym):
+    pass
+
+class SubSym(BinarySym):
+    pass
+
+class MulSym(BinarySym):
+    pass
+
+class DivSym(BinarySym):
+    pass
+
+class ModSym(BinarySym):
+    pass
+
+
+
 class BitAndSym(BinarySym):
     pass
 

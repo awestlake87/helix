@@ -118,6 +118,7 @@ def gen_binary_expr_info(ctx, expr_sym):
     if expr_type is AssignSym:
         return AssignInfo(lhs, rhs)
 
+
     elif expr_type is LtnSym:
         return LtnInfo(lhs, rhs)
 
@@ -136,6 +137,7 @@ def gen_binary_expr_info(ctx, expr_sym):
     elif expr_type is NeqSym:
         return NeqInfo(lhs, rhs)
 
+
     elif expr_type is AndSym:
         return AndInfo(lhs, rhs)
 
@@ -144,6 +146,23 @@ def gen_binary_expr_info(ctx, expr_sym):
 
     elif expr_type is XorSym:
         return XorInfo(lhs, rhs)
+
+
+    elif expr_type is AddSym:
+        return AddInfo(lhs, rhs)
+
+    elif expr_type is SubSym:
+        return SubInfo(lhs, rhs)
+
+    elif expr_type is MulSym:
+        return MulInfo(lhs, rhs)
+
+    elif expr_type is DivSym:
+        return DivInfo(lhs, rhs)
+
+    elif expr_type is ModSym:
+        return ModInfo(lhs, rhs)
+        
 
     elif expr_type is BitAndSym:
         return BitAndInfo(lhs, rhs)

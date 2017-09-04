@@ -146,6 +146,7 @@ def gen_binary_expr_sym(ctx, expr_node):
     if expr_type is AssignNode:
         return AssignSym(lhs, rhs)
 
+
     elif expr_type is LtnNode:
         return LtnSym(lhs, rhs)
 
@@ -164,6 +165,7 @@ def gen_binary_expr_sym(ctx, expr_node):
     elif expr_type is NeqNode:
         return NeqSym(lhs, rhs)
 
+
     elif expr_type is AndNode:
         return AndSym(lhs, rhs)
 
@@ -172,6 +174,23 @@ def gen_binary_expr_sym(ctx, expr_node):
 
     elif expr_type is XorNode:
         return XorSym(lhs, rhs)
+
+
+    elif expr_type is AddNode:
+        return AddSym(lhs, rhs)
+
+    elif expr_type is SubNode:
+        return SubSym(lhs, rhs)
+
+    elif expr_type is MulNode:
+        return MulSym(lhs, rhs)
+
+    elif expr_type is DivNode:
+        return DivSym(lhs, rhs)
+
+    elif expr_type is ModNode:
+        return ModSym(lhs, rhs)
+        
 
     elif expr_type is BitAndNode:
         return BitAndSym(lhs, rhs)
