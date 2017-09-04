@@ -1,56 +1,60 @@
 
-from ...ast import *
+from ...info import *
 
 from ..types import *
 
-def gen_static_expr_ir(scope, expr):
-    expr_type = type(expr)
+def gen_static_expr_ir(scope, expr_info):
+    expr_type = type(expr_info)
 
-    if expr_type is IntTypeNode:
-        return IntType(expr.num_bits, expr.is_signed)
+    if expr_type is IntTypeInfo:
+        return IntType(expr_info.num_bits, expr_info.is_signed)
 
-    elif expr_type is VoidTypeNode:
+    elif expr_type is VoidTypeInfo:
         return VoidType()
 
-    elif expr_type is AutoTypeNode:
+    elif expr_type is AutoTypeInfo:
         return AutoType()
 
-    elif expr_type is AutoIntNode:
-        return IntValue(AutoIntType(), int(str(expr.value), expr.radix))
-
-    elif expr_type is IntNode:
+    elif expr_type is AutoIntInfo:
         return IntValue(
-            IntType(expr.num_bits, expr.is_signed),
-            int(str(expr.value), expr.radix)
+            AutoIntType(), int(str(expr_info.value), expr_info.radix)
         )
 
-    elif expr_type is NilNode:
+    elif expr_type is IntInfo:
+        return IntValue(
+            IntType(expr_info.num_bits, expr_info.is_signed),
+            int(str(expr_info.value), expr_info.radix)
+        )
+
+    elif expr_type is NilInfo:
         return NilValue(AutoPtrType())
 
-    elif expr_type is SymbolNode:
-        return scope.resolve(expr.id).get_ir_value()
+    elif expr_type is SymbolInfo:
+        return scope.resolve(expr_info.id).proto_target.ir_value
 
-    elif expr_type is ArrayTypeNode:
-        return gen_static_array_type_ir(scope, expr.length, expr.type)
+    elif expr_type is ArrayTypeInfo:
+        return gen_static_array_type_ir(
+            scope, expr_info.length, expr_info.type
+        )
 
-    elif expr_type is EmbedCallExprNode:
-        return gen_static_embed_call_ir(scope, expr)
+    elif expr_type is EmbedCallExprInfo:
+        return gen_static_embed_call_ir(scope, expr_info)
 
-    elif expr_type is CallExprNode:
-        return gen_static_call_ir(scope, expr)
+    elif expr_type is CallExprInfo:
+        return gen_static_call_ir(scope, expr_info)
 
-    elif issubclass(expr_type, UnaryExprNode):
-        return gen_static_unary_expr_ir(scope, expr)
+    elif issubclass(expr_type, UnaryExprInfo):
+        return gen_static_unary_expr_ir(scope, expr_info)
 
     else:
-        raise Todo(expr)
+        raise Todo(expr_info)
 
 
 def gen_static_unary_expr_ir(scope, expr):
     expr_type = type(expr)
     operand = gen_static_expr_ir(scope, expr.operand)
 
-    if expr_type is PtrExprNode:
+    if expr_type is PtrExprInfo:
         return gen_static_ptr_expr_ir(scope, operand)
 
     else:
@@ -88,7 +92,7 @@ def gen_static_embed_call_ir(scope, expr):
 
 def gen_static_call_ir(scope, expr):
     from .cast_exprs import gen_static_as_ir
-    
+
     lhs = gen_static_expr_ir(scope, expr.lhs)
 
     value_type = type(lhs)

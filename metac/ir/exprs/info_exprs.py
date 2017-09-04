@@ -1,7 +1,7 @@
 from llvmlite import ir
 
 from ..types import *
-from ...ast import *
+from ...info import *
 
 def get_rtti_info(ctx, t):
     def get_extern_rtti_var(name):
@@ -62,7 +62,7 @@ def gen_offsetof_ir(ctx, expr):
     lhs = gen_expr_ir(ctx, expr.lhs)
 
     if type(lhs) is StructType:
-        if type(expr.rhs) is AttrNode:
+        if type(expr.rhs) is AttrInfo:
             symbol = lhs.get_attr_symbol(expr.rhs.id)
 
             if type(symbol) is DataAttrSymbol:

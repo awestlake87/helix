@@ -2,8 +2,6 @@
 from ..err import Todo
 from ..dep import GlobalTarget
 
-from .scope import Scope
-
 class GlobalSymbol:
     def __init__(self, unit, ast, parent_scope):
         super().__init__()

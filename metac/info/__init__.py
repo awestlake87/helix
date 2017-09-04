@@ -4,5 +4,5 @@ from .statements import *
 from .types import *
 from .values import *
 
-from .gen_syms import gen_unit_sym
-from .manglers import *
+from .expr_info import *
+from .gen_info import gen_unit_info

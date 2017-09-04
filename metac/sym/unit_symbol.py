@@ -1,6 +1,6 @@
 from contextlib import contextmanager
 
-from .scope import Scope
+from ..scope import Scope
 from .fun_symbol import FunSymbol
 
 from ..err import Todo
