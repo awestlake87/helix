@@ -429,32 +429,31 @@ def parse_expr_prec14(ctx):
     lhs = parse_expr_prec13(ctx)
 
     if ctx.accept(':'):
-        return InitExprNode(lhs, parse_expr_prec14(ctx))
+        return InitNode(lhs, parse_expr_prec14(ctx))
     elif ctx.accept('='):
         return AssignNode(lhs, parse_expr_prec14(ctx))
 
     elif ctx.accept(Token.OP_ADD_ASSIGN):
-        return AddAssignNode(lhs, parse_expr_prec14(ctx))
-
+        return AssignNode(lhs, AddNode(lhs, parse_expr_prec14(ctx)))
     elif ctx.accept(Token.OP_SUB_ASSIGN):
-        return SubAssignNode(lhs, parse_expr_prec14(ctx))
+        return AssignNode(lhs, SubNode(lhs, parse_expr_prec14(ctx)))
     elif ctx.accept(Token.OP_MUL_ASSIGN):
-        return MulAssignNode(lhs, parse_expr_prec14(ctx))
+        return AssignNode(lhs, MulNode(lhs, parse_expr_prec14(ctx)))
     elif ctx.accept(Token.OP_DIV_ASSIGN):
-        return DivAssignNode(lhs, parse_expr_prec14(ctx))
+        return AssignNode(lhs, DivNode(lhs, parse_expr_prec14(ctx)))
     elif ctx.accept(Token.OP_MOD_ASSIGN):
-        return ModAssignNode(lhs, parse_expr_prec14(ctx))
+        return AssignNode(lhs, ModNode(lhs, parse_expr_prec14(ctx)))
 
     elif ctx.accept(Token.OP_AND_ASSIGN):
-        return BitAndAssignNode(lhs, parse_expr_prec14(ctx))
+        return AssignNode(lhs, BitAndNode(lhs, parse_expr_prec14(ctx)))
     elif ctx.accept(Token.OP_XOR_ASSIGN):
-        return BitXorAssignNode(lhs, parse_expr_prec14(ctx))
+        return AssignNode(lhs, BitXorNode(lhs, parse_expr_prec14(ctx)))
     elif ctx.accept(Token.OP_OR_ASSIGN):
-        return BitOrAssignNode(lhs, parse_expr_prec14(ctx))
+        return AssignNode(lhs, BitOrNode(lhs, parse_expr_prec14(ctx)))
     elif ctx.accept(Token.OP_SHL_ASSIGN):
-        return BitShlAssignNode(lhs, parse_expr_prec14(ctx))
+        return AssignNode(lhs, BitShlNode(lhs, parse_expr_prec14(ctx)))
     elif ctx.accept(Token.OP_SHR_ASSIGN):
-        return BitShrAssignNode(lhs, parse_expr_prec14(ctx))
+        return AssignNode(lhs, BitShrNode(lhs, parse_expr_prec14(ctx)))
 
     else:
         return lhs
@@ -557,7 +556,7 @@ def parse_expr_prec7(ctx):
         elif id == '/':
             lhs = DivNode(lhs, parse_expr_prec6(ctx))
         elif id == '%':
-            lhs = ModExprNode(lhs, parse_expr_prec6(ctx))
+            lhs = ModNode(lhs, parse_expr_prec6(ctx))
         else:
             raise CompilerBug("$_$")
 
@@ -670,7 +669,7 @@ def parse_expr_prec4(ctx):
                         ctx.expect(')')
                         break
 
-            lhs = CallExprNode(lhs, args)
+            lhs = CallNode(lhs, args)
 
         elif id == '[':
             expr = parse_expr(ctx)
@@ -689,13 +688,13 @@ def parse_expr_prec4(ctx):
                         ctx.expect(Token.OP_R_EMBED)
                         break
 
-            lhs = EmbedCallExprNode(lhs, args)
+            lhs = EmbedCallNode(lhs, args)
 
         elif id == Token.OP_INC:
-            lhs = PostIncExprNode(lhs)
+            lhs = PostIncNode(lhs)
 
         elif id == Token.OP_DEC:
-            lhs = PostDecExprNode(lhs)
+            lhs = PostDecNode(lhs)
 
         else:
             raise CompilerBug("O_o")
@@ -710,13 +709,13 @@ def parse_expr_prec3(ctx):
         return RefExprNode(parse_expr_prec3(ctx))
 
     elif ctx.accept('-'):
-        return NegExprNode(parse_expr_prec3(ctx))
+        return NegNode(parse_expr_prec3(ctx))
 
     elif ctx.accept(Token.OP_INC):
-        return PreIncExprNode(parse_expr_prec3(ctx))
+        return PreIncNode(parse_expr_prec3(ctx))
 
     elif ctx.accept(Token.OP_DEC):
-        return PreDecExprNode(parse_expr_prec3(ctx))
+        return PreDecNode(parse_expr_prec3(ctx))
 
     elif ctx.accept('~'):
         return BitNotNode(parse_expr_prec3(ctx))
@@ -989,10 +988,10 @@ def parse_global(ctx):
         id = ctx.current.value
         return GlobalNode(expr, id, is_cglobal=is_cglobal)
 
-    elif type(expr) is InitExprNode:
+    elif type(expr) is InitNode:
         if type(expr.lhs) is SymbolNode:
             id = expr.lhs.id
-            return InitExprNode(
+            return InitNode(
                 GlobalNode(AutoTypeNode(), id, is_cglobal=is_cglobal),
                 expr.rhs
             )

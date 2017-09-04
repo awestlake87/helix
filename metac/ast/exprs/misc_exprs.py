@@ -1,50 +1,50 @@
 
-from ..expr_node import ExprNode, UnaryExprNode, BinaryExprNode
+from ..expr_node import ExprNode, UnaryNode, BinaryNode
 
-class PtrExprNode(UnaryExprNode):
+class PtrExprNode(UnaryNode):
     pass
 
-class RefExprNode(UnaryExprNode):
+class RefExprNode(UnaryNode):
     pass
 
-class DotExprNode(BinaryExprNode):
+class DotExprNode(BinaryNode):
     pass
 
-class IndexExprNode(BinaryExprNode):
-    pass
-
-
-class AsNode(BinaryExprNode):
-    pass
-
-class CastNode(BinaryExprNode):
-    pass
-
-class BitcastNode(BinaryExprNode):
+class IndexExprNode(BinaryNode):
     pass
 
 
-class SizeofNode(UnaryExprNode):
+class AsNode(BinaryNode):
     pass
 
-class OffsetofNode(BinaryExprNode):
+class CastNode(BinaryNode):
     pass
 
-class TypeofNode(UnaryExprNode):
+class BitcastNode(BinaryNode):
     pass
 
-class InitExprNode(BinaryExprNode):
+
+class SizeofNode(UnaryNode):
     pass
 
-class AssignNode(BinaryExprNode):
+class OffsetofNode(BinaryNode):
     pass
 
-class CallExprNode(ExprNode):
+class TypeofNode(UnaryNode):
+    pass
+
+class InitNode(BinaryNode):
+    pass
+
+class AssignNode(BinaryNode):
+    pass
+
+class CallNode(ExprNode):
     def __init__(self, lhs, args):
         self.lhs = lhs
         self.args = args
 
-class EmbedCallExprNode(ExprNode):
+class EmbedCallNode(ExprNode):
     def __init__(self, lhs, args):
         self.lhs = lhs
         self.args = args

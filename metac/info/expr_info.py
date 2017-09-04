@@ -2,11 +2,11 @@
 class ExprInfo:
     pass
 
-class BinaryExprInfo(ExprInfo):
+class BinaryInfo(ExprInfo):
     def __init__(self, lhs, rhs):
         self.lhs = lhs
         self.rhs = rhs
 
-class UnaryExprInfo(ExprInfo):
+class UnaryInfo(ExprInfo):
     def __init__(self, operand):
         self.operand = operand

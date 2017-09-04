@@ -3,11 +3,11 @@ from .statement_node import StatementNode
 class ExprNode(StatementNode):
     pass
 
-class UnaryExprNode(ExprNode):
+class UnaryNode(ExprNode):
     def __init__(self, operand):
         self.operand = operand
 
-class BinaryExprNode(ExprNode):
+class BinaryNode(ExprNode):
     def __init__(self, lhs, rhs):
         self.lhs = lhs
         self.rhs = rhs

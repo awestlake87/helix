@@ -1,33 +1,33 @@
-from .expr_node import BinaryExprNode, UnaryExprNode
+from .expr_node import BinaryNode, UnaryNode
 
-class AndNode(BinaryExprNode):
+class AndNode(BinaryNode):
     pass
 
-class XorNode(BinaryExprNode):
+class XorNode(BinaryNode):
     pass
 
-class OrNode(BinaryExprNode):
+class OrNode(BinaryNode):
     pass
 
-class NotNode(UnaryExprNode):
-    pass
-
-
-class LtnNode(BinaryExprNode):
-    pass
-
-class GtnNode(BinaryExprNode):
-    pass
-
-class LeqNode(BinaryExprNode):
-    pass
-
-class GeqNode(BinaryExprNode):
+class NotNode(UnaryNode):
     pass
 
 
-class EqlNode(BinaryExprNode):
+class LtnNode(BinaryNode):
     pass
 
-class NeqNode(BinaryExprNode):
+class GtnNode(BinaryNode):
+    pass
+
+class LeqNode(BinaryNode):
+    pass
+
+class GeqNode(BinaryNode):
+    pass
+
+
+class EqlNode(BinaryNode):
+    pass
+
+class NeqNode(BinaryNode):
     pass

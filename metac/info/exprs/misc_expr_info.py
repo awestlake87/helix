@@ -12,109 +12,114 @@ class EmbedCallInfo:
 
 
 
-class LtnInfo(BinaryExprInfo):
+class LtnInfo(BinaryInfo):
     pass
 
-class GtnInfo(BinaryExprInfo):
+class GtnInfo(BinaryInfo):
     pass
 
-class LeqInfo(BinaryExprInfo):
+class LeqInfo(BinaryInfo):
     pass
 
-class GeqInfo(BinaryExprInfo):
+class GeqInfo(BinaryInfo):
     pass
 
-class EqlInfo(BinaryExprInfo):
+class EqlInfo(BinaryInfo):
     pass
 
-class NeqInfo(BinaryExprInfo):
-    pass
-
-
-
-class AndInfo(BinaryExprInfo):
-    pass
-
-class OrInfo(BinaryExprInfo):
-    pass
-
-class NotInfo(UnaryExprInfo):
-    pass
-
-class XorInfo(BinaryExprInfo):
+class NeqInfo(BinaryInfo):
     pass
 
 
 
-class AddInfo(BinaryExprInfo):
+class AndInfo(BinaryInfo):
     pass
 
-class SubInfo(BinaryExprInfo):
+class OrInfo(BinaryInfo):
     pass
 
-class MulInfo(BinaryExprInfo):
+class NotInfo(UnaryInfo):
     pass
 
-class DivInfo(BinaryExprInfo):
-    pass
-
-class ModInfo(BinaryExprInfo):
+class XorInfo(BinaryInfo):
     pass
 
 
 
-class BitAndInfo(BinaryExprInfo):
-    pass
-
-class BitOrInfo(BinaryExprInfo):
-    pass
-
-class BitNotInfo(UnaryExprInfo):
-    pass
-
-class BitXorInfo(BinaryExprInfo):
-    pass
-
-class BitShlInfo(BinaryExprInfo):
-    pass
-
-class BitShrInfo(BinaryExprInfo):
+class NegInfo(UnaryInfo):
     pass
 
 
 
-class PreIncInfo(UnaryExprInfo):
+class AddInfo(BinaryInfo):
     pass
 
-class PostIncInfo(UnaryExprInfo):
+class SubInfo(BinaryInfo):
     pass
 
-class PreDecInfo(UnaryExprInfo):
+class MulInfo(BinaryInfo):
     pass
 
-class PostDecInfo(UnaryExprInfo):
+class DivInfo(BinaryInfo):
     pass
 
-
-
-class PtrExprInfo(UnaryExprInfo):
-    pass
-
-class RefExprInfo(UnaryExprInfo):
+class ModInfo(BinaryInfo):
     pass
 
 
 
-class InitInfo(BinaryExprInfo):
+class BitAndInfo(BinaryInfo):
     pass
 
-class AssignInfo(BinaryExprInfo):
+class BitOrInfo(BinaryInfo):
     pass
 
-class DotInfo(BinaryExprInfo):
+class BitNotInfo(UnaryInfo):
     pass
 
-class OffsetofInfo(UnaryExprInfo):
+class BitXorInfo(BinaryInfo):
+    pass
+
+class BitShlInfo(BinaryInfo):
+    pass
+
+class BitShrInfo(BinaryInfo):
+    pass
+
+
+
+class PreIncInfo(UnaryInfo):
+    pass
+
+class PostIncInfo(UnaryInfo):
+    pass
+
+class PreDecInfo(UnaryInfo):
+    pass
+
+class PostDecInfo(UnaryInfo):
+    pass
+
+
+
+class PtrExprInfo(UnaryInfo):
+    pass
+
+class RefExprInfo(UnaryInfo):
+    pass
+
+
+
+class InitInfo(BinaryInfo):
+    pass
+
+class AssignInfo(BinaryInfo):
+    pass
+
+class DotInfo(BinaryInfo):
+    pass
+
+class OffsetofInfo(UnaryInfo):
     pass
 
 class TernaryConditionalInfo:

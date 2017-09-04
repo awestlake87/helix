@@ -65,10 +65,10 @@ def gen_expr_ir(ctx, expr):
             ctx, value.type, value.get_llvm_ptr()
         )
 
-    elif issubclass(expr_type, BinaryExprInfo):
+    elif issubclass(expr_type, BinaryInfo):
         return gen_binary_expr_ir(ctx, expr)
 
-    elif issubclass(expr_type, UnaryExprInfo):
+    elif issubclass(expr_type, UnaryInfo):
         return gen_unary_expr_ir(ctx, expr)
 
     elif expr_type is StringInfo:
@@ -184,7 +184,7 @@ def gen_unary_expr_ir(ctx, expr):
     elif expr_type is PostDecInfo:
         return gen_post_dec_ir(ctx, operand)
 
-    elif expr_type is NegExprInfo:
+    elif expr_type is NegInfo:
         return gen_neg_ir(ctx, operand)
 
     elif expr_type is BitNotInfo:

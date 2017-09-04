@@ -56,13 +56,13 @@ def hoist_expr(unit, expr):
     elif expr_type is FunNode:
         hoist_fun(unit, expr)
 
-    elif expr_type is CallExprNode:
+    elif expr_type is CallNode:
         hoist_call(unit, expr)
 
-    elif expr_type is EmbedCallExprNode:
+    elif expr_type is EmbedCallNode:
         hoist_call(unit, expr)
 
-    elif expr_type is InitExprNode:
+    elif expr_type is InitNode:
         hoist_init(unit, expr)
 
     elif expr_type is DotExprNode:
@@ -81,10 +81,10 @@ def hoist_expr(unit, expr):
     elif expr_type is GlobalNode:
         hoist_global_expr(unit, expr)
 
-    elif issubclass(expr_type, UnaryExprNode):
+    elif issubclass(expr_type, UnaryNode):
         hoist_unary_expr(unit, expr)
 
-    elif issubclass(expr_type, BinaryExprNode):
+    elif issubclass(expr_type, BinaryNode):
         hoist_binary_expr(unit, expr)
 
     elif expr_type is FunTypeNode:
