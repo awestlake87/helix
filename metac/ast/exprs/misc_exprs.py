@@ -36,7 +36,7 @@ class TypeofNode(UnaryExprNode):
 class InitExprNode(BinaryExprNode):
     pass
 
-class AssignExprNode(BinaryExprNode):
+class AssignNode(BinaryExprNode):
     pass
 
 class CallExprNode(ExprNode):

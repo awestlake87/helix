@@ -20,13 +20,13 @@ def hoist_block(unit, block):
             if issubclass(statement_type, ExprNode):
                 hoist_expr(unit, statement)
 
-            elif statement_type is IfStatementNode:
+            elif statement_type is IfNode:
                 hoist_if_statement(unit, statement)
 
-            elif statement_type is LoopStatementNode:
+            elif statement_type is LoopNode:
                 hoist_loop_statement(unit, statement)
 
-            elif statement_type is SwitchStatementNode:
+            elif statement_type is SwitchNode:
                 hoist_switch_statement(unit, statement)
 
             elif statement_type is ReturnNode:

@@ -22,11 +22,11 @@ from .static_exprs import *
 def gen_expr_ir(ctx, expr):
     expr_type = type(expr)
 
-    if expr_type is CallExprInfo:
+    if expr_type is CallInfo:
         return gen_call_ir(ctx, expr)
 
     elif expr_type is SymbolInfo:
-        value = ctx.scope.resolve(expr.id).proto_target.ir_value
+        value = ctx.scope.resolve(expr.id).ir_value
         if type(value) is GlobalValue:
             return LlvmRef(ctx, value.type, value.get_llvm_ptr())
         else:
@@ -47,10 +47,10 @@ def gen_expr_ir(ctx, expr):
     elif expr_type is XorInfo:
         return gen_xor_ir(ctx, expr)
 
-    elif expr_type is InitExprInfo:
+    elif expr_type is InitInfo:
         return gen_init_ir(ctx, expr)
 
-    elif expr_type is DotExprInfo:
+    elif expr_type is DotInfo:
         return gen_dot_ir(ctx, expr)
 
     elif expr_type is OffsetofInfo:
@@ -95,61 +95,61 @@ def gen_binary_expr_ir(ctx, expr):
     elif expr_type is NeqInfo:
         return gen_neq_ir(ctx, lhs, rhs)
 
-    elif expr_type is AddExprInfo:
+    elif expr_type is AddInfo:
         return gen_add_ir(ctx, lhs, rhs)
-    elif expr_type is SubExprInfo:
+    elif expr_type is SubInfo:
         return gen_sub_ir(ctx, lhs, rhs)
-    elif expr_type is MulExprInfo:
+    elif expr_type is MulInfo:
         return gen_mul_ir(ctx, lhs, rhs)
-    elif expr_type is DivExprInfo:
+    elif expr_type is DivInfo:
         return gen_div_ir(ctx, lhs, rhs)
-    elif expr_type is ModExprInfo:
+    elif expr_type is ModInfo:
         return gen_mod_ir(ctx, lhs, rhs)
 
-    elif expr_type is BitAndExprInfo:
+    elif expr_type is BitAndInfo:
         return gen_bit_and_ir(ctx, lhs, rhs)
-    elif expr_type is BitOrExprInfo:
+    elif expr_type is BitOrInfo:
         return gen_bit_or_ir(ctx, lhs, rhs)
-    elif expr_type is BitXorExprInfo:
+    elif expr_type is BitXorInfo:
         return gen_bit_xor_ir(ctx, lhs, rhs)
-    elif expr_type is BitShlExprInfo:
+    elif expr_type is BitShlInfo:
         return gen_bit_shl_ir(ctx, lhs, rhs)
-    elif expr_type is BitShrExprInfo:
+    elif expr_type is BitShrInfo:
         return gen_bit_shr_ir(ctx, lhs, rhs)
 
-    elif expr_type is AssignExprInfo:
+    elif expr_type is AssignInfo:
         gen_assign_code(ctx, lhs, rhs)
         return lhs
 
-    elif expr_type is AddAssignExprInfo:
+    elif expr_type is AddAssignInfo:
         gen_assign_code(ctx, lhs, gen_add_ir(ctx, lhs, rhs))
         return lhs
-    elif expr_type is SubAssignExprInfo:
+    elif expr_type is SubAssignInfo:
         gen_assign_code(ctx, lhs, gen_sub_ir(ctx, lhs, rhs))
         return lhs
-    elif expr_type is MulAssignExprInfo:
+    elif expr_type is MulAssignInfo:
         gen_assign_code(ctx, lhs, gen_mul_ir(ctx, lhs, rhs))
         return lhs
-    elif expr_type is DivAssignExprInfo:
+    elif expr_type is DivAssignInfo:
         gen_assign_code(ctx, lhs, gen_div_ir(ctx, lhs, rhs))
         return lhs
-    elif expr_type is ModAssignExprInfo:
+    elif expr_type is ModAssignInfo:
         gen_assign_code(ctx, lhs, gen_mod_ir(ctx, lhs, rhs))
         return lhs
 
-    elif expr_type is BitAndAssignExprInfo:
+    elif expr_type is BitAndAssignInfo:
         gen_assign_code(ctx, lhs, gen_bit_and_ir(ctx, lhs, rhs))
         return lhs
-    elif expr_type is BitOrAssignExprInfo:
+    elif expr_type is BitOrAssignInfo:
         gen_assign_code(ctx, lhs, gen_bit_or_ir(ctx, lhs, rhs))
         return lhs
-    elif expr_type is BitXorAssignExprInfo:
+    elif expr_type is BitXorAssignInfo:
         gen_assign_code(ctx, lhs, gen_bit_xor_ir(ctx, lhs, rhs))
         return lhs
-    elif expr_type is BitShlAssignExprInfo:
+    elif expr_type is BitShlAssignInfo:
         gen_assign_code(ctx, lhs, gen_bit_shl_ir(ctx, lhs, rhs))
         return lhs
-    elif expr_type is BitShrAssignExprInfo:
+    elif expr_type is BitShrAssignInfo:
         gen_assign_code(ctx, lhs, gen_bit_shr_ir(ctx, lhs, rhs))
         return lhs
 
@@ -175,19 +175,19 @@ def gen_unary_expr_ir(ctx, expr):
     elif expr_type is RefExprInfo:
         return gen_ref_expr_ir(ctx, operand)
 
-    elif expr_type is PreIncExprInfo:
+    elif expr_type is PreIncInfo:
         return gen_pre_inc_ir(ctx, operand)
-    elif expr_type is PostIncExprInfo:
+    elif expr_type is PostIncInfo:
         return gen_post_inc_ir(ctx, operand)
-    elif expr_type is PreDecExprInfo:
+    elif expr_type is PreDecInfo:
         return gen_pre_dec_ir(ctx, operand)
-    elif expr_type is PostDecExprInfo:
+    elif expr_type is PostDecInfo:
         return gen_post_dec_ir(ctx, operand)
 
     elif expr_type is NegExprInfo:
         return gen_neg_ir(ctx, operand)
 
-    elif expr_type is BitNotExprInfo:
+    elif expr_type is BitNotInfo:
         return gen_bit_not_ir(ctx, operand)
 
     elif expr_type is SizeofInfo:

@@ -59,13 +59,13 @@ def gen_statement_deps(unit, statement):
     if statement_type is ReturnNode:
         return gen_return_deps(unit, statement)
 
-    elif statement_type is IfStatementNode:
+    elif statement_type is IfNode:
         return gen_if_statement_deps(unit, statement)
 
-    elif statement_type is LoopStatementNode:
+    elif statement_type is LoopNode:
         return gen_loop_statement_deps(unit, statement)
 
-    elif statement_type is SwitchStatementNode:
+    elif statement_type is SwitchNode:
         return gen_switch_statement_deps(unit, statement)
 
     elif statement_type is TryStatementNode:

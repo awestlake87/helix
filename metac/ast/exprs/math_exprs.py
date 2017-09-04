@@ -1,34 +1,34 @@
 from ..expr_node import ExprNode, UnaryExprNode, BinaryExprNode
 
-class AddExprNode(BinaryExprNode):
+class AddNode(BinaryExprNode):
     pass
 
-class SubExprNode(BinaryExprNode):
+class SubNode(BinaryExprNode):
     pass
 
-class MulExprNode(BinaryExprNode):
+class MulNode(BinaryExprNode):
     pass
 
-class DivExprNode(BinaryExprNode):
+class DivNode(BinaryExprNode):
     pass
 
 class ModExprNode(BinaryExprNode):
     pass
 
 
-class AddAssignExprNode(BinaryExprNode):
+class AddAssignNode(BinaryExprNode):
     pass
 
-class SubAssignExprNode(BinaryExprNode):
+class SubAssignNode(BinaryExprNode):
     pass
 
-class MulAssignExprNode(BinaryExprNode):
+class MulAssignNode(BinaryExprNode):
     pass
 
-class DivAssignExprNode(BinaryExprNode):
+class DivAssignNode(BinaryExprNode):
     pass
 
-class ModAssignExprNode(BinaryExprNode):
+class ModAssignNode(BinaryExprNode):
     pass
 
 

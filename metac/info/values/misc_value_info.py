@@ -6,8 +6,13 @@ from ...scope import Scope
 from ..expr_info import ExprInfo
 from ..statements import BlockInfo
 
-class IntInfo:
-    pass
+class IntInfo(ExprInfo):
+    def __init__(self, num_bits, is_signed, value, radix):
+        self.num_bits = num_bits
+        self.is_signed = is_signed
+        self.value = str(value)
+        self.radix = radix
+        self.is_signed = is_signed
 
 class NilInfo:
     pass
@@ -19,6 +24,9 @@ class AttrInfo:
     pass
 
 class StringInfo:
+    pass
+
+class StructInfo:
     pass
 
 class Target:
@@ -131,8 +139,25 @@ class FunInfo(ExprInfo):
         )
         self.target = FunTarget(self.proto_target, self.scope, self)
 
+    @property
+    def ir_value(self):
+        return self.proto_target.ir_value
+
 class VarInfo(ExprInfo):
-    pass
+    def __init__(self):
+        self._ir_value = None
+
+    @property
+    def ir_value(self):
+        if self._ir_value is not None:
+            return self._ir_value
+
+        else:
+            raise Todo()
+
+    @ir_value.setter
+    def ir_value(self, val):
+        self._ir_value = val
 
 class SymbolInfo(ExprInfo):
     def __init__(self, id):

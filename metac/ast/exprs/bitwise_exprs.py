@@ -1,36 +1,36 @@
 from ..expr_node import ExprNode, UnaryExprNode, BinaryExprNode
-from .misc_exprs import AssignExprNode
+from .misc_exprs import AssignNode
 
-class BitAndExprNode(BinaryExprNode):
+class BitAndNode(BinaryExprNode):
     pass
 
-class BitXorExprNode(BinaryExprNode):
+class BitXorNode(BinaryExprNode):
     pass
 
-class BitOrExprNode(BinaryExprNode):
+class BitOrNode(BinaryExprNode):
     pass
 
-class BitNotExprNode(UnaryExprNode):
+class BitNotNode(UnaryExprNode):
     pass
 
-class BitShrExprNode(BinaryExprNode):
+class BitShrNode(BinaryExprNode):
     pass
 
-class BitShlExprNode(BinaryExprNode):
+class BitShlNode(BinaryExprNode):
     pass
 
 
-class BitAndAssignExprNode(AssignExprNode):
+class BitAndAssignNode(AssignNode):
     pass
 
-class BitXorAssignExprNode(AssignExprNode):
+class BitXorAssignNode(AssignNode):
     pass
 
-class BitOrAssignExprNode(AssignExprNode):
+class BitOrAssignNode(AssignNode):
     pass
 
-class BitShrAssignExprNode(AssignExprNode):
+class BitShrAssignNode(AssignNode):
     pass
 
-class BitShlAssignExprNode(AssignExprNode):
+class BitShlAssignNode(AssignNode):
     pass

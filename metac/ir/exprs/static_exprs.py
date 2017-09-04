@@ -37,10 +37,10 @@ def gen_static_expr_ir(scope, expr_info):
             scope, expr_info.length, expr_info.type
         )
 
-    elif expr_type is EmbedCallExprInfo:
+    elif expr_type is EmbedCallInfo:
         return gen_static_embed_call_ir(scope, expr_info)
 
-    elif expr_type is CallExprInfo:
+    elif expr_type is CallInfo:
         return gen_static_call_ir(scope, expr_info)
 
     elif issubclass(expr_type, UnaryExprInfo):
