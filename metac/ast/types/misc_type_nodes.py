@@ -1,4 +1,4 @@
-from ..expr_node import ExprNode, UnaryNode
+from ..expr_node import ExprNode, UnaryExprNode
 
 class FunTypeNode(ExprNode):
     def __init__(self, ret_type, param_types):

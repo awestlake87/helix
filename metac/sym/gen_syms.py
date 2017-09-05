@@ -55,12 +55,6 @@ def gen_statement_sym(ctx, statement_node):
     elif statement_type is SwitchNode:
         return gen_switch_sym(ctx, statement_node)
 
-    elif statement_type is BreakNode:
-        return BreakSym()
-
-    elif statement_type is ContinueNode:
-        return ContinueSym()
-
     elif issubclass(statement_type, ExprNode):
         return gen_expr_sym(ctx, statement_node)
 
@@ -70,16 +64,16 @@ def gen_statement_sym(ctx, statement_node):
 def gen_expr_sym(ctx, expr_node):
     expr_type = type(expr_node)
 
-    if expr_type is CallNode:
+    if expr_type is CallExprNode:
         return gen_call_sym(ctx, expr_node)
 
-    elif expr_type is InitNode:
+    elif expr_type is InitExprNode:
         return gen_init_sym(ctx, expr_node)
 
-    elif issubclass(expr_type, BinaryNode):
+    elif issubclass(expr_type, BinaryExprNode):
         return gen_binary_expr_sym(ctx, expr_node)
 
-    elif issubclass(expr_type, UnaryNode):
+    elif issubclass(expr_type, UnaryExprNode):
         return gen_unary_expr_sym(ctx, expr_node)
 
     elif expr_type is FunNode:
@@ -113,26 +107,17 @@ def gen_unary_expr_sym(ctx, expr_node):
 
     operand = gen_expr_sym(ctx, expr_node.operand)
 
-    if expr_type is PreIncNode:
-        return PreIncSym(operand)
+    if expr_type is PreIncExprNode:
+        return PreIncExprSym(operand)
 
-    elif expr_type is PostIncNode:
-        return PostIncSym(operand)
+    elif expr_type is PostIncExprNode:
+        return PostIncExprSym(operand)
 
-    elif expr_type is PreDecNode:
-        return PreDecSym(operand)
+    elif expr_type is PreDecExprNode:
+        return PreDecExprSym(operand)
 
-    elif expr_type is PostDecNode:
-        return PostDecSym(operand)
-
-    elif expr_type is NegNode:
-        return NegSym(operand)
-
-    elif expr_type is NotNode:
-        return NotSym(operand)
-
-    elif expr_type is BitNotNode:
-        return BitNotSym(operand)
+    elif expr_type is PostDecExprNode:
+        return PostDecExprSym(operand)
 
     else:
         raise Todo(expr_type)
@@ -163,30 +148,6 @@ def gen_binary_expr_sym(ctx, expr_node):
 
     elif expr_type is NeqNode:
         return NeqSym(lhs, rhs)
-
-    elif expr_type is AndNode:
-        return AndSym(lhs, rhs)
-
-    elif expr_type is OrNode:
-        return OrSym(lhs, rhs)
-
-    elif expr_type is XorNode:
-        return XorSym(lhs, rhs)
-
-    elif expr_type is BitAndNode:
-        return BitAndSym(lhs, rhs)
-
-    elif expr_type is BitOrNode:
-        return BitOrSym(lhs, rhs)
-
-    elif expr_type is BitXorNode:
-        return BitXorSym(lhs, rhs)
-
-    elif expr_type is BitShlNode:
-        return BitShlSym(lhs, rhs)
-
-    elif expr_type is BitShrNode:
-        return BitShrSym(lhs, rhs)
 
     else:
         raise Todo(expr_type)
@@ -257,7 +218,7 @@ def gen_switch_sym(ctx, switch_node):
 
 
 def gen_call_sym(ctx, call_expr_node):
-    return CallSym(
+    return CallExprSym(
         gen_expr_sym(ctx, call_expr_node.lhs),
         [ gen_expr_sym(ctx, arg_node) for arg_node in call_expr_node.args ]
     )
@@ -271,7 +232,7 @@ def gen_init_sym(ctx, expr):
 
         ctx.scope.insert(lhs.id, lhs)
 
-        return InitSym(lhs, rhs)
+        return InitExprSym(lhs, rhs)
 
     else:
         raise Todo(lhs_type)

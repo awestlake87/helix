@@ -1,88 +1,49 @@
 
 from ..expr_sym import *
 
-class CallSym(ExprSym):
+class CallExprSym(ExprSym):
     def __init__(self, lhs, args):
         self.lhs = lhs
         self.args = args
 
 
 
-class LtnSym(BinarySym):
+class LtnSym(BinaryExprSym):
     pass
 
-class GtnSym(BinarySym):
+class GtnSym(BinaryExprSym):
     pass
 
-class LeqSym(BinarySym):
+class LeqSym(BinaryExprSym):
     pass
 
-class GeqSym(BinarySym):
+class GeqSym(BinaryExprSym):
     pass
 
-class EqlSym(BinarySym):
+class EqlSym(BinaryExprSym):
     pass
 
-class NeqSym(BinarySym):
-    pass
-
-
-
-class AndSym(BinarySym):
-    pass
-
-class OrSym(BinarySym):
-    pass
-
-class NotSym(UnarySym):
-    pass
-
-class XorSym(BinarySym):
+class NeqSym(BinaryExprSym):
     pass
 
 
 
-class NegSym(UnarySym):
+class PreIncExprSym(UnaryExprSym):
+    pass
+
+class PostIncExprSym(UnaryExprSym):
+    pass
+
+class PreDecExprSym(UnaryExprSym):
+    pass
+
+class PostDecExprSym(UnaryExprSym):
     pass
 
 
 
-class PreIncSym(UnarySym):
+class InitExprSym(BinaryExprSym):
     pass
 
-class PostIncSym(UnarySym):
-    pass
-
-class PreDecSym(UnarySym):
-    pass
-
-class PostDecSym(UnarySym):
-    pass
-
-
-
-class BitAndSym(BinarySym):
-    pass
-
-class BitOrSym(BinarySym):
-    pass
-
-class BitNotSym(UnarySym):
-    pass
-
-class BitXorSym(BinarySym):
-    pass
-
-class BitShlSym(BinarySym):
-    pass
-
-class BitShrSym(BinarySym):
-    pass
-
-
-
-class InitSym(BinarySym):
-    pass
-
-class AssignSym(BinarySym):
+class AssignSym(BinaryExprSym):
     pass

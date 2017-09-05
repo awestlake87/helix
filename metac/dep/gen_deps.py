@@ -30,7 +30,7 @@ def gen_expr_sym(unit, expr):
                 else:
                     raise Todo()
 
-    elif expr_type is CallNode:
+    elif expr_type is CallExprNode:
         lhs = gen_expr_sym(unit, expr.lhs)
 
         if type(lhs) is StructSymbol:
@@ -99,25 +99,25 @@ def gen_expr_deps(unit, expr):
     if expr_type is FunNode:
         raise Todo("fun node is used")
 
-    elif expr_type is CallNode:
+    elif expr_type is CallExprNode:
         return gen_call_deps(unit, expr)
 
-    elif expr_type is EmbedCallNode:
+    elif expr_type is EmbedCallExprNode:
         return gen_call_deps(unit, expr)
 
     elif expr_type is DotExprNode:
         return gen_dot_expr_deps(unit, expr)
 
-    elif expr_type is InitNode:
+    elif expr_type is InitExprNode:
         return gen_init_expr_deps(unit, expr)
 
     elif expr_type is TernaryConditionalNode:
         return gen_ternary_conditional_deps(unit, expr)
 
-    elif issubclass(expr_type, UnaryNode):
+    elif issubclass(expr_type, UnaryExprNode):
         return gen_unary_expr_deps(unit, expr)
 
-    elif issubclass(expr_type, BinaryNode):
+    elif issubclass(expr_type, BinaryExprNode):
         return gen_binary_expr_deps(unit, expr)
 
     elif expr_type is SymbolNode:

@@ -61,12 +61,6 @@ def gen_statement_deps(ctx, statement_info):
     elif statement_type is SwitchInfo:
         return gen_switch_deps(ctx, statement_info)
 
-    elif statement_type is BreakInfo:
-        return [ ]
-
-    elif statement_type is ContinueInfo:
-        return [ ]
-
     elif issubclass(statement_type, ExprInfo):
         return gen_expr_deps(ctx, statement_info)
 
@@ -82,10 +76,10 @@ def gen_expr_deps(ctx, expr_info):
     elif expr_type is CallInfo:
         return gen_call_deps(ctx, expr_info)
 
-    elif issubclass(expr_type, BinaryInfo):
+    elif issubclass(expr_type, BinaryExprInfo):
         return gen_binary_expr_deps(ctx, expr_info)
 
-    elif issubclass(expr_type, UnaryInfo):
+    elif issubclass(expr_type, UnaryExprInfo):
         return gen_unary_expr_deps(ctx, expr_info)
 
     elif expr_type is FunInfo:
@@ -146,9 +140,6 @@ def gen_call_deps(ctx, call_info):
 
         deps.append(fun_info.proto_target)
         ctx.unit.target.deps.append(fun_info.target)
-
-    elif lhs_type is IntTypeInfo:
-        pass
 
     else:
         raise Todo(lhs_type)

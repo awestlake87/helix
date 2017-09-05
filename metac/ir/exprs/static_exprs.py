@@ -43,7 +43,7 @@ def gen_static_expr_ir(scope, expr_info):
     elif expr_type is CallInfo:
         return gen_static_call_ir(scope, expr_info)
 
-    elif issubclass(expr_type, UnaryInfo):
+    elif issubclass(expr_type, UnaryExprInfo):
         return gen_static_unary_expr_ir(scope, expr_info)
 
     else:

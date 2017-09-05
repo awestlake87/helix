@@ -55,12 +55,6 @@ def gen_statement_info(ctx, statement_sym):
     elif statement_type is SwitchSym:
         return gen_switch_info(ctx, statement_sym)
 
-    elif statement_type is BreakSym:
-        return BreakInfo()
-
-    elif statement_type is ContinueSym:
-        return ContinueInfo()
-
     elif issubclass(statement_type, ExprSym):
         return gen_expr_info(ctx, statement_sym)
 
@@ -70,16 +64,16 @@ def gen_statement_info(ctx, statement_sym):
 def gen_expr_info(ctx, expr_sym):
     expr_type = type(expr_sym)
 
-    if expr_type is CallSym:
+    if expr_type is CallExprSym:
         return gen_call_expr_info(ctx, expr_sym)
 
-    elif expr_type is InitSym:
+    elif expr_type is InitExprSym:
         return gen_init_info(ctx, expr_sym)
 
-    elif issubclass(expr_type, BinarySym):
+    elif issubclass(expr_type, BinaryExprSym):
         return gen_binary_expr_info(ctx, expr_sym)
 
-    elif issubclass(expr_type, UnarySym):
+    elif issubclass(expr_type, UnaryExprSym):
         return gen_unary_expr_info(ctx, expr_sym)
 
     elif expr_type is FunSym:
@@ -114,11 +108,7 @@ def gen_binary_expr_info(ctx, expr_sym):
     lhs = gen_expr_info(ctx, expr_sym.lhs)
     rhs = gen_expr_info(ctx, expr_sym.rhs)
 
-
-    if expr_type is AssignSym:
-        return AssignInfo(lhs, rhs)
-
-    elif expr_type is LtnSym:
+    if expr_type is LtnSym:
         return LtnInfo(lhs, rhs)
 
     elif expr_type is GtnSym:
@@ -136,29 +126,8 @@ def gen_binary_expr_info(ctx, expr_sym):
     elif expr_type is NeqSym:
         return NeqInfo(lhs, rhs)
 
-    elif expr_type is AndSym:
-        return AndInfo(lhs, rhs)
-
-    elif expr_type is OrSym:
-        return OrInfo(lhs, rhs)
-
-    elif expr_type is XorSym:
-        return XorInfo(lhs, rhs)
-
-    elif expr_type is BitAndSym:
-        return BitAndInfo(lhs, rhs)
-
-    elif expr_type is BitOrSym:
-        return BitOrInfo(lhs, rhs)
-
-    elif expr_type is BitXorSym:
-        return BitXorInfo(lhs, rhs)
-
-    elif expr_type is BitShlSym:
-        return BitShlInfo(lhs, rhs)
-
-    elif expr_type is BitShrSym:
-        return BitShrInfo(lhs, rhs)
+    elif expr_type is AssignSym:
+        return AssignInfo(lhs, rhs)
 
     else:
         raise Todo(expr_type)
@@ -168,26 +137,17 @@ def gen_unary_expr_info(ctx, expr_sym):
 
     operand = gen_expr_info(ctx, expr_sym.operand)
 
-    if expr_type is PreIncSym:
+    if expr_type is PreIncExprSym:
         return PreIncInfo(operand)
 
-    elif expr_type is PostIncSym:
+    elif expr_type is PostIncExprSym:
         return PostIncInfo(operand)
 
-    elif expr_type is PreDecSym:
+    elif expr_type is PreDecExprSym:
         return PreDecInfo(operand)
 
-    elif expr_type is PostDecSym:
+    elif expr_type is PostDecExprSym:
         return PostDecInfo(operand)
-
-    elif expr_type is NegSym:
-        return NegInfo(operand)
-
-    elif expr_type is NotSym:
-        return NotInfo(operand)
-
-    elif expr_type is BitNotSym:
-        return BitNotInfo(operand)
 
     else:
         raise Todo(expr_type)

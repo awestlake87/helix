@@ -3,11 +3,11 @@
 class ExprSym:
     pass
 
-class BinarySym(ExprSym):
+class BinaryExprSym(ExprSym):
     def __init__(self, lhs, rhs):
         self.lhs = lhs
         self.rhs = rhs
 
-class UnarySym(ExprSym):
+class UnaryExprSym(ExprSym):
     def __init__(self, operand):
         self.operand = operand

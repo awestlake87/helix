@@ -42,9 +42,3 @@ class SwitchSym:
         self.value = None
         self.case_branches = [ ]
         self.default_block = None
-
-class BreakSym:
-    pass
-
-class ContinueSym:
-    pass

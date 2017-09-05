@@ -139,6 +139,7 @@ class LoopTests(unittest.TestCase):
             )
         )
 
+    @unittest.SkipTest
     def test_loop_control(self):
         self.assertEqual(
             0,
