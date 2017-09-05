@@ -264,38 +264,38 @@ def gen_block_code(ctx, block):
 def gen_statement_code(ctx, statement):
     statement_type = type(statement)
 
-    if statement_type is ReturnInfo:
+    if statement_type is ReturnNode:
         gen_return_statement_code(ctx, statement)
 
-    elif statement_type is IfStatementInfo:
+    elif statement_type is IfStatementNode:
         gen_if_statement_code(ctx, statement)
 
-    elif statement_type is LoopStatementInfo:
+    elif statement_type is LoopStatementNode:
         gen_loop_statement_code(ctx, statement)
 
-    elif statement_type is SwitchStatementInfo:
+    elif statement_type is SwitchStatementNode:
         gen_switch_statement_code(ctx, statement)
 
-    elif statement_type is TryStatementInfo:
+    elif statement_type is TryStatementNode:
         gen_try_statement_code(ctx, statement)
 
-    elif statement_type is ThrowStatementInfo:
+    elif statement_type is ThrowStatementNode:
         gen_throw_statement_code(ctx, statement)
 
-    elif statement_type is BreakInfo:
+    elif statement_type is BreakNode:
         gen_break_statement_code(ctx, statement)
 
-    elif statement_type is ContinueInfo:
+    elif statement_type is ContinueNode:
         gen_continue_statement_code(ctx, statement)
 
-    elif statement_type is FunInfo or statement_type is StructInfo:
+    elif statement_type is FunNode or statement_type is StructNode:
         # only interested in generating the current fun
         pass
 
-    elif issubclass(statement_type, ExprInfo):
+    elif issubclass(statement_type, ExprNode):
         gen_expr_ir(ctx, statement)
 
-    elif statement_type is BlockInfo:
+    elif statement_type is BlockNode:
         gen_block_code(ctx, statement)
 
     else:

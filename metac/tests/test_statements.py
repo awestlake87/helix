@@ -18,7 +18,6 @@ class LoopTests(unittest.TestCase):
             )
         )
 
-    @unittest.SkipTest
     def test_for_loop(self):
         self.assertEqual(
             9,
@@ -35,7 +34,6 @@ class LoopTests(unittest.TestCase):
             )
         )
 
-    @unittest.SkipTest
     def test_while_loop(self):
         self.assertEqual(
             100,
@@ -51,7 +49,6 @@ class LoopTests(unittest.TestCase):
             )
         )
 
-    @unittest.SkipTest
     def test_until_loop(self):
         self.assertEqual(
             100,
@@ -68,7 +65,6 @@ class LoopTests(unittest.TestCase):
             )
         )
 
-    @unittest.SkipTest
     def test_switch(self):
         self.assertEqual(
             0,
@@ -94,7 +90,6 @@ class LoopTests(unittest.TestCase):
             )
         )
 
-    @unittest.SkipTest
     def test_multi_case_switch(self):
         self.assertEqual(
             0,
@@ -123,7 +118,6 @@ class LoopTests(unittest.TestCase):
             )
         )
 
-    @unittest.SkipTest
     def test_if(self):
         self.assertEqual(
             0,
@@ -145,7 +139,6 @@ class LoopTests(unittest.TestCase):
             )
         )
 
-    @unittest.SkipTest
     def test_loop_control(self):
         self.assertEqual(
             0,

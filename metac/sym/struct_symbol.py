@@ -1,5 +1,5 @@
 
-from ..scope import Scope
+from .scope import Scope
 
 from ..err import Todo
 from ..dep import StructTarget

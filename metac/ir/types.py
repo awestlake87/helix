@@ -200,7 +200,7 @@ class FunValue(LlvmValue):
         super().__init__(
             ir_type,
             ir.Function(
-                unit.get_llvm_value(),
+                unit.get_ir_value().get_llvm_value(),
                 ir_type.get_llvm_value(),
                 self.id
             )

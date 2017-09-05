@@ -5,5 +5,5 @@ from .types import *
 from .values import *
 from .condition_nodes import *
 from .lexer import *
-from .parse import *
+from .parser import *
 from .token import *

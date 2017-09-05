@@ -1,7 +1,7 @@
 
 import json
 
-from .err import SymbolNotFound, SymbolAlreadyExists
+from ..err import SymbolNotFound, SymbolAlreadyExists
 
 class Scope:
     def __init__(self, parent=None):

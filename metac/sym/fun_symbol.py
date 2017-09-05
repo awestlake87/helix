@@ -2,7 +2,7 @@
 from ..err import Todo
 from ..dep import FunProtoTarget, AttrFunProtoTarget
 
-from ..scope import Scope
+from .scope import Scope
 
 class FunSymbol:
     def __init__(self, unit, ast, parent_scope):

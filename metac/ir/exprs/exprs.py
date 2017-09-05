@@ -1,6 +1,6 @@
 
 
-from ...info import *
+from ...ast import *
 from ...err import Todo
 
 from ..types import *
@@ -22,56 +22,56 @@ from .static_exprs import *
 def gen_expr_ir(ctx, expr):
     expr_type = type(expr)
 
-    if expr_type is CallExprInfo:
+    if expr_type is CallExprNode:
         return gen_call_ir(ctx, expr)
 
-    elif expr_type is SymbolInfo:
-        value = ctx.scope.resolve(expr.id).proto_target.ir_value
+    elif expr_type is SymbolNode:
+        value = ctx.scope.resolve(expr.id).get_ir_value()
         if type(value) is GlobalValue:
             return LlvmRef(ctx, value.type, value.get_llvm_ptr())
         else:
             return value
 
-    elif expr_type is AttrInfo:
+    elif expr_type is AttrNode:
         return gen_access_ir(ctx, ctx.instance, expr.id)
 
-    elif expr_type is AndInfo:
+    elif expr_type is AndNode:
         return gen_and_ir(ctx, expr)
 
-    elif expr_type is OrInfo:
+    elif expr_type is OrNode:
         return gen_or_ir(ctx, expr)
 
-    elif expr_type is NotInfo:
+    elif expr_type is NotNode:
         return gen_not_ir(ctx, expr)
 
-    elif expr_type is XorInfo:
+    elif expr_type is XorNode:
         return gen_xor_ir(ctx, expr)
 
-    elif expr_type is InitExprInfo:
+    elif expr_type is InitExprNode:
         return gen_init_ir(ctx, expr)
 
-    elif expr_type is DotExprInfo:
+    elif expr_type is DotExprNode:
         return gen_dot_ir(ctx, expr)
 
-    elif expr_type is OffsetofInfo:
+    elif expr_type is OffsetofNode:
         return gen_offsetof_ir(ctx, expr)
 
-    elif expr_type is TernaryConditionalInfo:
+    elif expr_type is TernaryConditionalNode:
         return gen_ternary_conditional_ir(ctx, expr)
 
-    elif expr_type is GlobalInfo:
+    elif expr_type is GlobalNode:
         value = ctx.scope.resolve(expr.id).get_ir_value()
         return LlvmRef(
             ctx, value.type, value.get_llvm_ptr()
         )
 
-    elif issubclass(expr_type, BinaryExprInfo):
+    elif issubclass(expr_type, BinaryExprNode):
         return gen_binary_expr_ir(ctx, expr)
 
-    elif issubclass(expr_type, UnaryExprInfo):
+    elif issubclass(expr_type, UnaryExprNode):
         return gen_unary_expr_ir(ctx, expr)
 
-    elif expr_type is StringInfo:
+    elif expr_type is StringNode:
         return gen_string_ir(ctx, expr)
 
     else:
@@ -82,84 +82,84 @@ def gen_binary_expr_ir(ctx, expr):
     lhs = gen_expr_ir(ctx, expr.lhs)
     rhs = gen_expr_ir(ctx, expr.rhs)
 
-    if expr_type is LtnInfo:
+    if expr_type is LtnNode:
         return gen_ltn_ir(ctx, lhs, rhs)
-    elif expr_type is LeqInfo:
+    elif expr_type is LeqNode:
         return gen_leq_ir(ctx, lhs, rhs)
-    elif expr_type is GtnInfo:
+    elif expr_type is GtnNode:
         return gen_gtn_ir(ctx, lhs, rhs)
-    elif expr_type is GeqInfo:
+    elif expr_type is GeqNode:
         return gen_geq_ir(ctx, lhs, rhs)
-    elif expr_type is EqlInfo:
+    elif expr_type is EqlNode:
         return gen_eql_ir(ctx, lhs, rhs)
-    elif expr_type is NeqInfo:
+    elif expr_type is NeqNode:
         return gen_neq_ir(ctx, lhs, rhs)
 
-    elif expr_type is AddExprInfo:
+    elif expr_type is AddExprNode:
         return gen_add_ir(ctx, lhs, rhs)
-    elif expr_type is SubExprInfo:
+    elif expr_type is SubExprNode:
         return gen_sub_ir(ctx, lhs, rhs)
-    elif expr_type is MulExprInfo:
+    elif expr_type is MulExprNode:
         return gen_mul_ir(ctx, lhs, rhs)
-    elif expr_type is DivExprInfo:
+    elif expr_type is DivExprNode:
         return gen_div_ir(ctx, lhs, rhs)
-    elif expr_type is ModExprInfo:
+    elif expr_type is ModExprNode:
         return gen_mod_ir(ctx, lhs, rhs)
 
-    elif expr_type is BitAndExprInfo:
+    elif expr_type is BitAndExprNode:
         return gen_bit_and_ir(ctx, lhs, rhs)
-    elif expr_type is BitOrExprInfo:
+    elif expr_type is BitOrExprNode:
         return gen_bit_or_ir(ctx, lhs, rhs)
-    elif expr_type is BitXorExprInfo:
+    elif expr_type is BitXorExprNode:
         return gen_bit_xor_ir(ctx, lhs, rhs)
-    elif expr_type is BitShlExprInfo:
+    elif expr_type is BitShlExprNode:
         return gen_bit_shl_ir(ctx, lhs, rhs)
-    elif expr_type is BitShrExprInfo:
+    elif expr_type is BitShrExprNode:
         return gen_bit_shr_ir(ctx, lhs, rhs)
 
-    elif expr_type is AssignExprInfo:
+    elif expr_type is AssignExprNode:
         gen_assign_code(ctx, lhs, rhs)
         return lhs
 
-    elif expr_type is AddAssignExprInfo:
+    elif expr_type is AddAssignExprNode:
         gen_assign_code(ctx, lhs, gen_add_ir(ctx, lhs, rhs))
         return lhs
-    elif expr_type is SubAssignExprInfo:
+    elif expr_type is SubAssignExprNode:
         gen_assign_code(ctx, lhs, gen_sub_ir(ctx, lhs, rhs))
         return lhs
-    elif expr_type is MulAssignExprInfo:
+    elif expr_type is MulAssignExprNode:
         gen_assign_code(ctx, lhs, gen_mul_ir(ctx, lhs, rhs))
         return lhs
-    elif expr_type is DivAssignExprInfo:
+    elif expr_type is DivAssignExprNode:
         gen_assign_code(ctx, lhs, gen_div_ir(ctx, lhs, rhs))
         return lhs
-    elif expr_type is ModAssignExprInfo:
+    elif expr_type is ModAssignExprNode:
         gen_assign_code(ctx, lhs, gen_mod_ir(ctx, lhs, rhs))
         return lhs
 
-    elif expr_type is BitAndAssignExprInfo:
+    elif expr_type is BitAndAssignExprNode:
         gen_assign_code(ctx, lhs, gen_bit_and_ir(ctx, lhs, rhs))
         return lhs
-    elif expr_type is BitOrAssignExprInfo:
+    elif expr_type is BitOrAssignExprNode:
         gen_assign_code(ctx, lhs, gen_bit_or_ir(ctx, lhs, rhs))
         return lhs
-    elif expr_type is BitXorAssignExprInfo:
+    elif expr_type is BitXorAssignExprNode:
         gen_assign_code(ctx, lhs, gen_bit_xor_ir(ctx, lhs, rhs))
         return lhs
-    elif expr_type is BitShlAssignExprInfo:
+    elif expr_type is BitShlAssignExprNode:
         gen_assign_code(ctx, lhs, gen_bit_shl_ir(ctx, lhs, rhs))
         return lhs
-    elif expr_type is BitShrAssignExprInfo:
+    elif expr_type is BitShrAssignExprNode:
         gen_assign_code(ctx, lhs, gen_bit_shr_ir(ctx, lhs, rhs))
         return lhs
 
-    elif expr_type is IndexExprInfo:
+    elif expr_type is IndexExprNode:
         return gen_index_expr_ir(ctx, lhs, rhs)
 
-    elif expr_type is AsInfo:
+    elif expr_type is AsNode:
         return gen_implicit_cast_ir(ctx, lhs, rhs)
 
-    elif expr_type is CastInfo:
+    elif expr_type is CastNode:
         return gen_cast_ir(ctx, lhs, rhs)
 
     else:
@@ -170,27 +170,27 @@ def gen_unary_expr_ir(ctx, expr):
 
     expr_type = type(expr)
 
-    if expr_type is PtrExprInfo:
+    if expr_type is PtrExprNode:
         return gen_ptr_expr_ir(ctx, operand)
-    elif expr_type is RefExprInfo:
+    elif expr_type is RefExprNode:
         return gen_ref_expr_ir(ctx, operand)
 
-    elif expr_type is PreIncExprInfo:
+    elif expr_type is PreIncExprNode:
         return gen_pre_inc_ir(ctx, operand)
-    elif expr_type is PostIncExprInfo:
+    elif expr_type is PostIncExprNode:
         return gen_post_inc_ir(ctx, operand)
-    elif expr_type is PreDecExprInfo:
+    elif expr_type is PreDecExprNode:
         return gen_pre_dec_ir(ctx, operand)
-    elif expr_type is PostDecExprInfo:
+    elif expr_type is PostDecExprNode:
         return gen_post_dec_ir(ctx, operand)
 
-    elif expr_type is NegExprInfo:
+    elif expr_type is NegExprNode:
         return gen_neg_ir(ctx, operand)
 
-    elif expr_type is BitNotExprInfo:
+    elif expr_type is BitNotExprNode:
         return gen_bit_not_ir(ctx, operand)
 
-    elif expr_type is SizeofInfo:
+    elif expr_type is SizeofNode:
         return gen_sizeof_ir(ctx, operand)
 
     else:
