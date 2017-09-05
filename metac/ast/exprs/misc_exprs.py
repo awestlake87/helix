@@ -14,6 +14,7 @@ class IndexExprNode(BinaryExprNode):
     pass
 
 
+
 class AsNode(BinaryExprNode):
     pass
 
@@ -22,6 +23,7 @@ class CastNode(BinaryExprNode):
 
 class BitcastNode(BinaryExprNode):
     pass
+
 
 
 class SizeofNode(UnaryExprNode):
@@ -38,6 +40,16 @@ class InitExprNode(BinaryExprNode):
 
 class AssignExprNode(BinaryExprNode):
     pass
+
+
+
+class BangNode(UnaryExprNode):
+    pass
+
+class TropeNode(UnaryExprNode):
+    pass
+
+
 
 class CallExprNode(ExprNode):
     def __init__(self, lhs, args):

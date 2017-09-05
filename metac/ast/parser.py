@@ -532,9 +532,9 @@ def parse_expr_prec8(ctx):
         id = ctx.current.id
 
         if id == '+':
-            lhs = AddExprNode(lhs, parse_expr_prec7(ctx))
+            lhs = AddNode(lhs, parse_expr_prec7(ctx))
         elif id == '-':
-            lhs = SubExprNode(lhs, parse_expr_prec7(ctx))
+            lhs = SubNode(lhs, parse_expr_prec7(ctx))
         else:
             raise CompilerBug("*_*")
 
@@ -553,9 +553,9 @@ def parse_expr_prec7(ctx):
         id = ctx.current.id
 
         if id == '*':
-            lhs = MulExprNode(lhs, parse_expr_prec6(ctx))
+            lhs = MulNode(lhs, parse_expr_prec6(ctx))
         elif id == '/':
-            lhs = DivExprNode(lhs, parse_expr_prec6(ctx))
+            lhs = DivNode(lhs, parse_expr_prec6(ctx))
         elif id == '%':
             lhs = ModExprNode(lhs, parse_expr_prec6(ctx))
         else:
@@ -646,6 +646,12 @@ def parse_expr_prec4(ctx):
             else:
                 return False
 
+        elif ctx.accept('!'):
+            return True
+
+        elif ctx.accept('~'):
+            return True
+
         elif ctx.accept(Token.OP_INC):
             return True
 
@@ -690,6 +696,12 @@ def parse_expr_prec4(ctx):
                         break
 
             lhs = EmbedCallExprNode(lhs, args)
+
+        elif id == '!':
+            lhs = BangNode(lhs)
+
+        elif id == "~":
+            lhs = TropeNode(lhs)
 
         elif id == Token.OP_INC:
             lhs = PostIncExprNode(lhs)

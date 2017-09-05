@@ -45,7 +45,7 @@ class FunProtoTarget(Target):
         )
 
         if self.symbol.ast.body is not None:
-            self.symbol.unit.get_target().add_dep(FunTarget(self))
+            self.symbol.unit.get_target().deps.append(FunTarget(self))
 
         self._on_ir(self.ir_value)
 
@@ -90,7 +90,7 @@ class AttrFunProtoTarget(Target):
         )
 
         if self.symbol.ast.body is not None:
-            self.symbol.unit.get_target().add_dep(FunTarget(self))
+            self.symbol.unit.get_target().deps.append(FunTarget(self))
 
         self._on_ir(self.ir_value)
 

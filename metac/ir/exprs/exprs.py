@@ -95,13 +95,13 @@ def gen_binary_expr_ir(ctx, expr):
     elif expr_type is NeqNode:
         return gen_neq_ir(ctx, lhs, rhs)
 
-    elif expr_type is AddExprNode:
+    elif expr_type is AddNode:
         return gen_add_ir(ctx, lhs, rhs)
-    elif expr_type is SubExprNode:
+    elif expr_type is SubNode:
         return gen_sub_ir(ctx, lhs, rhs)
-    elif expr_type is MulExprNode:
+    elif expr_type is MulNode:
         return gen_mul_ir(ctx, lhs, rhs)
-    elif expr_type is DivExprNode:
+    elif expr_type is DivNode:
         return gen_div_ir(ctx, lhs, rhs)
     elif expr_type is ModExprNode:
         return gen_mod_ir(ctx, lhs, rhs)
