@@ -267,19 +267,19 @@ def gen_statement_code(ctx, statement):
     if statement_type is ReturnInfo:
         gen_return_statement_code(ctx, statement)
 
-    elif statement_type is IfInfo:
+    elif statement_type is IfStatementInfo:
         gen_if_statement_code(ctx, statement)
 
-    elif statement_type is LoopInfo:
+    elif statement_type is LoopStatementInfo:
         gen_loop_statement_code(ctx, statement)
 
-    elif statement_type is SwitchInfo:
+    elif statement_type is SwitchStatementInfo:
         gen_switch_statement_code(ctx, statement)
 
-    elif statement_type is TryInfo:
+    elif statement_type is TryStatementInfo:
         gen_try_statement_code(ctx, statement)
 
-    elif statement_type is ThrowInfo:
+    elif statement_type is ThrowStatementInfo:
         gen_throw_statement_code(ctx, statement)
 
     elif statement_type is BreakInfo:

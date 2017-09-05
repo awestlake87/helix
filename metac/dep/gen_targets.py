@@ -49,20 +49,11 @@ def gen_block_deps(ctx, block_info):
 def gen_statement_deps(ctx, statement_info):
     statement_type = type(statement_info)
 
-    if statement_type is ReturnInfo:
-        return gen_return_deps(ctx, statement_info)
-
-    elif statement_type is IfInfo:
-        return gen_if_deps(ctx, statement_info)
-
-    elif statement_type is LoopInfo:
-        return gen_loop_deps(ctx, statement_info)
-
-    elif statement_type is SwitchInfo:
-        return gen_switch_deps(ctx, statement_info)
-
-    elif issubclass(statement_type, ExprInfo):
+    if issubclass(statement_type, ExprInfo):
         return gen_expr_deps(ctx, statement_info)
+
+    elif statement_type is ReturnInfo:
+        return gen_return_deps(ctx, statement_info)
 
     else:
         raise Todo(statement_type)
@@ -70,29 +61,8 @@ def gen_statement_deps(ctx, statement_info):
 def gen_expr_deps(ctx, expr_info):
     expr_type = type(expr_info)
 
-    if expr_type is InitInfo:
-        return gen_init_deps(ctx, expr_info)
-
-    elif expr_type is CallInfo:
-        return gen_call_deps(ctx, expr_info)
-
-    elif issubclass(expr_type, BinaryExprInfo):
-        return gen_binary_expr_deps(ctx, expr_info)
-
-    elif issubclass(expr_type, UnaryExprInfo):
-        return gen_unary_expr_deps(ctx, expr_info)
-
-    elif expr_type is FunInfo:
+    if expr_type is FunInfo:
         return gen_fun_deps(ctx, expr_info)
-
-    elif expr_type is AutoIntInfo:
-        return [ ]
-
-    elif expr_type is IntInfo:
-        return [ ]
-
-    elif expr_type is SymbolInfo:
-        return [ ]
 
     elif expr_type is FunTypeInfo:
         return gen_fun_type_deps(ctx, expr_info)
@@ -100,16 +70,17 @@ def gen_expr_deps(ctx, expr_info):
     elif expr_type is IntTypeInfo:
         return [ ]
 
+    elif expr_type is AutoIntInfo:
+        return [ ]
+
+    elif expr_type is CallExprInfo:
+        return gen_call_deps(ctx, expr_info)
+
+    elif expr_type is SymbolInfo:
+        return [ ]
+
     else:
         raise Todo(expr_type)
-
-def gen_binary_expr_deps(ctx, expr_info):
-    return (
-        gen_expr_deps(ctx, expr_info.lhs) + gen_expr_deps(ctx, expr_info.rhs)
-    )
-
-def gen_unary_expr_deps(ctx, expr_info):
-    return gen_expr_deps(ctx, expr_info.operand)
 
 def gen_fun_deps(ctx, fun_info):
     fun_info.proto_target.deps += gen_expr_deps(ctx, fun_info.type)
@@ -126,9 +97,6 @@ def gen_fun_type_deps(ctx, fun_type_info):
         deps += gen_expr_deps(ctx, param_type)
 
     return deps
-
-def gen_init_deps(ctx, expr_info):
-    return gen_expr_deps(ctx, expr_info.rhs)
 
 def gen_call_deps(ctx, call_info):
     deps = gen_expr_deps(ctx, call_info.lhs)
@@ -156,54 +124,3 @@ def gen_return_deps(ctx, return_info):
 
     else:
         return [ ]
-
-def gen_if_deps(ctx, if_info):
-    deps = [ ]
-
-    with ctx.use_scope(if_info.scope):
-        for condition, block in if_info.if_branches:
-            deps += gen_expr_deps(ctx, condition)
-            deps += gen_block_deps(ctx, block)
-
-        if if_info.else_block is not None:
-            deps += gen_block_deps(ctx, if_info.else_block)
-
-    return deps
-
-def gen_loop_deps(ctx, loop_info):
-    deps = [ ]
-
-    with ctx.use_scope(loop_info.scope):
-        if loop_info.for_clause is not None:
-            deps += gen_expr_deps(ctx, loop_info.for_clause)
-
-        if loop_info.each_clause is not None:
-            deps += gen_expr_deps(ctx, loop_info.each_clause)
-
-        if loop_info.while_clause is not None:
-            deps += gen_expr_deps(ctx, loop_info.while_clause)
-
-        if loop_info.loop_body is not None:
-            deps += gen_block_deps(ctx, loop_info.loop_body)
-
-        if loop_info.then_clause is not None:
-            deps += gen_expr_deps(ctx, loop_info.then_clause)
-
-        if loop_info.until_clause is not None:
-            deps += gen_expr_deps(ctx, loop_info.until_clause)
-
-    return deps
-
-def gen_switch_deps(ctx, switch_info):
-    deps = [ ]
-
-    with ctx.use_scope(switch_info.scope):
-        for case_values, case_block in switch_info.case_branches:
-            for value in case_values:
-                deps += gen_expr_deps(ctx, value)
-            deps += gen_block_deps(ctx, case_block)
-
-        if switch_info.default_block is not None:
-            deps += gen_block_deps(ctx, switch_info.default_block)
-
-    return deps

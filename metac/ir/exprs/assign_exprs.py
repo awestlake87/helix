@@ -1,6 +1,6 @@
 from ..types import *
 
-from ...info import VarInfo, GlobalInfo
+from ...info import SymbolInfo, GlobalInfo
 
 from .cast_exprs import gen_implicit_cast_ir, get_concrete_type
 
@@ -9,10 +9,10 @@ def gen_init_ir(ctx, expr):
 
     rhs = gen_expr_ir(ctx, expr.rhs)
 
-    if type(expr.lhs) is VarInfo:
+    if type(expr.lhs) is SymbolInfo:
         lhs = StackValue(ctx, get_concrete_type(rhs.type))
 
-        expr.lhs.ir_value = lhs
+        ctx.scope.resolve(expr.lhs.id).set_ir_value(lhs)
 
         gen_assign_code(ctx, lhs, rhs)
 
