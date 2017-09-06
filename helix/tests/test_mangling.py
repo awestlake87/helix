@@ -54,3 +54,10 @@ class TestManglers(unittest.TestCase):
             scoped_name,
             demangle_type_info_name(tinfo_name)
         )
+
+    def test_oper_mangling(self):
+        scoped_name = [ "module", "unit", "Type", OperName(OperName.OP_JIT) ]
+        mangled_name = "_M6module4unit4TypeO3jit"
+
+        self.assertEqual(mangled_name, mangle_name(scoped_name))
+        self.assertEqual(scoped_name, demangle_name(mangled_name))

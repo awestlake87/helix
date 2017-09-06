@@ -1,6 +1,20 @@
 
 from ..err import Todo
 
+class OperName:
+    OP_JIT = "O3jit"
+    OP_CONSTRUCT = "O9construct"
+    OP_DROP = "O4drop"
+
+    def __init__(self, id):
+        self.id = id
+
+    def __eq__(self, rhs):
+        return self.id == rhs.id
+
+    def __repr__(self):
+        return self.id
+
 def mangle_name(scoped_name, reserved=False):
     if not reserved:
         return mangle_scoped_name(scoped_name, "_M")
@@ -43,21 +57,30 @@ def demangle_type_info_name(mangled_name, reserved=False):
 
 def mangle_scoped_name(name_list, prefix="_M"):
     def mangle_part(part):
-        mangled_part = ""
+        name_type = type(part)
 
-        for c in part:
-            if (
-                c >= 'a' and c <= 'z' or
-                c >= 'A' and c <= 'Z' or
-                c >= '0' and c <= '9' or
-                c == '_'
-            ):
-                mangled_part += c
+        if name_type is str:
+            mangled_part = ""
 
-            else:
-                raise Todo(c)
+            for c in part:
+                if (
+                    c >= 'a' and c <= 'z' or
+                    c >= 'A' and c <= 'Z' or
+                    c >= '0' and c <= '9' or
+                    c == '_'
+                ):
+                    mangled_part += c
 
-        return "{}{}".format(len(mangled_part), mangled_part)
+                else:
+                    raise Todo(c)
+
+            return "{}{}".format(len(mangled_part), mangled_part)
+
+        elif name_type is OperName:
+            return part.id
+
+        else:
+            raise Todo(name_type)
 
     return "{}{}".format(
         prefix,
@@ -75,36 +98,52 @@ def demangle_scoped_name(name, prefix="_M"):
         i = len(prefix)
 
         length = ""
+        is_oper = False
         while i < len(name):
             c = name[i]
-            if c >= '0' and c <= '9':
+
+            if c == 'O':
+                is_oper = True
+                i += 1
+                c = name[i]
+
+            while c >= '0' and c <= '9':
                 length += c
                 i += 1
+                c = name[i]
 
-            else:
-                if len(length) == 0:
-                    raise Todo(name)
+            if len(length) != 0:
+                l = int(length)
+                part = name[i:(i + l)]
 
-                length = int(length)
+                if is_oper:
+                    yield OperName("O{}{}".format(len(part), part))
 
-                yield name[i:(i + length)]
+                else:
+                    yield part
 
-                i += length
+                i += l
                 length = ""
 
 
     def demangle_part(part):
-        demangled_part = ""
+        name_type = type(part)
 
-        for c in part:
-            if (
-                c >= 'a' and c <= 'z' or
-                c >= 'A' and c <= 'Z' or
-                c >= '0' and c <= '9' or
-                c == '_'
-            ):
-                demangled_part += c
+        if name_type is str:
+            demangled_part = ""
 
-        return demangled_part
+            for c in part:
+                if (
+                    c >= 'a' and c <= 'z' or
+                    c >= 'A' and c <= 'Z' or
+                    c >= '0' and c <= '9' or
+                    c == '_'
+                ):
+                    demangled_part += c
+
+            return demangled_part
+
+        elif name_type is OperName:
+            return part
 
     return [ demangle_part(part) for part in split_mangled_name() ]
