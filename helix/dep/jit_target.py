@@ -21,7 +21,7 @@ class JitTarget(Target):
 
         self._jit_fun = None
 
-    def _build_target(self):
+    def build(self):
         from ..sym import mangle_name
 
         for unit in self.units:

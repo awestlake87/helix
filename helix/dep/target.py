@@ -10,5 +10,5 @@ class Target:
         self.marked = False
         self.built = False
 
-    def _build_target(self):
+    def build(self):
         raise Todo("implement build for {}".format(self))

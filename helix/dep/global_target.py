@@ -18,7 +18,7 @@ class GlobalTarget(Target):
 
         self.ir_value = None
 
-    def _build_target(self):
+    def build(self):
         from ..sym import mangle_name
 
         id = ""

@@ -43,6 +43,23 @@ def gen_expr_sym(unit, expr):
         return None
 
 
+def gen_unit_deps(unit):
+    from ..sym import FunSymbol
+
+    jit_fun = FunSymbol(
+        unit,
+        FunNode(
+            FunTypeNode(BangNode(IntTypeNode(32, True)), [ ]),
+            "__jit__",
+            [ ],
+            unit.ast
+        ),
+        unit.scope
+    )
+
+    return [ jit_fun.target ] + gen_block_deps(unit, unit.ast)
+
+
 def gen_block_deps(unit, block):
     assert block.scope is not None
 

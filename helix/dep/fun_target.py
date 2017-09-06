@@ -19,7 +19,7 @@ class FunProtoTarget(Target):
                 gen_expr_deps(self.symbol.unit, self.symbol.ast.type)
             )
 
-    def _build_target(self):
+    def build(self):
         from ..sym import mangle_name
 
         ret_node = self.symbol.ast.type.ret_type
@@ -84,7 +84,7 @@ class AttrFunProtoTarget(Target):
                 gen_expr_deps(self.symbol.unit, self.symbol.ast.type)
             )
 
-    def _build_target(self):
+    def build(self):
         from ..sym import mangle_name
 
         ret_node = self.symbol.ast.type.ret_type
@@ -146,7 +146,7 @@ class FunTarget(Target):
                 gen_block_deps(symbol.unit, symbol.ast.body)
             )
 
-    def _build_target(self):
+    def build(self):
         gen_code(
             self.proto_target.ir_value,
             self.proto_target.symbol.scope,

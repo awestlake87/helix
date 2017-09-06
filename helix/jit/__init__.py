@@ -1,9 +1,6 @@
 
 from ..dep import *
 
-def build_target(target):
-    target._build_target()
-
 def perform_build_pass(target):
     if target.marked:
         return 0
@@ -21,7 +18,7 @@ def perform_build_pass(target):
                 num_built += perform_build_pass(dep)
 
         if not unbuilt_deps and not target.built:
-            build_target(target)
+            target.build()
             num_built += 1
             target.built = True
 

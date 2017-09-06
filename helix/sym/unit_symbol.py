@@ -1,7 +1,6 @@
 from contextlib import contextmanager
 
 from .scope import Scope
-from .fun_symbol import FunSymbol
 
 from ..err import Todo
 from ..dep import UnitTarget
@@ -20,31 +19,14 @@ class UnitSymbol:
 
         hoist_block(self, self.ast)
 
-        self._jit_fun = FunSymbol(
-            self,
-            FunNode(
-                FunTypeNode(BangNode(IntTypeNode(32, True)), [ ]),
-                "__jit__",
-                [ ],
-                self.ast
-            ),
-            self.scope
+        self.target = UnitTarget(
+            self, on_llvm_module=self._on_llvm_module
         )
 
-        self._target = None
         self._llvm_module = None
 
     def _on_llvm_module(self, module):
         self._llvm_module = module
-
-    @property
-    def target(self):
-        if self._target is None:
-            self._target = UnitTarget(
-                self, on_llvm_module=self._on_llvm_module
-            )
-
-        return self._target
 
     def get_llvm_module(self):
         return self._llvm_module

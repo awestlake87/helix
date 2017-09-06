@@ -21,7 +21,7 @@ class StructTarget(Target):
 
         self._on_ir = on_ir
 
-    def _build_target(self):
+    def build(self):
         from ..sym import DataAttrSymbol
 
         data = [ ]
