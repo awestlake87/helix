@@ -10,7 +10,7 @@ class UnitTarget(Target):
         self._on_llvm_module = on_llvm_module
 
         super().__init__(
-            [ self.symbol._jit_fun.get_target() ] +
+            [ self.symbol._jit_fun.target ] +
             gen_block_deps(self.symbol, self.symbol.ast)
         )
 

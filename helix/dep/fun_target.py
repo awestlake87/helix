@@ -66,7 +66,7 @@ class FunProtoTarget(Target):
         )
 
         if self.symbol.ast.body is not None:
-            self.symbol.unit.get_target().deps.append(FunTarget(self))
+            self.symbol.unit.target.deps.append(FunTarget(self))
 
         self._on_ir(self.ir_value)
 
@@ -80,7 +80,7 @@ class AttrFunProtoTarget(Target):
 
         with self.symbol.unit.use_scope(self.symbol.parent_scope):
             super().__init__(
-                [ self.symbol.struct.get_target() ] +
+                [ self.symbol.struct.target ] +
                 gen_expr_deps(self.symbol.unit, self.symbol.ast.type)
             )
 
@@ -129,7 +129,7 @@ class AttrFunProtoTarget(Target):
         )
 
         if self.symbol.ast.body is not None:
-            self.symbol.unit.get_target().deps.append(FunTarget(self))
+            self.symbol.unit.target.deps.append(FunTarget(self))
 
         self._on_ir(self.ir_value)
 

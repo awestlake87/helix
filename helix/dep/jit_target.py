@@ -17,13 +17,13 @@ class JitTarget(Target):
             self._llvm_backing_module, self._llvm_target_machine
         )
 
-        super().__init__([ unit.get_target() for unit in units ])
+        super().__init__([ unit.target for unit in units ])
 
         self._jit_fun = None
 
     def _build_target(self):
         from ..sym import mangle_name
-        
+
         for unit in self.units:
             self._llvm_engine.add_module(unit.get_llvm_module())
 

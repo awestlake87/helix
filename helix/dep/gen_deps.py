@@ -77,10 +77,6 @@ def gen_statement_deps(unit, statement):
     elif statement_type is BreakNode or statement_type is ContinueNode:
         return [ ]
 
-    elif statement_type is StructNode or statement_type is FunNode:
-        # standalone structs or funs are not deps
-        return [ ]
-
     elif issubclass(statement_type, ExprNode):
         return gen_expr_deps(unit, statement)
 
@@ -93,13 +89,7 @@ def gen_statement_deps(unit, statement):
 def gen_expr_deps(unit, expr):
     expr_type = type(expr)
 
-    if expr_type is StructNode:
-        raise Todo("struct node is used")
-
-    if expr_type is FunNode:
-        raise Todo("fun node is used")
-
-    elif expr_type is CallNode:
+    if expr_type is CallNode:
         return gen_call_deps(unit, expr)
 
     elif expr_type is EmbedCallNode:
@@ -120,8 +110,14 @@ def gen_expr_deps(unit, expr):
     elif issubclass(expr_type, BinaryExprNode):
         return gen_binary_expr_deps(unit, expr)
 
+    elif expr_type is StructNode:
+        return gen_struct_deps(unit, expr)
+
+    elif expr_type is FunNode:
+        return [ ]
+
     elif expr_type is SymbolNode:
-        return [ unit.scope.resolve(expr.id).get_target() ]
+        return [ unit.scope.resolve(expr.id).target ]
 
     elif expr_type is FunTypeNode:
         return gen_fun_type_deps(unit, expr)
@@ -145,13 +141,36 @@ def gen_expr_deps(unit, expr):
         )
 
     elif expr_type is GlobalNode:
-        return [ unit.scope.resolve(expr.id).get_target() ]
+        return [ unit.scope.resolve(expr.id).target ]
 
     elif issubclass(expr_type, LiteralNode):
         return [ ]
 
     else:
         raise Todo(expr)
+
+def gen_struct_deps(unit, expr):
+    from ..sym import DataAttrSymbol, AttrFunSymbol
+
+    symbol = unit.scope.resolve(expr.id)
+
+    for attr_id, attr_symbol in symbol.attrs:
+        attr_type = type(attr_symbol)
+
+        if attr_type is DataAttrSymbol:
+            symbol.target.deps += gen_expr_deps(
+                unit, attr_symbol.ast.type
+            )
+            symbol.target.attrs[attr_id] = attr_symbol
+
+        elif issubclass(attr_type, AttrFunSymbol):
+            symbol.target.attrs[attr_id] = attr_symbol
+
+        else:
+            raise Todo()
+
+    return [ ]
+
 
 def gen_unary_expr_deps(unit, expr):
     return gen_expr_deps(unit, expr.operand)
@@ -167,10 +186,10 @@ def gen_dot_expr_deps(unit, expr):
     deps = [ ]
 
     if type(sym) is AttrFunSymbol:
-        deps.append(sym.get_target())
+        deps.append(sym.target)
 
     elif type(sym) is GlobalSymbol:
-        deps.append(sym.get_target())
+        deps.append(sym.target)
 
     return deps
 
@@ -209,10 +228,10 @@ def gen_call_deps(unit, expr):
         dtor = lhs.get_dtor_symbol()
 
         if ctor is not None:
-            deps.append(ctor.get_target())
+            deps.append(ctor.target)
 
         if dtor is not None:
-            deps.append(dtor.get_target())
+            deps.append(dtor.target)
 
     for arg in expr.args:
         deps += gen_expr_deps(unit, arg)

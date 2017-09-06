@@ -25,7 +25,8 @@ class FunSymbol:
     def _on_ir(self, value):
         self._ir_prototype = value
 
-    def get_target(self):
+    @property
+    def target(self):
         if self._target is None:
             self._target = FunProtoTarget(
                 self, self._on_ir, is_vargs=self.is_vargs
@@ -61,7 +62,8 @@ class AttrFunSymbol:
     def _on_ir(self, value):
         self._ir_prototype = value
 
-    def get_target(self):
+    @property
+    def target(self):
         if self._target is None:
             self._target = AttrFunProtoTarget(self, self._on_ir)
 

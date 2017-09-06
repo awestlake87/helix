@@ -7,6 +7,8 @@ from ..ir import StructType, gen_static_expr_ir
 
 class StructTarget(Target):
     def __init__(self, symbol, on_ir=lambda val: None):
+        super().__init__([ ])
+
         from ..sym import (
             DataAttrSymbol,
             AttrFunSymbol,
@@ -18,26 +20,6 @@ class StructTarget(Target):
         self.attrs = { }
 
         self._on_ir = on_ir
-
-        deps = [ ]
-
-        for attr_id, attr_symbol in self.symbol.attrs:
-            with self.symbol.unit.use_scope(self.symbol.parent_scope):
-                attr_type = type(attr_symbol)
-
-                if attr_type is DataAttrSymbol:
-                    deps += gen_expr_deps(
-                        self.symbol.unit, attr_symbol.ast.type
-                    )
-                    self.attrs[attr_id] = attr_symbol
-
-                elif issubclass(attr_type, AttrFunSymbol):
-                    self.attrs[attr_id] = attr_symbol
-                    
-                else:
-                    raise Todo()
-
-        super().__init__(deps)
 
     def _build_target(self):
         from ..sym import DataAttrSymbol

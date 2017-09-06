@@ -9,7 +9,8 @@ class VarSymbol:
 
         self.type = sym_type
 
-    def get_target(self):
+    @property
+    def target(self):
         if self._target is None:
             self._target = VarTarget()
 

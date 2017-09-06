@@ -26,7 +26,8 @@ class GlobalSymbol:
     def _on_ir(self, value):
         self._ir_value = value
 
-    def get_target(self):
+    @property
+    def target(self):
         if self._target is None:
             self._target = GlobalTarget(
                 self, self._on_ir

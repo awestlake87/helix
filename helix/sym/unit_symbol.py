@@ -37,7 +37,8 @@ class UnitSymbol:
     def _on_llvm_module(self, module):
         self._llvm_module = module
 
-    def get_target(self):
+    @property
+    def target(self):
         if self._target is None:
             self._target = UnitTarget(
                 self, on_llvm_module=self._on_llvm_module

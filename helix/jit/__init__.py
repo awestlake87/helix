@@ -1,4 +1,6 @@
 
+from ..dep import *
+
 def build_target(target):
     target._build_target()
 
