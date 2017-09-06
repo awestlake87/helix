@@ -12,38 +12,21 @@ class MulNode(BinaryExprNode):
 class DivNode(BinaryExprNode):
     pass
 
-class ModExprNode(BinaryExprNode):
+class ModNode(BinaryExprNode):
+    pass
+
+class PreIncNode(UnaryExprNode):
+    pass
+
+class PostIncNode(UnaryExprNode):
+    pass
+
+class PreDecNode(UnaryExprNode):
+    pass
+
+class PostDecNode(UnaryExprNode):
     pass
 
 
-class AddAssignExprNode(BinaryExprNode):
-    pass
-
-class SubAssignExprNode(BinaryExprNode):
-    pass
-
-class MulAssignExprNode(BinaryExprNode):
-    pass
-
-class DivAssignExprNode(BinaryExprNode):
-    pass
-
-class ModAssignExprNode(BinaryExprNode):
-    pass
-
-
-class PreIncExprNode(UnaryExprNode):
-    pass
-
-class PostIncExprNode(UnaryExprNode):
-    pass
-
-class PreDecExprNode(UnaryExprNode):
-    pass
-
-class PostDecExprNode(UnaryExprNode):
-    pass
-
-
-class NegExprNode(UnaryExprNode):
+class NegNode(UnaryExprNode):
     pass

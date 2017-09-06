@@ -22,7 +22,7 @@ from .static_exprs import *
 def gen_expr_ir(ctx, expr):
     expr_type = type(expr)
 
-    if expr_type is CallExprNode:
+    if expr_type is CallNode:
         return gen_call_ir(ctx, expr)
 
     elif expr_type is SymbolNode:
@@ -47,10 +47,10 @@ def gen_expr_ir(ctx, expr):
     elif expr_type is XorNode:
         return gen_xor_ir(ctx, expr)
 
-    elif expr_type is InitExprNode:
+    elif expr_type is InitNode:
         return gen_init_ir(ctx, expr)
 
-    elif expr_type is DotExprNode:
+    elif expr_type is DotNode:
         return gen_dot_ir(ctx, expr)
 
     elif expr_type is OffsetofNode:
@@ -103,57 +103,25 @@ def gen_binary_expr_ir(ctx, expr):
         return gen_mul_ir(ctx, lhs, rhs)
     elif expr_type is DivNode:
         return gen_div_ir(ctx, lhs, rhs)
-    elif expr_type is ModExprNode:
+    elif expr_type is ModNode:
         return gen_mod_ir(ctx, lhs, rhs)
 
-    elif expr_type is BitAndExprNode:
+    elif expr_type is BitAndNode:
         return gen_bit_and_ir(ctx, lhs, rhs)
-    elif expr_type is BitOrExprNode:
+    elif expr_type is BitOrNode:
         return gen_bit_or_ir(ctx, lhs, rhs)
-    elif expr_type is BitXorExprNode:
+    elif expr_type is BitXorNode:
         return gen_bit_xor_ir(ctx, lhs, rhs)
-    elif expr_type is BitShlExprNode:
+    elif expr_type is BitShlNode:
         return gen_bit_shl_ir(ctx, lhs, rhs)
-    elif expr_type is BitShrExprNode:
+    elif expr_type is BitShrNode:
         return gen_bit_shr_ir(ctx, lhs, rhs)
 
-    elif expr_type is AssignExprNode:
+    elif expr_type is AssignNode:
         gen_assign_code(ctx, lhs, rhs)
         return lhs
 
-    elif expr_type is AddAssignExprNode:
-        gen_assign_code(ctx, lhs, gen_add_ir(ctx, lhs, rhs))
-        return lhs
-    elif expr_type is SubAssignExprNode:
-        gen_assign_code(ctx, lhs, gen_sub_ir(ctx, lhs, rhs))
-        return lhs
-    elif expr_type is MulAssignExprNode:
-        gen_assign_code(ctx, lhs, gen_mul_ir(ctx, lhs, rhs))
-        return lhs
-    elif expr_type is DivAssignExprNode:
-        gen_assign_code(ctx, lhs, gen_div_ir(ctx, lhs, rhs))
-        return lhs
-    elif expr_type is ModAssignExprNode:
-        gen_assign_code(ctx, lhs, gen_mod_ir(ctx, lhs, rhs))
-        return lhs
-
-    elif expr_type is BitAndAssignExprNode:
-        gen_assign_code(ctx, lhs, gen_bit_and_ir(ctx, lhs, rhs))
-        return lhs
-    elif expr_type is BitOrAssignExprNode:
-        gen_assign_code(ctx, lhs, gen_bit_or_ir(ctx, lhs, rhs))
-        return lhs
-    elif expr_type is BitXorAssignExprNode:
-        gen_assign_code(ctx, lhs, gen_bit_xor_ir(ctx, lhs, rhs))
-        return lhs
-    elif expr_type is BitShlAssignExprNode:
-        gen_assign_code(ctx, lhs, gen_bit_shl_ir(ctx, lhs, rhs))
-        return lhs
-    elif expr_type is BitShrAssignExprNode:
-        gen_assign_code(ctx, lhs, gen_bit_shr_ir(ctx, lhs, rhs))
-        return lhs
-
-    elif expr_type is IndexExprNode:
+    elif expr_type is IndexNode:
         return gen_index_expr_ir(ctx, lhs, rhs)
 
     elif expr_type is AsNode:
@@ -170,24 +138,24 @@ def gen_unary_expr_ir(ctx, expr):
 
     expr_type = type(expr)
 
-    if expr_type is PtrExprNode:
+    if expr_type is PtrNode:
         return gen_ptr_expr_ir(ctx, operand)
-    elif expr_type is RefExprNode:
+    elif expr_type is RefNode:
         return gen_ref_expr_ir(ctx, operand)
 
-    elif expr_type is PreIncExprNode:
+    elif expr_type is PreIncNode:
         return gen_pre_inc_ir(ctx, operand)
-    elif expr_type is PostIncExprNode:
+    elif expr_type is PostIncNode:
         return gen_post_inc_ir(ctx, operand)
-    elif expr_type is PreDecExprNode:
+    elif expr_type is PreDecNode:
         return gen_pre_dec_ir(ctx, operand)
-    elif expr_type is PostDecExprNode:
+    elif expr_type is PostDecNode:
         return gen_post_dec_ir(ctx, operand)
 
-    elif expr_type is NegExprNode:
+    elif expr_type is NegNode:
         return gen_neg_ir(ctx, operand)
 
-    elif expr_type is BitNotExprNode:
+    elif expr_type is BitNotNode:
         return gen_bit_not_ir(ctx, operand)
 
     elif expr_type is SizeofNode:

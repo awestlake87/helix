@@ -1,6 +1,6 @@
 from ..types import *
 
-from ...ast import SymbolNode, CallExprNode
+from ...ast import SymbolNode, CallNode
 
 def gen_dot_ir(ctx, expr):
     from ...sym import DataAttrSymbol, AttrFunSymbol

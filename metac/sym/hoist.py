@@ -20,19 +20,19 @@ def hoist_block(unit, block):
             if issubclass(statement_type, ExprNode):
                 hoist_expr(unit, statement)
 
-            elif statement_type is IfStatementNode:
+            elif statement_type is IfNode:
                 hoist_if_statement(unit, statement)
 
-            elif statement_type is LoopStatementNode:
+            elif statement_type is LoopNode:
                 hoist_loop_statement(unit, statement)
 
-            elif statement_type is SwitchStatementNode:
+            elif statement_type is SwitchNode:
                 hoist_switch_statement(unit, statement)
 
             elif statement_type is ReturnNode:
                 hoist_return_statement(unit, statement)
 
-            elif statement_type is TryStatementNode:
+            elif statement_type is TryNode:
                 hoist_try_statement(unit, statement)
 
             elif statement_type is ThrowStatementNode:
@@ -56,16 +56,16 @@ def hoist_expr(unit, expr):
     elif expr_type is FunNode:
         hoist_fun(unit, expr)
 
-    elif expr_type is CallExprNode:
+    elif expr_type is CallNode:
         hoist_call(unit, expr)
 
-    elif expr_type is EmbedCallExprNode:
+    elif expr_type is EmbedCallNode:
         hoist_call(unit, expr)
 
-    elif expr_type is InitExprNode:
+    elif expr_type is InitNode:
         hoist_init(unit, expr)
 
-    elif expr_type is DotExprNode:
+    elif expr_type is DotNode:
         pass
 
     elif expr_type is OffsetofNode:

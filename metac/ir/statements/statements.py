@@ -267,16 +267,16 @@ def gen_statement_code(ctx, statement):
     if statement_type is ReturnNode:
         gen_return_statement_code(ctx, statement)
 
-    elif statement_type is IfStatementNode:
+    elif statement_type is IfNode:
         gen_if_statement_code(ctx, statement)
 
-    elif statement_type is LoopStatementNode:
+    elif statement_type is LoopNode:
         gen_loop_statement_code(ctx, statement)
 
-    elif statement_type is SwitchStatementNode:
+    elif statement_type is SwitchNode:
         gen_switch_statement_code(ctx, statement)
 
-    elif statement_type is TryStatementNode:
+    elif statement_type is TryNode:
         gen_try_statement_code(ctx, statement)
 
     elif statement_type is ThrowStatementNode:

@@ -13,7 +13,7 @@ def gen_expr_sym(unit, expr):
     elif expr_type is GlobalNode:
         return unit.scope.resolve(expr.id)
 
-    elif expr_type is DotExprNode:
+    elif expr_type is DotNode:
         lhs = gen_expr_sym(unit, expr.lhs)
 
         if type(lhs) is VarSymbol or type(lhs) is GlobalSymbol:
@@ -30,7 +30,7 @@ def gen_expr_sym(unit, expr):
                 else:
                     raise Todo()
 
-    elif expr_type is CallExprNode:
+    elif expr_type is CallNode:
         lhs = gen_expr_sym(unit, expr.lhs)
 
         if type(lhs) is StructSymbol:
@@ -59,16 +59,16 @@ def gen_statement_deps(unit, statement):
     if statement_type is ReturnNode:
         return gen_return_deps(unit, statement)
 
-    elif statement_type is IfStatementNode:
+    elif statement_type is IfNode:
         return gen_if_statement_deps(unit, statement)
 
-    elif statement_type is LoopStatementNode:
+    elif statement_type is LoopNode:
         return gen_loop_statement_deps(unit, statement)
 
-    elif statement_type is SwitchStatementNode:
+    elif statement_type is SwitchNode:
         return gen_switch_statement_deps(unit, statement)
 
-    elif statement_type is TryStatementNode:
+    elif statement_type is TryNode:
         return gen_try_statement_deps(unit, statement)
 
     elif statement_type is ThrowStatementNode:
@@ -99,16 +99,16 @@ def gen_expr_deps(unit, expr):
     if expr_type is FunNode:
         raise Todo("fun node is used")
 
-    elif expr_type is CallExprNode:
+    elif expr_type is CallNode:
         return gen_call_deps(unit, expr)
 
-    elif expr_type is EmbedCallExprNode:
+    elif expr_type is EmbedCallNode:
         return gen_call_deps(unit, expr)
 
-    elif expr_type is DotExprNode:
+    elif expr_type is DotNode:
         return gen_dot_expr_deps(unit, expr)
 
-    elif expr_type is InitExprNode:
+    elif expr_type is InitNode:
         return gen_init_expr_deps(unit, expr)
 
     elif expr_type is TernaryConditionalNode:

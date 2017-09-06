@@ -1,16 +1,16 @@
 
 from ..expr_node import ExprNode, UnaryExprNode, BinaryExprNode
 
-class PtrExprNode(UnaryExprNode):
+class PtrNode(UnaryExprNode):
     pass
 
-class RefExprNode(UnaryExprNode):
+class RefNode(UnaryExprNode):
     pass
 
-class DotExprNode(BinaryExprNode):
+class DotNode(BinaryExprNode):
     pass
 
-class IndexExprNode(BinaryExprNode):
+class IndexNode(BinaryExprNode):
     pass
 
 
@@ -35,10 +35,10 @@ class OffsetofNode(BinaryExprNode):
 class TypeofNode(UnaryExprNode):
     pass
 
-class InitExprNode(BinaryExprNode):
+class InitNode(BinaryExprNode):
     pass
 
-class AssignExprNode(BinaryExprNode):
+class AssignNode(BinaryExprNode):
     pass
 
 
@@ -51,12 +51,12 @@ class TropeNode(UnaryExprNode):
 
 
 
-class CallExprNode(ExprNode):
+class CallNode(ExprNode):
     def __init__(self, lhs, args):
         self.lhs = lhs
         self.args = args
 
-class EmbedCallExprNode(ExprNode):
+class EmbedCallNode(ExprNode):
     def __init__(self, lhs, args):
         self.lhs = lhs
         self.args = args

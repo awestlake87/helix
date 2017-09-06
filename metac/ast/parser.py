@@ -213,7 +213,7 @@ def parse_loop(ctx):
         ctx.expect(Token.KW_UNTIL)
         until_clause = parse_expr(ctx)
 
-    return LoopStatementNode(
+    return LoopNode(
         for_clause,
         each_clause,
         while_clause,
@@ -265,7 +265,7 @@ def parse_switch(ctx):
             default_block = parse_block(ctx)
 
         ctx.expect(Token.DEDENT)
-        return SwitchStatementNode(value, case_branches, default_block)
+        return SwitchNode(value, case_branches, default_block)
 
 def parse_if(ctx):
     ctx.expect(Token.KW_IF)
@@ -296,10 +296,10 @@ def parse_if(ctx):
         if_branches.append((cond, block))
 
     if ctx.accept(Token.KW_ELSE):
-        return IfStatementNode(if_branches, parse_block(ctx))
+        return IfNode(if_branches, parse_block(ctx))
 
     else:
-        return IfStatementNode(if_branches)
+        return IfNode(if_branches)
 
 def parse_try(ctx):
     ctx.expect(Token.KW_TRY)
@@ -322,7 +322,7 @@ def parse_try(ctx):
             id = ctx.current.value
             block = parse_block(ctx)
 
-            catch_clauses.append(CatchClauseNode(type_expr, id, block))
+            catch_clauses.append(CatchNode(type_expr, id, block))
 
         try_continues = False
         with ctx.use_prescanner():
@@ -336,7 +336,7 @@ def parse_try(ctx):
     if len(catch_clauses) == 0 and default_catch is None:
         raise Todo("try must have at least one catch")
 
-    return TryStatementNode(try_block, catch_clauses, default_catch)
+    return TryNode(try_block, catch_clauses, default_catch)
 
 
 def parse_expr(ctx):
@@ -429,32 +429,32 @@ def parse_expr_prec14(ctx):
     lhs = parse_expr_prec13(ctx)
 
     if ctx.accept(':'):
-        return InitExprNode(lhs, parse_expr_prec14(ctx))
+        return InitNode(lhs, parse_expr_prec14(ctx))
     elif ctx.accept('='):
-        return AssignExprNode(lhs, parse_expr_prec14(ctx))
+        return AssignNode(lhs, parse_expr_prec14(ctx))
 
     elif ctx.accept(Token.OP_ADD_ASSIGN):
-        return AddAssignExprNode(lhs, parse_expr_prec14(ctx))
+        return AssignNode(lhs, AddNode(lhs, parse_expr_prec14(ctx)))
 
     elif ctx.accept(Token.OP_SUB_ASSIGN):
-        return SubAssignExprNode(lhs, parse_expr_prec14(ctx))
+        return AssignNode(lhs, SubNode(lhs, parse_expr_prec14(ctx)))
     elif ctx.accept(Token.OP_MUL_ASSIGN):
-        return MulAssignExprNode(lhs, parse_expr_prec14(ctx))
+        return AssignNode(lhs, MulNode(lhs, parse_expr_prec14(ctx)))
     elif ctx.accept(Token.OP_DIV_ASSIGN):
-        return DivAssignExprNode(lhs, parse_expr_prec14(ctx))
+        return AssignNode(lhs, DivNode(lhs, parse_expr_prec14(ctx)))
     elif ctx.accept(Token.OP_MOD_ASSIGN):
-        return ModAssignExprNode(lhs, parse_expr_prec14(ctx))
+        return AssignNode(lhs, ModNode(lhs, parse_expr_prec14(ctx)))
 
     elif ctx.accept(Token.OP_AND_ASSIGN):
-        return BitAndAssignExprNode(lhs, parse_expr_prec14(ctx))
+        return AssignNode(lhs, BitAndNode(lhs, parse_expr_prec14(ctx)))
     elif ctx.accept(Token.OP_XOR_ASSIGN):
-        return BitXorAssignExprNode(lhs, parse_expr_prec14(ctx))
+        return AssignNode(lhs, BitXorNode(lhs, parse_expr_prec14(ctx)))
     elif ctx.accept(Token.OP_OR_ASSIGN):
-        return BitOrAssignExprNode(lhs, parse_expr_prec14(ctx))
+        return AssignNode(lhs, BitOrNode(lhs, parse_expr_prec14(ctx)))
     elif ctx.accept(Token.OP_SHL_ASSIGN):
-        return BitShlAssignExprNode(lhs, parse_expr_prec14(ctx))
+        return AssignNode(lhs, BitShlNode(lhs, parse_expr_prec14(ctx)))
     elif ctx.accept(Token.OP_SHR_ASSIGN):
-        return BitShrAssignExprNode(lhs, parse_expr_prec14(ctx))
+        return AssignNode(lhs, BitShrNode(lhs, parse_expr_prec14(ctx)))
 
     else:
         return lhs
@@ -478,7 +478,7 @@ def parse_expr_prec12(ctx):
     lhs = parse_expr_prec11(ctx)
 
     while ctx.accept('|'):
-        lhs = BitOrExprNode(lhs, parse_expr_prec11(ctx))
+        lhs = BitOrNode(lhs, parse_expr_prec11(ctx))
 
     return lhs
 
@@ -486,7 +486,7 @@ def parse_expr_prec11(ctx):
     lhs = parse_expr_prec10(ctx)
 
     while ctx.accept('^'):
-        lhs = BitXorExprNode(lhs, parse_expr_prec10(ctx))
+        lhs = BitXorNode(lhs, parse_expr_prec10(ctx))
 
     return lhs
 
@@ -494,7 +494,7 @@ def parse_expr_prec10(ctx):
     lhs = parse_expr_prec9(ctx)
 
     while ctx.accept('&'):
-        lhs = BitAndExprNode(lhs, parse_expr_prec9(ctx))
+        lhs = BitAndNode(lhs, parse_expr_prec9(ctx))
 
     return lhs
 
@@ -511,9 +511,9 @@ def parse_expr_prec9(ctx):
         id = ctx.current.id
 
         if id == Token.OP_SHL:
-            lhs = BitShlExprNode(lhs, parse_expr_prec8(ctx))
+            lhs = BitShlNode(lhs, parse_expr_prec8(ctx))
         elif id == Token.OP_SHR:
-            lhs = BitShrExprNode(lhs, parse_expr_prec8(ctx))
+            lhs = BitShrNode(lhs, parse_expr_prec8(ctx))
         else:
             raise CompilerBug("^.^")
 
@@ -557,7 +557,7 @@ def parse_expr_prec7(ctx):
         elif id == '/':
             lhs = DivNode(lhs, parse_expr_prec6(ctx))
         elif id == '%':
-            lhs = ModExprNode(lhs, parse_expr_prec6(ctx))
+            lhs = ModNode(lhs, parse_expr_prec6(ctx))
         else:
             raise CompilerBug("$_$")
 
@@ -676,14 +676,14 @@ def parse_expr_prec4(ctx):
                         ctx.expect(')')
                         break
 
-            lhs = CallExprNode(lhs, args)
+            lhs = CallNode(lhs, args)
 
         elif id == '[':
             expr = parse_expr(ctx)
 
             ctx.expect(']')
 
-            lhs = IndexExprNode(lhs, expr)
+            lhs = IndexNode(lhs, expr)
 
         elif id == Token.OP_L_EMBED:
             args = [ ]
@@ -695,7 +695,7 @@ def parse_expr_prec4(ctx):
                         ctx.expect(Token.OP_R_EMBED)
                         break
 
-            lhs = EmbedCallExprNode(lhs, args)
+            lhs = EmbedCallNode(lhs, args)
 
         elif id == '!':
             lhs = BangNode(lhs)
@@ -704,10 +704,10 @@ def parse_expr_prec4(ctx):
             lhs = TropeNode(lhs)
 
         elif id == Token.OP_INC:
-            lhs = PostIncExprNode(lhs)
+            lhs = PostIncNode(lhs)
 
         elif id == Token.OP_DEC:
-            lhs = PostDecExprNode(lhs)
+            lhs = PostDecNode(lhs)
 
         else:
             raise CompilerBug("O_o")
@@ -716,22 +716,22 @@ def parse_expr_prec4(ctx):
 
 def parse_expr_prec3(ctx):
     if ctx.accept('*'):
-        return PtrExprNode(parse_expr_prec3(ctx))
+        return PtrNode(parse_expr_prec3(ctx))
 
     elif ctx.accept('&'):
-        return RefExprNode(parse_expr_prec3(ctx))
+        return RefNode(parse_expr_prec3(ctx))
 
     elif ctx.accept('-'):
-        return NegExprNode(parse_expr_prec3(ctx))
+        return NegNode(parse_expr_prec3(ctx))
 
     elif ctx.accept(Token.OP_INC):
-        return PreIncExprNode(parse_expr_prec3(ctx))
+        return PreIncNode(parse_expr_prec3(ctx))
 
     elif ctx.accept(Token.OP_DEC):
-        return PreDecExprNode(parse_expr_prec3(ctx))
+        return PreDecNode(parse_expr_prec3(ctx))
 
     elif ctx.accept('~'):
-        return BitNotExprNode(parse_expr_prec3(ctx))
+        return BitNotNode(parse_expr_prec3(ctx))
 
     elif ctx.accept('['):
         length = parse_expr(ctx)
@@ -754,7 +754,7 @@ def parse_expr_prec2(ctx):
         id = ctx.current.id
 
         if id == '.':
-            lhs = DotExprNode(lhs, parse_expr_prec1(ctx))
+            lhs = DotNode(lhs, parse_expr_prec1(ctx))
         else:
             raise CompilerBug("%.%")
 
@@ -1001,10 +1001,10 @@ def parse_global(ctx):
         id = ctx.current.value
         return GlobalNode(expr, id, is_cglobal=is_cglobal)
 
-    elif type(expr) is InitExprNode:
+    elif type(expr) is InitNode:
         if type(expr.lhs) is SymbolNode:
             id = expr.lhs.id
-            return InitExprNode(
+            return InitNode(
                 GlobalNode(AutoTypeNode(), id, is_cglobal=is_cglobal),
                 expr.rhs
             )

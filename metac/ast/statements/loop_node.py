@@ -1,6 +1,6 @@
 from ..statement_node import StatementNode
 
-class LoopStatementNode(StatementNode):
+class LoopNode(StatementNode):
     def __init__(
         self,
         for_clause,

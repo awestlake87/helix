@@ -32,7 +32,9 @@ class FunProtoTarget(Target):
                 self.symbol.ast.type.ret_type.operand
             )
         elif ret_type is VoidTypeNode:
-            ret_ir_type = gen_static_expr_ir(self.symbol.parent_scope, ret_node)
+            ret_ir_type = gen_static_expr_ir(
+                self.symbol.parent_scope, ret_node
+            )
 
         else:
             raise Todo(ret_type)
