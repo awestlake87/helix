@@ -40,6 +40,9 @@ class StructSymbol:
 
         self.id = self.ast.id
 
+        self.target = StructTarget(self, on_ir=self._on_ir)
+        self._ir_value = None
+
         ids = { }
 
         attr_index = 0
@@ -93,10 +96,6 @@ class StructSymbol:
 
             else:
                 raise Todo()
-
-
-        self.target = StructTarget(self, on_ir=self._on_ir)
-        self._ir_value = None
 
     def get_ctor_symbol(self):
         for attr_id, attr_symbol in self.attrs:

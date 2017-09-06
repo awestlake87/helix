@@ -57,7 +57,9 @@ def gen_unit_deps(unit):
         unit.scope
     )
 
-    return [ jit_fun.target ] + gen_block_deps(unit, unit.ast)
+    gen_fun_deps(unit, jit_fun)
+
+    return [ jit_fun.target ]
 
 
 def gen_block_deps(unit, block):
@@ -104,6 +106,8 @@ def gen_statement_deps(unit, statement):
         raise Todo(repr(statement))
 
 def gen_expr_deps(unit, expr):
+    from ..sym import FunSymbol
+
     expr_type = type(expr)
 
     if expr_type is CallNode:
@@ -131,10 +135,16 @@ def gen_expr_deps(unit, expr):
         return gen_struct_deps(unit, expr)
 
     elif expr_type is FunNode:
-        return [ ]
+        return gen_fun_deps(unit, unit.scope.resolve(expr.id))
 
     elif expr_type is SymbolNode:
-        return [ unit.scope.resolve(expr.id).target ]
+        sym = unit.scope.resolve(expr.id)
+
+        if type(sym) is FunSymbol:
+            return [ sym.proto_target ]
+
+        else:
+            return [ sym.target ]
 
     elif expr_type is FunTypeNode:
         return gen_fun_type_deps(unit, expr)
@@ -185,6 +195,17 @@ def gen_struct_deps(unit, expr):
 
         else:
             raise Todo()
+
+    return [ ]
+
+def gen_fun_deps(unit, symbol):
+    from ..sym import AttrFunSymbol
+
+    symbol.proto_target.deps += gen_expr_deps(unit, symbol.ast.type)
+
+    if symbol.ast.body is not None:
+        with unit.use_scope(symbol.scope):
+            symbol.target.deps += gen_block_deps(unit, symbol.ast.body)
 
     return [ ]
 
@@ -249,7 +270,7 @@ def gen_ternary_conditional_deps(unit, expr):
     )
 
 def gen_call_deps(unit, expr):
-    from ..sym import StructSymbol
+    from ..sym import StructSymbol, FunSymbol, AttrFunSymbol
 
     deps = gen_expr_deps(unit, expr.lhs)
 
@@ -265,8 +286,11 @@ def gen_call_deps(unit, expr):
         if dtor is not None:
             deps.append(dtor.target)
 
-    for arg in expr.args:
-        deps += gen_expr_deps(unit, arg)
+    elif type(lhs) is FunSymbol or type(lhs) is AttrFunSymbol:
+        if lhs.target is not None:
+            unit.target.deps.append(lhs.target)
+
+        deps.append(lhs.proto_target)
 
     return deps
 
