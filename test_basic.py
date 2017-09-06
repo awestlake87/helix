@@ -1,8 +1,8 @@
 
-from metac import init_metac
+from helix import init_helix
 
-from metac.tests import *
+from helix.tests import *
 
 if __name__ == "__main__":
-    init_metac()
+    init_helix()
     unittest.main()

@@ -1,2 +1,2 @@
-# metac
-Compiler for Meta Programming Language
+# Helix
+Interpreter for the Helix Programming Language
