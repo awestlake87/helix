@@ -1,6 +1,6 @@
 from ..ast import parse_unit
-from ..sym import UnitSymbol
-from ..dep import JitTarget, gen_unit_deps
+from ..sym import UnitSymbol, JitTarget
+from ..dep import gen_unit_deps
 from ..jit import run
 
 def run_test(code, emit_ir=False):

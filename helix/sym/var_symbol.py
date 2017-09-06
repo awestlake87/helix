@@ -1,6 +1,13 @@
 
 from ..err import Todo
-from ..dep import VarTarget
+from .target import Target
+
+class VarTarget(Target):
+    def __init__(self):
+        super().__init__([ ])
+
+    def build(self):
+        pass
 
 class VarSymbol:
     def __init__(self, sym_type=None):

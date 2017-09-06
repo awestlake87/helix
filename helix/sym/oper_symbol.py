@@ -1,5 +1,4 @@
 from ..err import Todo
-from ..dep import AttrFunProtoTarget
 
 from .fun_symbol import AttrFunSymbol
 

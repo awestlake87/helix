@@ -1,10 +1,9 @@
 
 from ..ast import *
 from ..err import *
+from ..sym import *
 
 def gen_expr_sym(unit, expr):
-    from ..sym import StructSymbol, VarSymbol, GlobalSymbol
-
     expr_type = type(expr)
 
     if expr_type is SymbolNode:
@@ -44,8 +43,6 @@ def gen_expr_sym(unit, expr):
 
 
 def gen_unit_deps(unit):
-    from ..sym import FunSymbol
-
     jit_fun = FunSymbol(
         unit,
         FunNode(
@@ -106,8 +103,6 @@ def gen_statement_deps(unit, statement):
         raise Todo(repr(statement))
 
 def gen_expr_deps(unit, expr):
-    from ..sym import FunSymbol
-
     expr_type = type(expr)
 
     if expr_type is CallNode:
@@ -177,8 +172,6 @@ def gen_expr_deps(unit, expr):
         raise Todo(expr)
 
 def gen_struct_deps(unit, expr):
-    from ..sym import DataAttrSymbol, AttrFunSymbol
-
     symbol = unit.scope.resolve(expr.id)
 
     for attr_id, attr_symbol in symbol.attrs:
@@ -199,8 +192,6 @@ def gen_struct_deps(unit, expr):
     return [ ]
 
 def gen_fun_deps(unit, symbol):
-    from ..sym import AttrFunSymbol
-
     symbol.proto_target.deps += gen_expr_deps(unit, symbol.ast.type)
 
     if symbol.ast.body is not None:
@@ -227,8 +218,6 @@ def gen_binary_expr_deps(unit, expr):
     return gen_expr_deps(unit, expr.lhs) + gen_expr_deps(unit, expr.rhs)
 
 def gen_dot_expr_deps(unit, expr):
-    from ..sym import AttrFunSymbol, GlobalSymbol
-
     deps = [ ]
 
     lhs = gen_expr_sym(unit, expr.lhs)
@@ -247,8 +236,6 @@ def gen_dot_expr_deps(unit, expr):
     return deps
 
 def gen_init_expr_deps(unit, expr):
-    from ..sym import VarSymbol, GlobalSymbol
-
     deps = gen_expr_deps(unit, expr.lhs) + gen_expr_deps(unit, expr.rhs)
 
     lhs = gen_expr_sym(unit, expr.lhs)
@@ -270,8 +257,6 @@ def gen_ternary_conditional_deps(unit, expr):
     )
 
 def gen_call_deps(unit, expr):
-    from ..sym import StructSymbol, FunSymbol, AttrFunSymbol
-
     deps = gen_expr_deps(unit, expr.lhs)
 
     lhs = gen_expr_sym(unit, expr.lhs)
