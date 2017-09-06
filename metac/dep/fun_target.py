@@ -2,6 +2,8 @@ from .target import Target
 
 from .gen_deps import gen_expr_deps, gen_block_deps
 
+from ..err import Todo
+from ..ast import BangNode, VoidTypeNode
 from ..ir import FunType, FunValue, PtrType, gen_static_expr_ir, gen_code
 
 class FunProtoTarget(Target):
@@ -20,15 +22,32 @@ class FunProtoTarget(Target):
     def _build_target(self):
         from ..sym import mangle_name
 
+        ret_node = self.symbol.ast.type.ret_type
+        ret_type = type(ret_node)
+        ret_ir_type = None
+
+        if ret_type is BangNode:
+            ret_ir_type = gen_static_expr_ir(
+                self.symbol.parent_scope,
+                self.symbol.ast.type.ret_type.operand
+            )
+        elif ret_type is VoidTypeNode:
+            ret_ir_type = gen_static_expr_ir(self.symbol.parent_scope, ret_node)
+
+        else:
+            raise Todo(ret_type)
+
+        param_types = [ ]
+
+        for t in self.symbol.ast.type.param_types:
+            if type(t) is BangNode:
+                param_types.append(
+                    gen_static_expr_ir(self.symbol.parent_scope, t.operand)
+                )
+
         fun_type = FunType(
-            gen_static_expr_ir(
-                self.symbol.parent_scope, self.symbol.ast.type.ret_type
-            ),
-            [
-                gen_static_expr_ir(self.symbol.parent_scope, t)
-                for t in
-                self.symbol.ast.type.param_types
-            ],
+            ret_ir_type,
+            param_types,
             self.is_vargs
         )
 
@@ -66,16 +85,34 @@ class AttrFunProtoTarget(Target):
     def _build_target(self):
         from ..sym import mangle_name
 
+        ret_node = self.symbol.ast.type.ret_type
+        ret_type = type(ret_node)
+        ret_ir_type = None
+
+        if ret_type is BangNode:
+            ret_ir_type = gen_static_expr_ir(
+                self.symbol.parent_scope,
+                self.symbol.ast.type.ret_type.operand
+            )
+        elif ret_type is VoidTypeNode:
+            ret_ir_type = gen_static_expr_ir(self.symbol.parent_scope, ret_node)
+
+        else:
+            raise Todo(ret_type)
+
+        param_types = [ PtrType(self.symbol.struct.get_ir_value()) ]
+
+        for t in self.symbol.ast.type.param_types:
+            if type(t) is BangNode:
+                param_types.append(
+                    gen_static_expr_ir(self.symbol.parent_scope, t.operand)
+                )
+
         fun_type = FunType(
-            gen_static_expr_ir(
-                self.symbol.parent_scope, self.symbol.ast.type.ret_type
-            ),
-            [ PtrType(self.symbol.struct.get_ir_value()) ] + [
-                gen_static_expr_ir(self.symbol.parent_scope, t)
-                for t in
-                self.symbol.ast.type.param_types
-            ]
+            ret_ir_type,
+            param_types
         )
+
 
         id = ""
 

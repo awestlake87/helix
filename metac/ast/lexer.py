@@ -368,6 +368,9 @@ class Lexer:
             if _toss('='):
                 return Token(Token.OP_NEQ)
 
+            else:
+                return Token('!')
+
         elif _toss(':'):
             return Token(':')
 

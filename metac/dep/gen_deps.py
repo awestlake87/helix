@@ -223,7 +223,11 @@ def gen_fun_type_deps(unit, fun_type):
     deps = gen_expr_deps(unit, fun_type.ret_type)
 
     for param in fun_type.param_types:
-        deps += gen_expr_deps(unit, param)
+        if type(param) is BangNode:
+            deps += gen_expr_deps(unit, param.operand)
+
+        else:
+            raise Todo()
 
     return deps
 

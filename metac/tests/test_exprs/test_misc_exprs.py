@@ -10,13 +10,13 @@ class MiscExprTests(unittest.TestCase):
             43,
             run_test(
                 """
-                cfun int test()
-                    cfun int call_fun(int a, int b)
+                cfun int! test()
+                    cfun int! call_fun(int! a, int! b)
                         return return_43(a, b)
 
                     return call_fun(46, 3)
 
-                cfun int return_43(int a, int b)
+                cfun int! return_43(int! a, int! b)
                     return 43
 
                 return test()
@@ -37,7 +37,7 @@ class MiscExprTests(unittest.TestCase):
         with self.assertRaises(ReturnTypeMismatch):
             run_test(
                 """
-                cfun int omg()
+                cfun int! omg()
                     return short(123)
 
                 return omg()

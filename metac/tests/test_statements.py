@@ -10,7 +10,7 @@ class LoopTests(unittest.TestCase):
             6573,
             run_test(
                 """
-                cfun int test()
+                cfun int! test()
                     return 6573
 
                 return test()

@@ -10,7 +10,7 @@ class TestGlobals(unittest.TestCase):
                 """
                 global int a_global: 45
 
-                fun void set_a_global(int value)
+                fun void set_a_global(int! value)
                     a_global = value
                     return
 
@@ -37,11 +37,11 @@ class TestGlobals(unittest.TestCase):
                 struct Object
                     int @value
 
-                    fun void @set_value(int value)
+                    fun void @set_value(int! value)
                         @value = value
                         return
 
-                fun void set_value(int value)
+                fun void set_value(int! value)
                     global_obj.set_value(value)
                     return
 

@@ -23,7 +23,7 @@ class UnitSymbol:
         self._jit_fun = FunSymbol(
             self,
             FunNode(
-                FunTypeNode(IntTypeNode(32, True), [ ]),
+                FunTypeNode(BangNode(IntTypeNode(32, True)), [ ]),
                 "__jit__",
                 [ ],
                 self.ast

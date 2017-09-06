@@ -12,7 +12,7 @@ class TestStructs(unittest.TestCase):
                 struct Object
                     int @a
 
-                    fun void @set_a(int val)
+                    fun void @set_a(int! val)
                         @a = val
                         return
 
@@ -35,10 +35,10 @@ class TestStructs(unittest.TestCase):
             run_test(
                 """
                 struct Object
-                    fun int @do_something(int a)
+                    fun int! @do_something(int! a)
                         return a
 
-                fun int do_something(int a)
+                fun int! do_something(int! a)
                     return 1
 
                 obj: Object()
@@ -60,13 +60,13 @@ class TestStructs(unittest.TestCase):
             run_test(
                 """
                 struct A
-                    fun int @do_it()
+                    fun int! @do_it()
                         return 568
 
                 struct B
                     A @a
 
-                    fun int @tell_a_to_do_it()
+                    fun int! @tell_a_to_do_it()
                         return @a.do_it()
 
                 a: A()
@@ -97,7 +97,7 @@ class TestStructs(unittest.TestCase):
                     int @a
                     int @b
 
-                    oper @construct(int a, int b)
+                    oper @construct(int! a, int! b)
                         @a = a
                         @b = b
 
@@ -107,7 +107,7 @@ class TestStructs(unittest.TestCase):
 
                     oper @destruct()
                         value = 2
-                        
+
                         return
 
                 if value != 0
