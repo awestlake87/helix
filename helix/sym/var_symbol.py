@@ -16,16 +16,18 @@ class VarSymbol:
 
         return self._target
 
-    def set_ir_value(self, value):
-        if self._ir_value is None:
-            self._ir_value = value
-
-        else:
-            raise Todo("var has a value already")
-
-    def get_ir_value(self):
+    @property
+    def ir_value(self):
         if self._ir_value is None:
             raise Todo("var has no value")
 
         else:
             return self._ir_value
+
+    @ir_value.setter
+    def ir_value(self, value):
+        if self._ir_value is None:
+            self._ir_value = value
+
+        else:
+            raise Todo("var has a value already")

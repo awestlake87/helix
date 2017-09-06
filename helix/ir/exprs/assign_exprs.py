@@ -12,7 +12,7 @@ def gen_init_ir(ctx, expr):
     if type(expr.lhs) is SymbolNode:
         lhs = StackValue(ctx, get_concrete_type(rhs.type))
 
-        ctx.scope.resolve(expr.lhs.id).set_ir_value(lhs)
+        ctx.scope.resolve(expr.lhs.id).ir_value = lhs
 
         gen_assign_code(ctx, lhs, rhs)
 

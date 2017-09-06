@@ -20,15 +20,17 @@ class DataAttrSymbol:
         self._ir_type = None
         self.type = None
 
-    def set_ir_type(self, t):
-        self._ir_type = t
-
-    def get_ir_type(self):
+    @property
+    def ir_type(self):
         if self._ir_type is None:
             raise Todo()
 
         else:
             return self._ir_type
+
+    @ir_type.setter
+    def ir_type(self, t):
+        self._ir_type = t
 
 class StructSymbol:
     def __init__(self, unit, parent_scope, ast):
@@ -40,7 +42,7 @@ class StructSymbol:
 
         self.id = self.ast.id
 
-        self.target = StructTarget(self, on_ir=self._on_ir)
+        self.target = StructTarget(self)
         self._ir_value = None
 
         ids = { }
@@ -126,11 +128,6 @@ class StructSymbol:
 
         raise Todo()
 
-    def _on_ir(self, value):
-        self._ir_value = value
-
-    def get_ir_value(self):
-        if self._ir_value is None:
-            raise Todo()
-        else:
-            return self._ir_value
+    @property
+    def ir_value(self):
+        return self.target.ir_value

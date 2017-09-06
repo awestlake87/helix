@@ -10,13 +10,20 @@ from ..ir import (
 )
 
 class GlobalTarget(Target):
-    def __init__(self, symbol, on_ir=lambda val: None, is_vargs=False):
+    def __init__(self, symbol):
         super().__init__([ ])
 
         self.symbol = symbol
-        self._on_ir = on_ir
 
-        self.ir_value = None
+        self._ir_value = None
+
+    @property
+    def ir_value(self):
+        if self._ir_value is not None:
+            return self._ir_value
+
+        else:
+            raise Todo("global has not been built yet")
 
     def build(self):
         from ..sym import mangle_name
@@ -54,8 +61,6 @@ class GlobalTarget(Target):
                 raise Todo()
 
 
-            self.ir_value = GlobalValue(
+            self._ir_value = GlobalValue(
                 self.symbol.unit, id, ir_type, ir_initializer
             )
-
-        self._on_ir(self.ir_value)

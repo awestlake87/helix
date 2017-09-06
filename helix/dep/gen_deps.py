@@ -290,8 +290,6 @@ def gen_call_deps(unit, expr):
         if lhs.target is not None:
             unit.target.deps.append(lhs.target)
 
-        deps.append(lhs.proto_target)
-
     return deps
 
 def gen_fun_type_deps(unit, fun_type):

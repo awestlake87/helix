@@ -172,7 +172,7 @@ class GlobalValue(IrValue):
         self.is_const = is_const
 
         self._llvm_global = ir.GlobalVariable(
-            self.unit.get_ir_value().get_llvm_value(),
+            self.unit.ir_value.get_llvm_value(),
             self.type.get_llvm_value(),
             self.id
         )
@@ -200,7 +200,7 @@ class FunValue(LlvmValue):
         super().__init__(
             ir_type,
             ir.Function(
-                unit.get_ir_value().get_llvm_value(),
+                unit.ir_value.get_llvm_value(),
                 ir_type.get_llvm_value(),
                 self.id
             )

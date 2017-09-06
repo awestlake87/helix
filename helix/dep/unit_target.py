@@ -7,14 +7,14 @@ from .gen_deps import gen_block_deps
 class UnitTarget(Target):
     def __init__(self, symbol, on_llvm_module=lambda m: None):
         super().__init__([ ])
-        
+
         self.symbol = symbol
         self._on_llvm_module = on_llvm_module
 
     def build(self):
         try:
             llvm_module = binding.parse_assembly(
-                str(self.symbol.get_ir_value().get_llvm_value())
+                str(self.symbol.ir_value.get_llvm_value())
             )
 
             llvm_module.verify()
@@ -23,6 +23,6 @@ class UnitTarget(Target):
 
         except Exception as e:
             print(e)
-            print(self.symbol.get_ir_value().get_llvm_value())
+            print(self.symbol.ir_value.get_llvm_value())
 
             raise e

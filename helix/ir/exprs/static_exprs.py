@@ -28,7 +28,7 @@ def gen_static_expr_ir(scope, expr):
         return NilValue(AutoPtrType())
 
     elif expr_type is SymbolNode:
-        return scope.resolve(expr.id).get_ir_value()
+        return scope.resolve(expr.id).ir_value
 
     elif expr_type is ArrayTypeNode:
         return gen_static_array_type_ir(scope, expr.length, expr.type)
@@ -88,7 +88,7 @@ def gen_static_embed_call_ir(scope, expr):
 
 def gen_static_call_ir(scope, expr):
     from .cast_exprs import gen_static_as_ir
-    
+
     lhs = gen_static_expr_ir(scope, expr.lhs)
 
     value_type = type(lhs)

@@ -24,7 +24,7 @@ def gen_access_ir(ctx, lhs, rhs):
             if type(symbol) is DataAttrSymbol:
                 return LlvmRef(
                     ctx,
-                    symbol.get_ir_type(),
+                    symbol.ir_type,
                     ctx.builder.gep(
                         lhs.get_llvm_ptr(),
                         [ ir.IntType(32)(0), ir.IntType(32)(symbol.index) ]
@@ -33,7 +33,7 @@ def gen_access_ir(ctx, lhs, rhs):
 
             elif type(symbol) is AttrFunSymbol:
                 if issubclass(type(lhs), LlvmRef):
-                    return BoundAttrFunValue(lhs, symbol.get_ir_value())
+                    return BoundAttrFunValue(lhs, symbol.ir_value)
                 else:
                     raise Todo("rval instance args?")
 

@@ -7,11 +7,10 @@ from ..ast import BangNode, VoidTypeNode
 from ..ir import FunType, FunValue, PtrType, gen_static_expr_ir, gen_code
 
 class FunProtoTarget(Target):
-    def __init__(self, symbol, on_ir=lambda val: None, is_vargs=False):
+    def __init__(self, symbol, is_vargs=False):
         super().__init__([ ])
 
         self.symbol = symbol
-        self._on_ir = on_ir
         self.is_vargs = is_vargs
 
         self._ir_value = None
@@ -70,15 +69,12 @@ class FunProtoTarget(Target):
             self.symbol.unit, id, fun_type
         )
 
-        self._on_ir(self.ir_value)
-
 
 class AttrFunProtoTarget(Target):
-    def __init__(self, symbol, on_ir=lambda val: None):
+    def __init__(self, symbol):
         super().__init__([ symbol.struct.target ])
 
         self.symbol = symbol
-        self._on_ir = on_ir
 
         self._ir_value = None
 
@@ -108,7 +104,7 @@ class AttrFunProtoTarget(Target):
         else:
             raise Todo(ret_type)
 
-        param_types = [ PtrType(self.symbol.struct.get_ir_value()) ]
+        param_types = [ PtrType(self.symbol.struct.ir_value) ]
 
         for t in self.symbol.ast.type.param_types:
             if type(t) is BangNode:
@@ -133,8 +129,6 @@ class AttrFunProtoTarget(Target):
         self._ir_value = FunValue(
             self.symbol.unit, id, fun_type
         )
-
-        self._on_ir(self.ir_value)
 
 
 class FunTarget(Target):

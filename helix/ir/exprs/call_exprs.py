@@ -90,7 +90,7 @@ def gen_call_ir(ctx, expr):
         ctor = lhs.get_ctor_symbol()
 
         if ctor is not None:
-            ctor_fun = ctor.get_ir_value()
+            ctor_fun = ctor.ir_value
             value = StackValue(ctx, lhs)
 
             ir_args = [ value.get_llvm_ptr() ]

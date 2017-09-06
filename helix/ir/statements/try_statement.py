@@ -147,12 +147,10 @@ def gen_try_statement_code(ctx, statement):
             )
 
             if type(catch_type) is PtrType:
-                clause.scope.resolve(clause.id).set_ir_value(
-                    LlvmValue(
-                        catch_type,
-                        ctx.builder.bitcast(
-                            e_ptr, catch_type.get_llvm_value()
-                        )
+                clause.scope.resolve(clause.id).ir_value = LlvmValue(
+                    catch_type,
+                    ctx.builder.bitcast(
+                        e_ptr, catch_type.get_llvm_value()
                     )
                 )
 

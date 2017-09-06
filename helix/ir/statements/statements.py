@@ -246,7 +246,7 @@ def gen_code(fun, scope, ast):
 
         gen_assign_code(ctx, value, LlvmValue(param_type, arg))
 
-        ctx.scope.resolve(param_id).set_ir_value(value)
+        ctx.scope.resolve(param_id).ir_value = value
 
     gen_block_code(ctx, ast.body)
 

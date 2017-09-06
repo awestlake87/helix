@@ -17,18 +17,12 @@ class GlobalSymbol:
         else:
             self.scoped_id = [ unit.id, self.ast.id ]
 
-        self.target = GlobalTarget(self, self._on_ir)
+        self.target = GlobalTarget(self)
         self._ir_value = None
 
         self.type = None
         self.init_expr = None
 
-    def _on_ir(self, value):
-        self._ir_value = value
-
-    def get_ir_value(self):
-        if self._ir_value is None:
-            raise Todo()
-
-        else:
-            return self._ir_value
+    @property
+    def ir_value(self):
+        return self.target.ir_value
