@@ -4,7 +4,7 @@ import llvmlite.binding as binding
 
 from .target import Target
 
-from .manglers import mangle_name
+from .manglers import mangle_name, OperName
 
 class JitTarget(Target):
     def __init__(self, units):
@@ -31,7 +31,7 @@ class JitTarget(Target):
 
         self._jit_fun = CFUNCTYPE(c_int)(
             self._llvm_engine.get_function_address(
-                mangle_name([ self.units[0].id, "__jit__" ])
+                mangle_name([ self.units[0].id, OperName(OperName.OP_JIT) ])
             )
         )
 

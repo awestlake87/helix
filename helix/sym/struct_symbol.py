@@ -109,7 +109,9 @@ class StructSymbol:
                 if attr_node.is_attr:
                     self.attrs.append((
                         attr_id,
-                        AttrFunSymbol(unit, self, attr_node, self.scope)
+                        AttrFunSymbol(
+                            unit, self, attr_node.id, attr_node, self.scope
+                        )
                     ))
 
                 else:

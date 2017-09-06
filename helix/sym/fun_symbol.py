@@ -162,9 +162,10 @@ class FunSymbol:
         return self.proto_target.ir_value
 
 class AttrFunSymbol:
-    def __init__(self, unit, struct, ast, parent_scope):
+    def __init__(self, unit, struct, id, ast, parent_scope):
         self.unit = unit
         self.struct = struct
+        self.id = id
         self.ast = ast
         self.parent_scope = parent_scope
         self.scope = Scope(parent_scope)
@@ -172,7 +173,7 @@ class AttrFunSymbol:
         if self.ast.is_cfun:
             self.absolute_id = self.ast.id
         else:
-            self.absolute_id = mangle_name([ unit.id, struct.id, self.ast.id ])
+            self.absolute_id = mangle_name([ unit.id, struct.id, self.id ])
 
         self.proto_target = AttrFunProtoTarget(
             self.unit,

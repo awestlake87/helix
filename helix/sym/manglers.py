@@ -4,7 +4,7 @@ from ..err import Todo
 class OperName:
     OP_JIT = "O3jit"
     OP_CONSTRUCT = "O9construct"
-    OP_DROP = "O4drop"
+    OP_DESTRUCT = "O8destruct"
 
     def __init__(self, id):
         self.id = id

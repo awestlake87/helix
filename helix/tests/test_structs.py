@@ -86,6 +86,7 @@ class TestStructs(unittest.TestCase):
             )
         )
 
+    @unittest.SkipTest
     def test_ctor_and_dtor(self):
         self.assertEqual(
             0,
