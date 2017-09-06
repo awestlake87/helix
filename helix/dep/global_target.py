@@ -11,18 +11,12 @@ from ..ir import (
 
 class GlobalTarget(Target):
     def __init__(self, symbol, on_ir=lambda val: None, is_vargs=False):
+        super().__init__([ ])
+
         self.symbol = symbol
         self._on_ir = on_ir
 
         self.ir_value = None
-
-        with self.symbol.unit.use_scope(self.symbol.parent_scope):
-            deps = gen_expr_deps(self.symbol.unit, self.symbol.ast.type)
-
-            if self.symbol.init_expr is not None:
-                deps += gen_expr_deps(self.symbol.unit, self.symbol.init_expr)
-
-            super().__init__(deps)
 
     def _build_target(self):
         from ..sym import mangle_name

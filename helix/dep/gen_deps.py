@@ -141,7 +141,7 @@ def gen_expr_deps(unit, expr):
         )
 
     elif expr_type is GlobalNode:
-        return [ unit.scope.resolve(expr.id).target ]
+        return gen_global_deps(unit, expr)
 
     elif issubclass(expr_type, LiteralNode):
         return [ ]
@@ -171,6 +171,16 @@ def gen_struct_deps(unit, expr):
 
     return [ ]
 
+def gen_global_deps(unit, expr):
+    symbol = unit.scope.resolve(expr.id)
+
+    symbol.target.deps += gen_expr_deps(unit, expr.type)
+
+    if symbol.init_expr is not None:
+        symbol.target.deps += gen_expr_deps(unit, symbol.init_expr)
+
+    return [ ]
+
 
 def gen_unary_expr_deps(unit, expr):
     return gen_expr_deps(unit, expr.operand)
@@ -181,9 +191,14 @@ def gen_binary_expr_deps(unit, expr):
 def gen_dot_expr_deps(unit, expr):
     from ..sym import AttrFunSymbol, GlobalSymbol
 
-    sym = gen_expr_sym(unit, expr)
-
     deps = [ ]
+
+    lhs = gen_expr_sym(unit, expr.lhs)
+
+    if type(lhs) is GlobalSymbol:
+        deps.append(lhs.target)
+
+    sym = gen_expr_sym(unit, expr)
 
     if type(sym) is AttrFunSymbol:
         deps.append(sym.target)

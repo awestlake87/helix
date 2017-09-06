@@ -17,7 +17,7 @@ class GlobalSymbol:
         else:
             self.scoped_id = [ unit.id, self.ast.id ]
 
-        self._target = None
+        self.target = GlobalTarget(self, self._on_ir)
         self._ir_value = None
 
         self.type = None
@@ -25,15 +25,6 @@ class GlobalSymbol:
 
     def _on_ir(self, value):
         self._ir_value = value
-
-    @property
-    def target(self):
-        if self._target is None:
-            self._target = GlobalTarget(
-                self, self._on_ir
-            )
-
-        return self._target
 
     def get_ir_value(self):
         if self._ir_value is None:
