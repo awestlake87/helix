@@ -1,9 +1,9 @@
-from ..err import Todo
+from ...err import Todo
+
+from ..scope import Scope
+from ..manglers import OperName
 
 from .fun_symbol import AttrFunSymbol
-
-from .scope import Scope
-from .manglers import OperName
 
 class ConstructOperSymbol(AttrFunSymbol):
     def __init__(self, unit, struct, ast, parent_scope):

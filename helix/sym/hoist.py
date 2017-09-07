@@ -1,12 +1,8 @@
 from ..ast import *
+from ..err import Todo
 
 from .scope import Scope
-from .fun_symbol import *
-from .struct_symbol import *
-from .var_symbol import *
-from .global_symbol import GlobalSymbol
-
-from ..err import Todo
+from .values import *
 
 def hoist_block(unit, block):
     assert block.scope is None

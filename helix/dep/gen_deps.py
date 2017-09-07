@@ -49,7 +49,7 @@ def gen_unit_deps(unit):
             FunTypeNode(BangNode(IntTypeNode(32, True)), [ ]),
             OperName(OperName.OP_JIT),
             [ ],
-            unit.ast
+            unit.ast.block
         ),
         unit.scope
     )

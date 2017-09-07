@@ -1,16 +1,15 @@
-from ..err import Todo
-
-from .scope import Scope
-
-from .target import Target
-
-from ..ir import (
+from ...err import Todo
+from ...ir import (
     gen_static_expr_ir,
     gen_static_as_ir,
     GlobalValue,
     AutoType,
     get_concrete_type
 )
+
+from ..scope import Scope
+from ..target import Target
+from ..manglers import mangle_name
 
 class GlobalTarget(Target):
     def __init__(self, symbol):
@@ -29,8 +28,6 @@ class GlobalTarget(Target):
             raise Todo("global has not been built yet")
 
     def build(self):
-        from ..sym import mangle_name
-
         id = ""
 
         if self.symbol.ast.is_cglobal:

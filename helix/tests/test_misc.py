@@ -21,62 +21,68 @@ class MiscTests(unittest.TestCase):
         )
 
     def test_ptr_type(self):
-        run_test(
-            """
-            cfun *int! omg()
-                return nil
-            cfun ****int! int_ptr_ptr_ptr_ptr()
-                return nil
+        self.assertEqual(
+            0,
+            run_test(
+                """
+                cfun *int! omg()
+                    return nil
+                cfun ****int! int_ptr_ptr_ptr_ptr()
+                    return nil
 
-            if int_ptr_ptr_ptr_ptr() != nil
-                return 1
+                if int_ptr_ptr_ptr_ptr() != nil
+                    return 1
 
-            elif omg() != nil
-                return 2
+                elif omg() != nil
+                    return 2
 
-            else
-                return 0
+                else
+                    return 0
 
-            """
+                """
+            )
         )
 
     def test_int_types(self):
-        run_test(
-            """
-            cfun bit! get_bit()
-                return 0
+        self.assertEqual(
+            0,
+            run_test(
+                """
+                cfun bit! get_bit()
+                    return 0
 
-            cfun byte! get_byte()
-                return 0
-            cfun short! get_short()
-                return 0
-            cfun int! get_int()
-                return 0
-            cfun long! get_long()
-                return 0
+                cfun byte! get_byte()
+                    return 0
+                cfun short! get_short()
+                    return 0
+                cfun int! get_int()
+                    return 0
+                cfun long! get_long()
+                    return 0
 
-            cfun ubyte! get_ubyte()
-                return 0
-            cfun ushort! get_ushort()
-                return 0
-            cfun uint! get_uint()
-                return 0
-            cfun ulong! get_ulong()
-                return 0
+                cfun ubyte! get_ubyte()
+                    return 0
+                cfun ushort! get_ushort()
+                    return 0
+                cfun uint! get_uint()
+                    return 0
+                cfun ulong! get_ulong()
+                    return 0
 
-            get_bit()
-            get_byte()
-            get_short()
-            get_int()
-            get_long()
+                get_bit()
+                get_byte()
+                get_short()
+                get_int()
+                get_long()
 
-            get_ubyte()
-            get_ushort()
-            get_uint()
-            get_ulong()
+                get_ubyte()
+                get_ushort()
+                get_uint()
+                get_ulong()
 
-            return 0
-            """
+                return 0
+                """
+            )
         )
 
     def test_return_type_mismatch(self):

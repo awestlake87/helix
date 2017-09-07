@@ -1,11 +1,6 @@
 
-from .fun_symbol import *
-from .global_symbol import *
+from .gen_syms import *
 from .hoist import *
 from .jit_target import *
 from .manglers import *
-from .oper_symbol import *
 from .scope import *
-from .struct_symbol import *
-from .unit_symbol import *
-from .var_symbol import *

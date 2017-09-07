@@ -1,6 +1,7 @@
 
-from ..err import Todo
-from .target import Target
+from ...err import Todo
+
+from ..target import Target
 
 class VarTarget(Target):
     def __init__(self):
@@ -10,7 +11,7 @@ class VarTarget(Target):
         pass
 
 class VarSymbol:
-    def __init__(self, sym_type=None):
+    def __init__(self, sym_type = None):
         self._target = None
         self._ir_value = None
 

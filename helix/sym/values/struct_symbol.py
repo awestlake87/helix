@@ -1,26 +1,19 @@
 
-from ..err import Todo
-from ..ast import (
+from ...err import Todo
+from ...ast import (
     DataAttr, FunNode, StructNode, ConstructOperNode, DestructOperNode
 )
-from ..ir import StructType, gen_static_expr_ir
+from ...ir import StructType, gen_static_expr_ir
+
+from ..scope import Scope
+from ..target import Target
 
 from .fun_symbol import FunSymbol, AttrFunSymbol
 from .oper_symbol import ConstructOperSymbol, DestructOperSymbol
 
-from .scope import Scope
-from .target import Target
-
 class StructTarget(Target):
     def __init__(self, symbol):
         super().__init__([ ])
-
-        from ..sym import (
-            DataAttrSymbol,
-            AttrFunSymbol,
-            ConstructOperSymbol,
-            DestructOperSymbol
-        )
 
         self.symbol = symbol
         self.attrs = { }
@@ -36,8 +29,6 @@ class StructTarget(Target):
             raise Todo("struct has not been built yet")
 
     def build(self):
-        from ..sym import DataAttrSymbol
-
         data = [ ]
 
         for attr_id, symbol in self.symbol.attrs:

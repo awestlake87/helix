@@ -660,6 +660,11 @@ class Lexer:
                     if _accept('p'):
                         return _end_kw(Token.KW_LOOP)
 
+        elif _accept('m'):
+            if _accept('u'):
+                if _accept('t'):
+                    return _end_kw(Token.KW_MUT)
+
         elif _accept('n'):
             if _accept('i'):
                 if _accept('l'):

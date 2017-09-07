@@ -1,11 +1,11 @@
 
-from ..err import Todo
-from ..ast import BangNode, VoidTypeNode
-from ..ir import FunType, FunValue, PtrType, gen_static_expr_ir, gen_code
+from ...err import Todo
+from ...ast import BangNode, VoidTypeNode
+from ...ir import FunType, FunValue, PtrType, gen_static_expr_ir, gen_code
 
-from .scope import Scope
-from .target import Target
-from .manglers import mangle_name
+from ..scope import Scope
+from ..target import Target
+from ..manglers import mangle_name
 
 class FunProtoTarget(Target):
     def __init__(

@@ -1,15 +1,12 @@
 from contextlib import contextmanager
+from llvmlite import binding
 
-import llvmlite.binding as binding
+from ...err import Todo
+from ...ir import UnitValue
+from ...ast import *
 
-from ..err import Todo
-from ..ir import UnitValue
-from ..ast import *
-
-from .hoist import hoist_block
-
-from .target import Target
-from .scope import Scope
+from ..target import Target
+from ..scope import Scope
 
 class UnitTarget(Target):
     def __init__(self, symbol, on_llvm_module=lambda m: None):
@@ -41,8 +38,6 @@ class UnitSymbol:
 
         self.id = id
         self.ir_value = UnitValue(self.id)
-
-        hoist_block(self, self.ast)
 
         self.target = UnitTarget(
             self, on_llvm_module=self._on_llvm_module

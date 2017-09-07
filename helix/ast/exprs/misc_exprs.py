@@ -7,6 +7,9 @@ class PtrNode(UnaryExprNode):
 class RefNode(UnaryExprNode):
     pass
 
+class MutNode(UnaryExprNode):
+    pass
+
 class DotNode(BinaryExprNode):
     pass
 

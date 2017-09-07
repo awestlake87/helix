@@ -11,7 +11,7 @@ from .condition_nodes import *
 
 from ..err import Todo, ExpectedToken, UnexpectedToken, CompilerBug
 
-def parse_unit(unit_code):
+def parse_unit(unit_id, unit_code):
     class Context:
         def __init__(self, code):
             self.scanner = scan_tokens(code)
@@ -108,7 +108,7 @@ def parse_unit(unit_code):
     block = parse_block(ctx)
     ctx.expect(Token.END)
 
-    return block
+    return UnitNode(unit_id, block)
 
 def parse_block(ctx):
     ctx.accept(Token.KW_DO)
@@ -720,6 +720,9 @@ def parse_expr_prec3(ctx):
 
     elif ctx.accept('&'):
         return RefNode(parse_expr_prec3(ctx))
+
+    elif ctx.accept(Token.KW_MUT):
+        return MutNode(parse_expr_prec3(ctx))
 
     elif ctx.accept('-'):
         return NegNode(parse_expr_prec3(ctx))
