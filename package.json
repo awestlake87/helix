@@ -4,7 +4,9 @@
   "description": "Documentation Website for Helix Programming Language",
   "main": "index.js",
   "scripts": {
-    "test": "test"
+    "test": "test",
+    "build-dev": "./node_modules/.bin/webpack -d",
+    "dev-server": "webpack-dev-server --inline"
   },
   "repository": {
     "type": "git",

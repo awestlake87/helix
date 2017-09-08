@@ -8,6 +8,7 @@ var config = {
   entry: APP_DIR + "/index.jsx",
   output: {
     path: BUILD_DIR,
+    publicPath: "/public/",
     filename: "bundle.js"
   },
   module: {
@@ -18,7 +19,16 @@ var config = {
         loader: "babel-loader"
       }
     ]
-  }
+  },
+  devtool: "source-map",
+  devServer: {
+    contentBase: __dirname,
+    hot: true,
+    filename: "bundle.js"
+  },
+  plugins: [
+    new webpack.HotModuleReplacementPlugin()
+  ]
 }
 
 module.exports = config
