@@ -65,7 +65,7 @@ class GlobalTarget(Target):
             )
 
 
-class GlobalSymbol:
+class GlobalSym:
     def __init__(self, unit, ast, parent_scope):
         super().__init__()
 

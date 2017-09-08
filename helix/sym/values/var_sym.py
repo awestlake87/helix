@@ -10,7 +10,7 @@ class VarTarget(Target):
     def build(self):
         pass
 
-class VarSymbol:
+class VarSym:
     def __init__(self, sym_type = None):
         self._target = None
         self._ir_value = None

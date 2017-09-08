@@ -14,6 +14,6 @@ class TryNode(StatementNode):
         self.catch_clauses = catch_clauses
         self.default_catch = default_catch
 
-class ThrowStatementNode(StatementNode):
+class ThrowNode(StatementNode):
     def __init__(self, expr):
         self.expr = expr

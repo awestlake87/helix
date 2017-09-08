@@ -56,7 +56,7 @@ def gen_sizeof_ir(ctx, value):
     )
 
 def gen_offsetof_ir(ctx, expr):
-    from ...sym import DataAttrSymbol
+    from ...sym import DataAttrSym
     from .exprs import gen_expr_ir
 
     lhs = gen_expr_ir(ctx, expr.lhs)
@@ -65,7 +65,7 @@ def gen_offsetof_ir(ctx, expr):
         if type(expr.rhs) is AttrNode:
             symbol = lhs.get_attr_symbol(expr.rhs.id)
 
-            if type(symbol) is DataAttrSymbol:
+            if type(symbol) is DataAttrSym:
                 nil_value = NilValue(PtrType(lhs))
                 size_type = IntType(32, False)
 

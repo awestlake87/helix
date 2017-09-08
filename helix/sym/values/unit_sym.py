@@ -31,7 +31,7 @@ class UnitTarget(Target):
 
             raise e
 
-class UnitSymbol:
+class UnitSym:
     def __init__(self, id, ast):
         self.ast = ast
         self.scope = Scope()

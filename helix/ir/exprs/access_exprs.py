@@ -3,7 +3,7 @@ from ..types import *
 from ...ast import SymbolNode, CallNode
 
 def gen_dot_ir(ctx, expr):
-    from ...sym import DataAttrSymbol, AttrFunSymbol
+    from ...sym import DataAttrSym, AttrFunSym
     from .exprs import gen_expr_ir
 
     lhs = gen_expr_ir(ctx, expr.lhs)
@@ -15,13 +15,13 @@ def gen_dot_ir(ctx, expr):
         raise Todo(expr.rhs)
 
 def gen_access_ir(ctx, lhs, rhs):
-    from ...sym import DataAttrSymbol, AttrFunSymbol
+    from ...sym import DataAttrSym, AttrFunSym
 
     if type(lhs.type) is StructType:
         if type(rhs) is str:
             symbol = lhs.type.get_attr_symbol(rhs)
 
-            if type(symbol) is DataAttrSymbol:
+            if type(symbol) is DataAttrSym:
                 return LlvmRef(
                     ctx,
                     symbol.ir_type,
@@ -31,7 +31,7 @@ def gen_access_ir(ctx, lhs, rhs):
                     )
                 )
 
-            elif type(symbol) is AttrFunSymbol:
+            elif type(symbol) is AttrFunSym:
                 if issubclass(type(lhs), LlvmRef):
                     return BoundAttrFunValue(lhs, symbol.ir_value)
                 else:

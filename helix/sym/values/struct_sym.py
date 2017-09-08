@@ -8,8 +8,8 @@ from ...ir import StructType, gen_static_expr_ir
 from ..scope import Scope
 from ..target import Target
 
-from .fun_symbol import FunSymbol, AttrFunSymbol
-from .oper_symbol import ConstructOperSymbol, DestructOperSymbol
+from .fun_sym import FunSym, AttrFunSym
+from .oper_sym import ConstructOperSym, DestructOperSym
 
 class StructTarget(Target):
     def __init__(self, symbol):
@@ -32,7 +32,7 @@ class StructTarget(Target):
         data = [ ]
 
         for attr_id, symbol in self.symbol.attrs:
-            if type(symbol) is DataAttrSymbol:
+            if type(symbol) is DataAttrSym:
                 data.append(symbol)
                 symbol.ir_type = gen_static_expr_ir(
                     self.symbol.parent_scope, symbol.ast.type
@@ -50,7 +50,7 @@ class StructTarget(Target):
             ]
         )
 
-class DataAttrSymbol:
+class DataAttrSym:
     def __init__(self, ast, index):
         self.ast = ast
         self.id = ast.id
@@ -71,7 +71,7 @@ class DataAttrSymbol:
     def ir_type(self, t):
         self._ir_type = t
 
-class StructSymbol:
+class StructSym:
     def __init__(self, unit, parent_scope, ast):
         self.unit = unit
         self.parent_scope = parent_scope
@@ -100,24 +100,24 @@ class StructSymbol:
                 if attr_node.is_attr:
                     self.attrs.append((
                         attr_id,
-                        AttrFunSymbol(
+                        AttrFunSym(
                             unit, self, attr_node.id, attr_node, self.scope
                         )
                     ))
 
                 else:
                     self.attrs.append(
-                        (attr_id, FunSymbol(unit, attr_node, self.scope))
+                        (attr_id, FunSym(unit, attr_node, self.scope))
                     )
 
             elif attr_type is StructNode:
                 self.attrs.append(
-                    (attr_id, StructSymbol(unit, self.scope, attr_node))
+                    (attr_id, StructSym(unit, self.scope, attr_node))
                 )
 
             elif attr_type is DataAttr:
                 self.attrs.append(
-                    (attr_id, DataAttrSymbol(attr_node, attr_index))
+                    (attr_id, DataAttrSym(attr_node, attr_index))
                 )
                 attr_index += 1
 
@@ -125,7 +125,7 @@ class StructSymbol:
                 self.attrs.append(
                     (
                         attr_id,
-                        ConstructOperSymbol(unit, self, attr_node, self.scope)
+                        ConstructOperSym(unit, self, attr_node, self.scope)
                     )
                 )
 
@@ -133,7 +133,7 @@ class StructSymbol:
                 self.attrs.append(
                     (
                         attr_id,
-                        DestructOperSymbol(unit, self, attr_node, self.scope)
+                        DestructOperSym(unit, self, attr_node, self.scope)
                     )
                 )
 
@@ -143,7 +143,7 @@ class StructSymbol:
     def get_ctor_symbol(self):
         for attr_id, attr_symbol in self.attrs:
             if attr_id == "construct":
-                if type(attr_symbol) is ConstructOperSymbol:
+                if type(attr_symbol) is ConstructOperSym:
                     return attr_symbol
 
         return None
@@ -151,7 +151,7 @@ class StructSymbol:
     def get_dtor_symbol(self):
         for attr_id, attr_symbol in self.attrs:
             if attr_id == "destruct":
-                if type(attr_symbol) is DestructOperSymbol:
+                if type(attr_symbol) is DestructOperSym:
                     return attr_symbol
 
         return None
@@ -160,8 +160,8 @@ class StructSymbol:
         for attr_id, attr_symbol in self.attrs:
             if attr_id == id:
                 if (
-                    type(attr_symbol) is AttrFunSymbol or
-                    type(attr_symbol) is DataAttrSymbol
+                    type(attr_symbol) is AttrFunSym or
+                    type(attr_symbol) is DataAttrSym
                 ):
                     return attr_symbol
                 else:

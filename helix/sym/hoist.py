@@ -109,7 +109,7 @@ def hoist_expr(unit, expr):
 
 def hoist_global_expr(unit, expr):
     hoist_expr(unit, expr.type)
-    unit.scope.insert(expr.id, GlobalSymbol(unit, expr, unit.scope))
+    unit.scope.insert(expr.id, GlobalSym(unit, expr, unit.scope))
 
 def hoist_unary_expr(unit, expr):
     hoist_expr(unit, expr.operand)
@@ -127,7 +127,7 @@ def hoist_call(unit, expr):
 def hoist_init(unit, expr):
     if type(expr.lhs) is SymbolNode:
         hoist_expr(unit, expr.rhs)
-        unit.scope.insert(expr.lhs.id, VarSymbol())
+        unit.scope.insert(expr.lhs.id, VarSym())
 
     elif type(expr.lhs) is GlobalNode:
         hoist_expr(unit, expr.lhs)
@@ -143,25 +143,25 @@ def hoist_ternary_conditional(unit, expr):
     hoist_expr(unit, expr.rhs)
 
 def hoist_struct(unit, s):
-    symbol = StructSymbol(unit, unit.scope, s)
+    symbol = StructSym(unit, unit.scope, s)
     unit.scope.insert(s.id, symbol)
 
     with unit.use_scope(symbol.scope):
         for attr_id, attr_symbol in symbol.attrs:
-            if issubclass(type(attr_symbol), AttrFunSymbol):
+            if issubclass(type(attr_symbol), AttrFunSym):
                 hoist_expr(unit, attr_symbol.ast.type)
 
                 for param in attr_symbol.ast.param_ids:
-                    attr_symbol.scope.insert(param, VarSymbol())
+                    attr_symbol.scope.insert(param, VarSym())
 
                 if attr_symbol.ast.body is not None:
                     with unit.use_scope(attr_symbol.scope):
                         hoist_block(unit, attr_symbol.ast.body)
 
-            elif type(attr_symbol) is FunSymbol:
+            elif type(attr_symbol) is FunSym:
                 hoist_fun(unit, attr_symbol.ast)
 
-            elif type(attr_symbol) is DataAttrSymbol:
+            elif type(attr_symbol) is DataAttrSym:
                 pass
 
             else:
@@ -169,13 +169,13 @@ def hoist_struct(unit, s):
 
 
 def hoist_fun(unit, f):
-    symbol = FunSymbol(unit, f, unit.scope)
+    symbol = FunSym(unit, f, unit.scope)
     unit.scope.insert(f.id, symbol)
 
     hoist_expr(unit, f.type)
 
     for param in symbol.ast.param_ids:
-        symbol.scope.insert(param, VarSymbol())
+        symbol.scope.insert(param, VarSym())
 
     if symbol.ast.body is not None:
         with unit.use_scope(symbol.scope):
@@ -255,7 +255,7 @@ def hoist_try_statement(unit, statement):
         with unit.use_scope(clause.scope):
             hoist_expr(unit, clause.type)
 
-            unit.scope.insert(clause.id, VarSymbol())
+            unit.scope.insert(clause.id, VarSym())
 
             hoist_block(unit, clause.block)
 

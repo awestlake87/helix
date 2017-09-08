@@ -131,29 +131,45 @@ class FunTarget(Target):
             self.fun_node
         )
 
-class FunSymbol:
-    def __init__(self, unit, ast, parent_scope):
+class FunSym:
+    def __init__(
+        self,
+        unit,
+        parent_scope,
+        type_sym,
+        id,
+        param_ids,
+        body,
+        is_vargs = False,
+        is_cfun = False
+    ):
         self.unit = unit
-        self.ast = ast
         self.parent_scope = parent_scope
         self.scope = Scope(parent_scope)
-        self.is_vargs = ast.is_vargs
 
-        if self.ast.is_cfun:
-            self.absolute_id = self.ast.id
+        self.type = type_sym
+        self.id = id
+        self.param_ids = param_ids
+        self.body = body
+
+        self.is_vargs = is_vargs
+        self.is_cfun = is_cfun
+
+        if self.is_cfun:
+            self.absolute_id = self.id
         else:
-            self.absolute_id = mangle_name([ unit.id, self.ast.id ])
+            self.absolute_id = mangle_name([ unit.id, self.id ])
 
         self.proto_target = FunProtoTarget(
             self.unit,
             self.parent_scope,
-            self.ast.type,
+            self.type,
             self.absolute_id,
             is_vargs = self.is_vargs
         )
 
-        if self.ast.body is not None:
-            self.target = FunTarget(self.proto_target, self.scope, self.ast)
+        if self.body is not None:
+            self.target = FunTarget(self.proto_target, self.scope, self.body)
 
         else:
             self.target = None
@@ -161,7 +177,7 @@ class FunSymbol:
     def ir_value(self):
         return self.proto_target.ir_value
 
-class AttrFunSymbol:
+class AttrFunSym:
     def __init__(self, unit, struct, id, ast, parent_scope):
         self.unit = unit
         self.struct = struct
