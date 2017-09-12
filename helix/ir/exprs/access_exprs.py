@@ -1,14 +1,12 @@
 from ..types import *
 
-from ...ast import SymbolNode, CallNode
-
 def gen_dot_ir(ctx, expr):
-    from ...sym import DataAttrSym, AttrFunSym
+    from ...sym import DataAttrSym, AttrFunSym, SymbolSym
     from .exprs import gen_expr_ir
 
     lhs = gen_expr_ir(ctx, expr.lhs)
 
-    if type(expr.rhs) is SymbolNode:
+    if type(expr.rhs) is SymbolSym:
         return gen_access_ir(ctx, lhs, expr.rhs.id)
 
     else:

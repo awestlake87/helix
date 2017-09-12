@@ -262,40 +262,55 @@ def gen_block_code(ctx, block):
 
 
 def gen_statement_code(ctx, statement):
+    from ...sym import (
+        ReturnSym,
+        IfSym,
+        LoopSym,
+        SwitchSym,
+        TrySym,
+        ThrowSym,
+        BreakSym,
+        ContinueSym,
+        FunSym,
+        StructSym,
+        ExprSym,
+        BlockSym
+    )
+
     statement_type = type(statement)
 
-    if statement_type is ReturnNode:
-        gen_return_statement_code(ctx, statement)
+    if statement_type is ReturnSym:
+        gen_return_code(ctx, statement)
 
-    elif statement_type is IfNode:
-        gen_if_statement_code(ctx, statement)
+    elif statement_type is IfSym:
+        gen_if_code(ctx, statement)
 
-    elif statement_type is LoopNode:
-        gen_loop_statement_code(ctx, statement)
+    elif statement_type is LoopSym:
+        gen_loop_code(ctx, statement)
 
-    elif statement_type is SwitchNode:
-        gen_switch_statement_code(ctx, statement)
+    elif statement_type is SwitchSym:
+        gen_switch_code(ctx, statement)
 
-    elif statement_type is TryNode:
-        gen_try_statement_code(ctx, statement)
+    elif statement_type is TrySym:
+        gen_try_code(ctx, statement)
 
-    elif statement_type is ThrowStatementNode:
-        gen_throw_statement_code(ctx, statement)
+    elif statement_type is ThrowSym:
+        gen_throw_code(ctx, statement)
 
-    elif statement_type is BreakNode:
-        gen_break_statement_code(ctx, statement)
+    elif statement_type is BreakSym:
+        gen_break_code(ctx, statement)
 
-    elif statement_type is ContinueNode:
-        gen_continue_statement_code(ctx, statement)
+    elif statement_type is ContinueSym:
+        gen_continue_code(ctx, statement)
 
-    elif statement_type is FunNode or statement_type is StructNode:
+    elif statement_type is FunSym or statement_type is StructSym:
         # only interested in generating the current fun
         pass
 
-    elif issubclass(statement_type, ExprNode):
+    elif issubclass(statement_type, ExprSym):
         gen_expr_ir(ctx, statement)
 
-    elif statement_type is BlockNode:
+    elif statement_type is BlockSym:
         gen_block_code(ctx, statement)
 
     else:

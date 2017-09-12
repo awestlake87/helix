@@ -1,8 +1,8 @@
 from ..exprs import gen_expr_ir, gen_as_bit_ir
 
-def gen_if_statement_code(ctx, statement):
+def gen_if_code(ctx, statement):
     from .statements import gen_block_code
-    
+
     assert statement.scope is not None
 
     if_control_path = ctx.control_path.fork()

@@ -4,8 +4,6 @@ import llvmlite.binding as binding
 
 from .target import Target
 
-from .manglers import mangle_name, OperName
-
 class JitTarget(Target):
     def __init__(self, units):
         self.units = units
@@ -23,6 +21,7 @@ class JitTarget(Target):
         self._jit_fun = None
 
     def build(self):
+        from ..sym import mangle_name, OperName
 
         for unit in self.units:
             self._llvm_engine.add_module(unit.get_llvm_module())

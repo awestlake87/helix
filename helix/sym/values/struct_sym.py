@@ -3,52 +3,11 @@ from ...err import Todo
 from ...ast import (
     DataAttr, FunNode, StructNode, ConstructOperNode, DestructOperNode
 )
-from ...ir import StructType, gen_static_expr_ir
 
 from ..scope import Scope
-from ..target import Target
 
 from .fun_sym import FunSym, AttrFunSym
 from .oper_sym import ConstructOperSym, DestructOperSym
-
-class StructTarget(Target):
-    def __init__(self, symbol):
-        super().__init__([ ])
-
-        self.symbol = symbol
-        self.attrs = { }
-
-        self._ir_value = None
-
-    @property
-    def ir_value(self):
-        if self._ir_value is not None:
-            return self._ir_value
-
-        else:
-            raise Todo("struct has not been built yet")
-
-    def build(self):
-        data = [ ]
-
-        for attr_id, symbol in self.symbol.attrs:
-            if type(symbol) is DataAttrSym:
-                data.append(symbol)
-                symbol.ir_type = gen_static_expr_ir(
-                    self.symbol.parent_scope, symbol.ast.type
-                )
-
-        self._ir_value = StructType(
-            self.attrs,
-            [
-                (
-                    member.ir_type,
-                    member.id
-                )
-                for member in
-                data
-            ]
-        )
 
 class DataAttrSym:
     def __init__(self, ast, index):

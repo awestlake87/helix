@@ -3,9 +3,9 @@ from ..types import IntType
 from ..exprs import gen_implicit_cast_ir, gen_expr_ir, get_concrete_type
 
 
-def gen_switch_statement_code(ctx, statement):
+def gen_switch_code(ctx, statement):
     from .statements import gen_block_code
-    
+
     assert statement.scope is not None
 
     control_path = ctx.control_path.fork()

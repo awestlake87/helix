@@ -1,6 +1,79 @@
 
 from ..expr_sym import ExprSym, UnaryExprSym, BinaryExprSym
 
+
+
+class LtnSym(BinaryExprSym):
+    pass
+
+class GtnSym(BinaryExprSym):
+    pass
+
+class LeqSym(BinaryExprSym):
+    pass
+
+class GeqSym(BinaryExprSym):
+    pass
+
+class EqlSym(BinaryExprSym):
+    pass
+
+class NeqSym(BinaryExprSym):
+    pass
+
+
+
+class AddSym(BinaryExprSym):
+    pass
+
+class SubSym(BinaryExprSym):
+    pass
+
+class MulSym(BinaryExprSym):
+    pass
+
+class DivSym(BinaryExprSym):
+    pass
+
+class ModSym(BinaryExprSym):
+    pass
+
+
+
+class BitAndSym(BinaryExprSym):
+    pass
+
+class BitOrSym(BinaryExprSym):
+    pass
+
+class BitXorSym(BinaryExprSym):
+    pass
+
+class BitNotSym(BinaryExprSym):
+    pass
+
+class BitShlSym(BinaryExprSym):
+    pass
+
+class BitShrSym(BinaryExprSym):
+    pass
+
+
+
+class AndSym(BinaryExprSym):
+    pass
+
+class OrSym(BinaryExprSym):
+    pass
+
+class NotSym(UnaryExprSym):
+    pass
+
+class XorSym(BinaryExprSym):
+    pass
+
+
+
 class PtrSym(UnaryExprSym):
     pass
 

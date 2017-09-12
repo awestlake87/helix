@@ -1,5 +1,6 @@
 from ..ast import parse_unit
-from ..sym import gen_unit_sym, JitTarget, hoist_block
+from ..sym import gen_unit_sym, hoist_block
+from ..targets import JitTarget
 from ..dep import gen_unit_deps
 from ..jit import run
 

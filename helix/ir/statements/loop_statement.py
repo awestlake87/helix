@@ -1,7 +1,7 @@
 
 from ..exprs import gen_expr_ir, gen_as_bit_ir
 
-def gen_loop_statement_code(ctx, statement):
+def gen_loop_code(ctx, statement):
     from .statements import gen_block_code
 
     assert statement.scope is not None

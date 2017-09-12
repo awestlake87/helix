@@ -162,7 +162,7 @@ def gen_expr_deps(unit, expr):
     elif expr_type is GlobalSym:
         return gen_global_deps(unit, expr)
 
-    elif issubclass(expr_type, LiteralSym):
+    elif expr_type is AutoIntSym:
         return [ ]
 
     else:

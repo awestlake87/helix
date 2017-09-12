@@ -2,7 +2,7 @@ from ..exprs import gen_expr_ir
 
 from ...err import ReturnTypeMismatch, Todo
 
-def gen_return_statement_code(ctx, statement):
+def gen_return_code(ctx, statement):
     if statement.expr is not None:
         value = gen_expr_ir(ctx, statement.expr)
 

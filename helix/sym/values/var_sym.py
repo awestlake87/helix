@@ -1,15 +1,6 @@
 
 from ...err import Todo
 
-from ..target import Target
-
-class VarTarget(Target):
-    def __init__(self):
-        super().__init__([ ])
-
-    def build(self):
-        pass
-
 class VarSym:
     def __init__(self, sym_type = None):
         self._target = None
@@ -19,6 +10,8 @@ class VarSym:
 
     @property
     def target(self):
+        from ...targets import VarTarget
+        
         if self._target is None:
             self._target = VarTarget()
 

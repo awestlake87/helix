@@ -1,6 +1,4 @@
 
-
-from ...ast import *
 from ...err import Todo
 
 from ..types import *
@@ -20,58 +18,76 @@ from .ptr_exprs import *
 from .static_exprs import *
 
 def gen_expr_ir(ctx, expr):
+    from ...sym import (
+        CallSym,
+        SymbolSym,
+        AttrSym,
+        AndSym,
+        OrSym,
+        NotSym,
+        XorSym,
+        InitSym,
+        DotSym,
+        OffsetofSym,
+        TernaryConditionalSym,
+        GlobalSym,
+        BinaryExprSym,
+        UnaryExprSym,
+        StringSym
+    )
+
     expr_type = type(expr)
 
-    if expr_type is CallNode:
+    if expr_type is CallSym:
         return gen_call_ir(ctx, expr)
 
-    elif expr_type is SymbolNode:
+    elif expr_type is SymbolSym:
         value = ctx.scope.resolve(expr.id).ir_value
         if type(value) is GlobalValue:
             return LlvmRef(ctx, value.type, value.get_llvm_ptr())
         else:
             return value
 
-    elif expr_type is AttrNode:
+    elif expr_type is AttrSym:
         return gen_access_ir(ctx, ctx.instance, expr.id)
 
-    elif expr_type is AndNode:
+    elif expr_type is AndSym:
         return gen_and_ir(ctx, expr)
 
-    elif expr_type is OrNode:
+    elif expr_type is OrSym:
         return gen_or_ir(ctx, expr)
 
-    elif expr_type is NotNode:
+    elif expr_type is NotSym:
         return gen_not_ir(ctx, expr)
 
-    elif expr_type is XorNode:
+    elif expr_type is XorSym:
         return gen_xor_ir(ctx, expr)
 
-    elif expr_type is InitNode:
+    elif expr_type is InitSym:
         return gen_init_ir(ctx, expr)
 
-    elif expr_type is DotNode:
+    elif expr_type is DotSym:
         return gen_dot_ir(ctx, expr)
 
-    elif expr_type is OffsetofNode:
+    elif expr_type is OffsetofSym:
         return gen_offsetof_ir(ctx, expr)
 
-    elif expr_type is TernaryConditionalNode:
+    elif expr_type is TernaryConditionalSym:
         return gen_ternary_conditional_ir(ctx, expr)
 
-    elif expr_type is GlobalNode:
+    elif expr_type is GlobalSym:
         value = ctx.scope.resolve(expr.id).ir_value
         return LlvmRef(
             ctx, value.type, value.get_llvm_ptr()
         )
 
-    elif issubclass(expr_type, BinaryExprNode):
+    elif issubclass(expr_type, BinaryExprSym):
         return gen_binary_expr_ir(ctx, expr)
 
-    elif issubclass(expr_type, UnaryExprNode):
+    elif issubclass(expr_type, UnaryExprSym):
         return gen_unary_expr_ir(ctx, expr)
 
-    elif expr_type is StringNode:
+    elif expr_type is StringSym:
         return gen_string_ir(ctx, expr)
 
     else:
@@ -82,52 +98,52 @@ def gen_binary_expr_ir(ctx, expr):
     lhs = gen_expr_ir(ctx, expr.lhs)
     rhs = gen_expr_ir(ctx, expr.rhs)
 
-    if expr_type is LtnNode:
+    if expr_type is LtnSym:
         return gen_ltn_ir(ctx, lhs, rhs)
-    elif expr_type is LeqNode:
+    elif expr_type is LeqSym:
         return gen_leq_ir(ctx, lhs, rhs)
-    elif expr_type is GtnNode:
+    elif expr_type is GtnSym:
         return gen_gtn_ir(ctx, lhs, rhs)
-    elif expr_type is GeqNode:
+    elif expr_type is GeqSym:
         return gen_geq_ir(ctx, lhs, rhs)
-    elif expr_type is EqlNode:
+    elif expr_type is EqlSym:
         return gen_eql_ir(ctx, lhs, rhs)
-    elif expr_type is NeqNode:
+    elif expr_type is NeqSym:
         return gen_neq_ir(ctx, lhs, rhs)
 
-    elif expr_type is AddNode:
+    elif expr_type is AddSym:
         return gen_add_ir(ctx, lhs, rhs)
-    elif expr_type is SubNode:
+    elif expr_type is SubSym:
         return gen_sub_ir(ctx, lhs, rhs)
-    elif expr_type is MulNode:
+    elif expr_type is MulSym:
         return gen_mul_ir(ctx, lhs, rhs)
-    elif expr_type is DivNode:
+    elif expr_type is DivSym:
         return gen_div_ir(ctx, lhs, rhs)
-    elif expr_type is ModNode:
+    elif expr_type is ModSym:
         return gen_mod_ir(ctx, lhs, rhs)
 
-    elif expr_type is BitAndNode:
+    elif expr_type is BitAndSym:
         return gen_bit_and_ir(ctx, lhs, rhs)
-    elif expr_type is BitOrNode:
+    elif expr_type is BitOrSym:
         return gen_bit_or_ir(ctx, lhs, rhs)
-    elif expr_type is BitXorNode:
+    elif expr_type is BitXorSym:
         return gen_bit_xor_ir(ctx, lhs, rhs)
-    elif expr_type is BitShlNode:
+    elif expr_type is BitShlSym:
         return gen_bit_shl_ir(ctx, lhs, rhs)
-    elif expr_type is BitShrNode:
+    elif expr_type is BitShrSym:
         return gen_bit_shr_ir(ctx, lhs, rhs)
 
-    elif expr_type is AssignNode:
+    elif expr_type is AssignSym:
         gen_assign_code(ctx, lhs, rhs)
         return lhs
 
-    elif expr_type is IndexNode:
+    elif expr_type is IndexSym:
         return gen_index_expr_ir(ctx, lhs, rhs)
 
-    elif expr_type is AsNode:
+    elif expr_type is AsSym:
         return gen_implicit_cast_ir(ctx, lhs, rhs)
 
-    elif expr_type is CastNode:
+    elif expr_type is CastSym:
         return gen_cast_ir(ctx, lhs, rhs)
 
     else:
@@ -138,27 +154,27 @@ def gen_unary_expr_ir(ctx, expr):
 
     expr_type = type(expr)
 
-    if expr_type is PtrNode:
+    if expr_type is PtrSym:
         return gen_ptr_expr_ir(ctx, operand)
-    elif expr_type is RefNode:
+    elif expr_type is RefSym:
         return gen_ref_expr_ir(ctx, operand)
 
-    elif expr_type is PreIncNode:
+    elif expr_type is PreIncSym:
         return gen_pre_inc_ir(ctx, operand)
-    elif expr_type is PostIncNode:
+    elif expr_type is PostIncSym:
         return gen_post_inc_ir(ctx, operand)
-    elif expr_type is PreDecNode:
+    elif expr_type is PreDecSym:
         return gen_pre_dec_ir(ctx, operand)
-    elif expr_type is PostDecNode:
+    elif expr_type is PostDecSym:
         return gen_post_dec_ir(ctx, operand)
 
-    elif expr_type is NegNode:
+    elif expr_type is NegSym:
         return gen_neg_ir(ctx, operand)
 
-    elif expr_type is BitNotNode:
+    elif expr_type is BitNotSym:
         return gen_bit_not_ir(ctx, operand)
 
-    elif expr_type is SizeofNode:
+    elif expr_type is SizeofSym:
         return gen_sizeof_ir(ctx, operand)
 
     else:

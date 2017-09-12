@@ -11,7 +11,7 @@ from ..exprs import (
     gen_sizeof_ir
 )
 
-def gen_try_statement_code(ctx, statement):
+def gen_try_code(ctx, statement):
     from .statements import gen_block_code
 
     lpad_block = ctx.builder.append_basic_block("lpad")
@@ -197,7 +197,7 @@ def gen_try_statement_code(ctx, statement):
         ctx.builder.branch(ctx.unreachable)
 
 
-def gen_throw_statement_code(ctx, statement):
+def gen_throw_code(ctx, statement):
     throw_value = gen_expr_ir(ctx, statement.expr)
     throw_value = gen_implicit_cast_ir(
         ctx, throw_value, get_concrete_type(throw_value.type)
