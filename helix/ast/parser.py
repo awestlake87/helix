@@ -156,7 +156,7 @@ def parse_statement(ctx):
         return parse_try(ctx)
 
     elif ctx.accept(Token.KW_THROW):
-        return ThrowStatementNode(parse_expr(ctx))
+        return ThrowNode(parse_expr(ctx))
 
     elif ctx.accept(Token.KW_BREAK):
         return BreakNode()
@@ -829,7 +829,8 @@ def parse_expr_prec1(ctx):
     elif ctx.accept(Token.KW_AUTO):
         return AutoTypeNode()
 
-    elif ctx.accept(Token.ATTR_ID):
+    elif ctx.accept('@'):
+        ctx.expect(Token.ID)
         return AttrNode(ctx.current.value)
 
     else:
@@ -853,6 +854,7 @@ def parse_fun(ctx):
     is_cfun = False
     is_vargs = False
     is_attr = False
+    is_mut = False
     param_types = [ ]
     param_ids = [ ]
 
@@ -864,11 +866,13 @@ def parse_fun(ctx):
 
     ret_type = parse_expr(ctx)
 
-    if ctx.accept(Token.ATTR_ID):
+    if ctx.accept('@'):
         is_attr = True
 
-    else:
-        ctx.expect(Token.ID)
+        if ctx.accept(Token.KW_MUT):
+            is_mut = True
+
+    ctx.expect(Token.ID)
 
     id = ctx.current.value
 
@@ -902,9 +906,10 @@ def parse_fun(ctx):
         id,
         param_ids,
         block,
-        is_cfun=is_cfun,
-        is_vargs=is_vargs,
-        is_attr=is_attr
+        is_cfun = is_cfun,
+        is_vargs = is_vargs,
+        is_attr = is_attr,
+        is_mut = is_mut
     )
 
 def parse_oper(ctx):
@@ -979,7 +984,8 @@ def parse_struct(ctx):
             else:
                 attr_type = parse_expr(ctx)
 
-                ctx.expect(Token.ATTR_ID)
+                ctx.expect('@')
+                ctx.expect(Token.ID)
                 attr_id = ctx.current.value
 
                 if attr_id and attr_id not in attrs:

@@ -4,6 +4,9 @@ from .cast_exprs import (
     gen_as_bit_ir, get_concrete_type, get_common_type, gen_implicit_cast_ir
 )
 
+def gen_mut_ir(ctx, operand):
+    return operand
+
 def gen_ternary_conditional_ir(ctx, expr):
     from .exprs import gen_expr_ir
 

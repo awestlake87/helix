@@ -10,6 +10,10 @@ class Todo(Exception):
         else:
             super().__init__("todo: {}".format(msg))
 
+class ValueIsNotMut(Exception):
+    def __init__(self):
+        super().__init__("value is not mutable")
+
 class NotApplicable(Exception):
     def __init__(self, msg=None):
         if msg == None:

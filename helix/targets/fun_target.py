@@ -1,8 +1,7 @@
 
 from ..err import Todo
-from ..sym import BangSym, VoidTypeSym
+from ..ast import BangNode, VoidTypeNode
 from ..ir import FunType, FunValue, PtrType, gen_static_expr_ir, gen_code
-from ..check import check_ownership
 
 from .target import Target
 
@@ -33,12 +32,12 @@ class FunProtoTarget(Target):
         ret_type = type(ret_node)
         ret_ir_type = None
 
-        if ret_type is BangSym:
+        if ret_type is BangNode:
             ret_ir_type = gen_static_expr_ir(
                 self.parent_scope,
                 self.type_node.ret_type.operand
             )
-        elif ret_type is VoidTypeSym:
+        elif ret_type is VoidTypeNode:
             ret_ir_type = gen_static_expr_ir(
                 self.parent_scope, ret_node
             )
@@ -123,7 +122,6 @@ class FunTarget(Target):
         self.fun_sym = fun_sym
 
     def build(self):
-        check_ownership(self.fun_sym.body)
         gen_code(
             self.proto_target.ir_value,
             self.scope,

@@ -6,40 +6,40 @@ from ..types import *
 def gen_static_expr_ir(scope, expr):
     expr_type = type(expr)
 
-    if expr_type is IntTypeSym:
+    if expr_type is IntTypeNode:
         return IntType(expr.num_bits, expr.is_signed)
 
-    elif expr_type is VoidTypeSym:
+    elif expr_type is VoidTypeNode:
         return VoidType()
 
-    elif expr_type is AutoTypeSym:
+    elif expr_type is AutoTypeNode:
         return AutoType()
 
-    elif expr_type is AutoIntSym:
+    elif expr_type is AutoIntNode:
         return IntValue(AutoIntType(), int(str(expr.value), expr.radix))
 
-    elif expr_type is IntSym:
+    elif expr_type is IntNode:
         return IntValue(
             IntType(expr.num_bits, expr.is_signed),
             int(str(expr.value), expr.radix)
         )
 
-    elif expr_type is NilSym:
+    elif expr_type is NilNode:
         return NilValue(AutoPtrType())
 
-    elif expr_type is SymbolSym:
+    elif expr_type is SymbolNode:
         return scope.resolve(expr.id).ir_value
 
-    elif expr_type is ArrayTypeSym:
+    elif expr_type is ArrayTypeNode:
         return gen_static_array_type_ir(scope, expr.length, expr.type)
 
-    elif expr_type is EmbedCallSym:
+    elif expr_type is EmbedCallNode:
         return gen_static_embed_call_ir(scope, expr)
 
-    elif expr_type is CallSym:
+    elif expr_type is CallNode:
         return gen_static_call_ir(scope, expr)
 
-    elif issubclass(expr_type, UnaryExprSym):
+    elif issubclass(expr_type, UnaryExprNode):
         return gen_static_unary_expr_ir(scope, expr)
 
     else:
@@ -50,7 +50,7 @@ def gen_static_unary_expr_ir(scope, expr):
     expr_type = type(expr)
     operand = gen_static_expr_ir(scope, expr.operand)
 
-    if expr_type is PtrSym:
+    if expr_type is PtrNode:
         return gen_static_ptr_expr_ir(scope, operand)
 
     else:

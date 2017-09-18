@@ -3,6 +3,7 @@ import unittest
 from .utils import run_test
 
 class TestGlobals(unittest.TestCase):
+    @unittest.SkipTest
     def test_global(self):
         self.assertEqual(
             0,
@@ -27,6 +28,7 @@ class TestGlobals(unittest.TestCase):
             )
         )
 
+    @unittest.SkipTest
     def test_global_struct(self):
         self.assertEqual(
             0,

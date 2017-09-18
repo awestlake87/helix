@@ -8,9 +8,9 @@ class BitwiseExprTests(unittest.TestCase):
             0,
             run_test(
                 """
-                a: 0b1010
-                b: 0b1111
-                c: 0b0101
+                mut a: 0b1010
+                mut b: 0b1111
+                mut c: 0b0101
 
                 if a & 0b0101 != 0b0000
                     return 1
@@ -47,9 +47,9 @@ class BitwiseExprTests(unittest.TestCase):
             0,
             run_test(
                 """
-                a: 0b1010
-                b: 0b1111
-                c: 0b0101
+                mut a: 0b1010
+                mut b: 0b1111
+                mut c: 0b0101
 
                 if a ^ 0b0101 != 0b1111
                     return 1
@@ -86,9 +86,9 @@ class BitwiseExprTests(unittest.TestCase):
             0,
             run_test(
                 """
-                a: 0b1010
-                b: 0b1111
-                c: 0b0101
+                mut a: 0b1010
+                mut b: 0b1111
+                mut c: 0b0101
 
                 if a | 0b0101 != 0b1111
                     return 1
@@ -125,9 +125,9 @@ class BitwiseExprTests(unittest.TestCase):
             0,
             run_test(
                 """
-                a: byte(0b10101010)
-                b: byte(0b00001111)
-                c: byte(0b01010101)
+                mut a: byte(0b10101010)
+                mut b: byte(0b00001111)
+                mut c: byte(0b01010101)
 
                 if ~a != 0b01010101
                     return 1
@@ -148,9 +148,9 @@ class BitwiseExprTests(unittest.TestCase):
             0,
             run_test(
                 """
-                a: byte(0b10101010)
-                b: byte(0b00001111)
-                c: byte(0b01010101)
+                mut a: byte(0b10101010)
+                mut b: byte(0b00001111)
+                mut c: byte(0b01010101)
 
                 if a >> 4 != 0b11111010
                     return 1
@@ -189,9 +189,9 @@ class BitwiseExprTests(unittest.TestCase):
             0,
             run_test(
                 """
-                a: byte(0b10101010)
-                b: byte(0b00001111)
-                c: byte(0b01010101)
+                mut a: byte(0b10101010)
+                mut b: byte(0b00001111)
+                mut c: byte(0b01010101)
 
                 if a << 4 != 0b10100000
                     return 1

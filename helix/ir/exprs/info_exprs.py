@@ -62,7 +62,7 @@ def gen_offsetof_ir(ctx, expr):
     lhs = gen_expr_ir(ctx, expr.lhs)
 
     if type(lhs) is StructType:
-        if type(expr.rhs) is AttrSym:
+        if type(expr.rhs) is AttrNode:
             symbol = lhs.get_attr_symbol(expr.rhs.id)
 
             if type(symbol) is DataAttrSym:

@@ -1,6 +1,5 @@
 
 from ...err import Todo
-from ...sym import BangSym, VoidTypeSym
 
 from ..scope import Scope
 from ..manglers import mangle_name
@@ -59,7 +58,9 @@ class FunSym:
         return self.proto_target.ir_value
 
 class AttrFunSym:
-    def __init__(self, unit, struct, id, ast, parent_scope):
+    def __init__(
+        self, unit, struct, id, ast, parent_scope, is_mut = False
+    ):
         from ...targets import AttrFunProtoTarget, FunTarget
 
         self.unit = unit
@@ -69,10 +70,14 @@ class AttrFunSym:
         self.parent_scope = parent_scope
         self.scope = Scope(parent_scope)
 
+        self.is_mut = is_mut
+
         if self.ast.is_cfun:
             self.absolute_id = self.ast.id
         else:
-            self.absolute_id = mangle_name([ unit.id, struct.id, self.id ])
+            self.absolute_id = mangle_name(
+                [ unit.id, struct.id, self.id ]
+            )
 
         self.proto_target = AttrFunProtoTarget(
             self.unit,

@@ -138,8 +138,6 @@ def gen_try_code(ctx, statement):
 
             ctx.builder.position_at_start(catch_block)
 
-            assert clause.scope is not None
-
             e_value = ctx.builder.extract_value(lpad, 0)
 
             e_ptr = ctx.builder.call(
@@ -160,7 +158,7 @@ def gen_try_code(ctx, statement):
             catch_control_path.push_cleanup(create_cleanup_block)
 
             with ctx.use_control_path(catch_control_path):
-                with ctx.use_scope(clause.scope):
+                with ctx.use_scope(ctx.get_scope(clause)):
                     gen_block_code(ctx, clause.block)
 
             if not catch_control_path.is_terminated:

@@ -23,9 +23,9 @@ class LoopTests(unittest.TestCase):
             9,
             run_test(
                 """
-                val: 0
+                mut val: 0
 
-                for i: 0 while i < 10
+                for mut i: 0 while i < 10
                     val = i
                 then i++
 
@@ -39,7 +39,7 @@ class LoopTests(unittest.TestCase):
             100,
             run_test(
                 """
-                i: 1000
+                mut i: 1000
 
                 while i != 100
                     --i
@@ -54,7 +54,7 @@ class LoopTests(unittest.TestCase):
             100,
             run_test(
                 """
-                i: 0
+                mut i: 0
 
                 loop
                     ++i
@@ -144,7 +144,7 @@ class LoopTests(unittest.TestCase):
             0,
             run_test(
             """
-            n: 0
+            mut n: 0
 
             while n < 12
                 if n == 7
@@ -167,7 +167,7 @@ class LoopTests(unittest.TestCase):
 
 
             for n = 0 while n < 10
-                for i: 0
+                for mut i: 0
                     if i == 10
                         break
                 then i++

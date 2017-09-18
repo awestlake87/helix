@@ -17,7 +17,7 @@ class DepTests(unittest.TestCase):
 
                     ladeeda: Lalala()
 
-                    blargh: Blargh()
+                    mut blargh: Blargh()
                     blargh.n = 456
 
                     return b(blargh)

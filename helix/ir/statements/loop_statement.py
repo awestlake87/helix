@@ -4,12 +4,10 @@ from ..exprs import gen_expr_ir, gen_as_bit_ir
 def gen_loop_code(ctx, statement):
     from .statements import gen_block_code
 
-    assert statement.scope is not None
-
     control_path = ctx.control_path.fork()
 
     with ctx.use_control_path(control_path):
-        with ctx.use_scope(statement.scope):
+        with ctx.use_scope(ctx.get_scope(statement)):
             if statement.for_clause is not None:
                 gen_expr_ir(ctx, statement.for_clause)
 
@@ -66,13 +64,13 @@ def gen_loop_code(ctx, statement):
             ctx.builder.position_at_start(loop_exit)
 
 
-def gen_break_statement_code(ctx, _):
+def gen_break_code(ctx, _):
     if ctx.loop_context is None:
         raise Todo()
 
     ctx.builder.branch(ctx.loop_context.loop_exit)
 
-def gen_continue_statement_code(ctx, _):
+def gen_continue_code(ctx, _):
     if ctx.loop_context is None:
         raise Todo()
 

@@ -20,7 +20,7 @@ class ConditionTests(unittest.TestCase):
                 if false and false
                     return 3
 
-                a: 123
+                mut a: 123
 
                 if false and a = 34
                     return 4
@@ -77,7 +77,7 @@ class ConditionTests(unittest.TestCase):
                 if false or false
                     return 1
 
-                a: 123
+                mut a: 123
 
                 if false or a = 34
                     if a == 34

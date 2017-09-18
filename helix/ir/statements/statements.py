@@ -119,6 +119,9 @@ def gen_code(fun, scope, ast):
 
             self.control_path = ControlPath()
 
+        def get_scope(self, ast_node):
+            return self.fun.unit.get_scope(ast_node)
+
         @property
         def unreachable(self):
             if self._unreachable is None:
@@ -224,7 +227,8 @@ def gen_code(fun, scope, ast):
         ctx.instance = LlvmRef(
             ctx,
             ctx.fun.type.param_types[0].pointee,
-            ctx.fun.get_llvm_value().args[0]
+            ctx.fun.get_llvm_value().args[0],
+            is_mut = ast.is_mut
         )
 
         params = zip(
@@ -244,73 +248,56 @@ def gen_code(fun, scope, ast):
     for arg, param_type, param_id in params:
         value = StackValue(ctx, param_type)
 
-        gen_assign_code(ctx, value, LlvmValue(param_type, arg))
+        gen_assign_code(ctx, value, LlvmValue(param_type, arg), is_init = True)
 
         ctx.scope.resolve(param_id).ir_value = value
 
     gen_block_code(ctx, ast.body)
 
 def gen_block_code(ctx, block):
-    assert block.scope is not None
-
     control_path = ctx.control_path.fork()
 
     with ctx.use_control_path(control_path):
-        with ctx.use_scope(block.scope):
+        with ctx.use_scope(ctx.get_scope(block)):
             for statement in block.statements:
                 gen_statement_code(ctx, statement)
 
 
 def gen_statement_code(ctx, statement):
-    from ...sym import (
-        ReturnSym,
-        IfSym,
-        LoopSym,
-        SwitchSym,
-        TrySym,
-        ThrowSym,
-        BreakSym,
-        ContinueSym,
-        FunSym,
-        StructSym,
-        ExprSym,
-        BlockSym
-    )
-
     statement_type = type(statement)
 
-    if statement_type is ReturnSym:
+    if statement_type is ReturnNode:
         gen_return_code(ctx, statement)
 
-    elif statement_type is IfSym:
+    elif statement_type is IfNode:
         gen_if_code(ctx, statement)
 
-    elif statement_type is LoopSym:
+    elif statement_type is LoopNode:
         gen_loop_code(ctx, statement)
 
-    elif statement_type is SwitchSym:
+    elif statement_type is SwitchNode:
         gen_switch_code(ctx, statement)
 
-    elif statement_type is TrySym:
+    elif statement_type is TryNode:
         gen_try_code(ctx, statement)
 
-    elif statement_type is ThrowSym:
+    elif statement_type is ThrowNode:
         gen_throw_code(ctx, statement)
 
-    elif statement_type is BreakSym:
+    elif statement_type is BreakNode:
         gen_break_code(ctx, statement)
 
-    elif statement_type is ContinueSym:
+    elif statement_type is ContinueNode:
         gen_continue_code(ctx, statement)
 
-    elif statement_type is FunSym or statement_type is StructSym:
+    elif statement_type is FunNode or statement_type is StructNode:
         # only interested in generating the current fun
         pass
 
-    elif issubclass(statement_type, ExprSym):
+    elif issubclass(statement_type, ExprNode):
         gen_expr_ir(ctx, statement)
 
-    elif statement_type is BlockSym:
+    elif statement_type is BlockNode:
         gen_block_code(ctx, statement)
 
     else:

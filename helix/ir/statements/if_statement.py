@@ -3,12 +3,10 @@ from ..exprs import gen_expr_ir, gen_as_bit_ir
 def gen_if_code(ctx, statement):
     from .statements import gen_block_code
 
-    assert statement.scope is not None
-
     if_control_path = ctx.control_path.fork()
 
     with ctx.use_control_path(if_control_path):
-        with ctx.use_scope(statement.scope):
+        with ctx.use_scope(ctx.get_scope(statement)):
             assert len(statement.if_branches) >= 1
 
             end_if = ctx.builder.append_basic_block("end_if")

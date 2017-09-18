@@ -13,6 +13,8 @@ class UnitSym:
         self.ast = ast
         self.scope = Scope()
 
+        self.ast_scopes = { }
+
         self.id = id
         self.ir_value = UnitValue(self.id)
 
@@ -21,6 +23,20 @@ class UnitSym:
         )
 
         self._llvm_module = None
+
+    def set_scope(self, ast_node, scope):
+        if not ast_node in self.ast_scopes:
+            self.ast_scopes[ast_node] = scope
+
+        else:
+            raise Todo("scope already exists for {}".format(ast_node))
+
+    def get_scope(self, ast_node):
+        if ast_node in self.ast_scopes:
+            return self.ast_scopes[ast_node]
+
+        else:
+            raise Todo("unable to get scope for {}".format(ast_node))
 
     def _on_llvm_module(self, module):
         self._llvm_module = module

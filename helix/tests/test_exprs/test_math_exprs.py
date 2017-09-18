@@ -8,9 +8,9 @@ class MathExprTests(unittest.TestCase):
             0,
             run_test(
                 """
-                a: 0
+                mut a: 0
 
-                b: a++
+                mut b: a++
 
                 if a != 1
                     return 1
@@ -65,8 +65,8 @@ class MathExprTests(unittest.TestCase):
                 if 2 + -3 != -1
                     return 3
 
-                a: 4
-                b: 4
+                mut a: 4
+                mut b: 4
 
                 if a + b != 8
                     return 4
@@ -101,8 +101,8 @@ class MathExprTests(unittest.TestCase):
                 if 2 - -3 != 5
                     return 3
 
-                a: 4
-                b: 4
+                mut a: 4
+                mut b: 4
 
                 if a - b != 0
                     return 4
@@ -137,8 +137,8 @@ class MathExprTests(unittest.TestCase):
                 if 2 * -3 != -6
                     return 3
 
-                a: 4
-                b: 4
+                mut a: 4
+                mut b: 4
 
                 if a * b != 16
                     return 4
@@ -173,8 +173,8 @@ class MathExprTests(unittest.TestCase):
                 if 6 / -3 != -2
                     return 3
 
-                a: 21
-                b: 2
+                mut a: 21
+                mut b: 2
 
                 if a / b != 10
                     return 4
@@ -209,8 +209,8 @@ class MathExprTests(unittest.TestCase):
                 if 7 % -3 != 1
                     return 3
 
-                a: 21
-                b: 2
+                mut a: 21
+                mut b: 2
 
                 if a % b != 1
                     return 4

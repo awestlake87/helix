@@ -55,6 +55,8 @@ class IntType(Type):
 
 class VoidType(Type):
     def __init__(self):
+        super().__init__()
+
         self._llvm_value = ir.VoidType()
 
     def get_llvm_value(self):
@@ -140,10 +142,13 @@ class ArrayType(Type):
 
 
 class IrValue:
-    pass
+    def __init__(self, is_mut = False):
+        self.is_mut = is_mut
 
 class LlvmValue(IrValue):
     def __init__(self, ir_type, llvm_value):
+        super().__init__()
+
         self.type = ir_type
         self._llvm_value = llvm_value
 
@@ -152,9 +157,12 @@ class LlvmValue(IrValue):
         return self._llvm_value
 
 class LlvmRef(IrValue):
-    def __init__(self, ctx, ir_type, llvm_ptr):
+    def __init__(self, ctx, ir_type, llvm_ptr, is_mut = False):
+        super().__init__(is_mut)
+
         self.ctx = ctx
         self.type = ir_type
+
         self._llvm_ptr = llvm_ptr
 
     def get_llvm_ptr(self):
@@ -165,7 +173,17 @@ class LlvmRef(IrValue):
         return self.ctx.builder.load(self.get_llvm_ptr())
 
 class GlobalValue(IrValue):
-    def __init__(self, unit, id, ir_type, ir_initializer, is_const=False):
+    def __init__(
+        self,
+        unit,
+        id,
+        ir_type,
+        ir_initializer,
+        is_const = False,
+        is_mut = False
+    ):
+        super().__init__(is_mut)
+        
         self.unit = unit
         self.id = id
         self.type = ir_type
@@ -213,10 +231,13 @@ class BoundAttrFunValue(LlvmValue):
         super().__init__(attr_fun.type, attr_fun.get_llvm_value())
 
 class StackValue(LlvmRef):
-    def __init__(self, ctx, ir_type):
+    def __init__(self, ctx, ir_type, is_mut = False):
         with ctx.builder.goto_block(ctx.entry):
             super().__init__(
-                ctx, ir_type, ctx.builder.alloca(ir_type.get_llvm_value())
+                ctx,
+                ir_type,
+                ctx.builder.alloca(ir_type.get_llvm_value()),
+                is_mut = is_mut
             )
 
 class IntValue(LlvmValue):

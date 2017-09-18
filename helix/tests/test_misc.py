@@ -118,7 +118,7 @@ class MiscTests(unittest.TestCase):
             0,
             run_test(
                 """
-                value: [4]int()
+                mut value: [4]int()
 
                 value[0] = 123
                 value[1] = 321
@@ -134,7 +134,7 @@ class MiscTests(unittest.TestCase):
                 if value[3] != 1
                     return 4
 
-                for i: 0 while i < 4
+                for mut i: 0 while i < 4
                     value[i] = 12
                 then i++
 
@@ -157,13 +157,13 @@ class MiscTests(unittest.TestCase):
             0,
             run_test(
                 """
-                array: [3]int()
+                mut array: [3]int()
 
                 array[0] = 54
                 array[1] = 43
                 array[2] = 98
 
-                ptr: array as *int
+                mut ptr: array as *int
 
                 if *(ptr + 0) != 54
                     return 1
@@ -276,41 +276,6 @@ class MiscTests(unittest.TestCase):
 
                 if sizeof blargh.a != 4
                     return 4
-
-                return 0
-                """
-            )
-        )
-
-    def test_void_fun(self):
-        self.assertEqual(
-            0,
-            run_test(
-                """
-                fun void a_void_fun(*int! a, int! b)
-                    if b == 3
-                        *a = b
-                        return
-                    else
-                        *a = 1
-
-                    *a = 2
-                    return
-
-                a: 0
-                b: 3
-
-                a_void_fun(&a, b)
-
-                if a != 3
-                    return 1
-
-                a_void_fun(&a, 4)
-
-                if a == 1
-                    return 2
-                elif a != 2
-                    return 3
 
                 return 0
                 """

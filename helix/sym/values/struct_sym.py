@@ -32,6 +32,8 @@ class DataAttrSym:
 
 class StructSym:
     def __init__(self, unit, parent_scope, ast):
+        from ...targets import StructTarget
+
         self.unit = unit
         self.parent_scope = parent_scope
         self.scope = Scope(parent_scope)
@@ -60,7 +62,12 @@ class StructSym:
                     self.attrs.append((
                         attr_id,
                         AttrFunSym(
-                            unit, self, attr_node.id, attr_node, self.scope
+                            unit,
+                            self,
+                            attr_node.id,
+                            attr_node,
+                            self.scope,
+                            is_mut = attr_node.is_mut
                         )
                     ))
 

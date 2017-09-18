@@ -3,7 +3,7 @@ from ..types import *
 from .cast_exprs import gen_implicit_cast_ir
 from .static_exprs import gen_static_ptr_expr_ir
 
-def gen_ptr_expr_ir(ctx, value):
+def gen_ptr_ir(ctx, value):
     if issubclass(type(value), IrValue):
         if type(value.type) is PtrType:
             return LlvmRef(
@@ -17,7 +17,7 @@ def gen_ptr_expr_ir(ctx, value):
     else:
         return gen_static_ptr_expr_ir(ctx.scope, value)
 
-def gen_ref_expr_ir(ctx, value):
+def gen_ref_ir(ctx, value):
     if issubclass(type(value), LlvmRef):
         return LlvmValue(PtrType(value.type), value.get_llvm_ptr())
 
@@ -38,7 +38,8 @@ def gen_index_expr_ir(ctx, lhs, rhs):
                             ctx, rhs, lhs.type.elem_type
                         ).get_llvm_value()
                     ]
-                )
+                ),
+                is_mut = lhs.is_mut
             )
 
         else:

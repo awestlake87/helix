@@ -131,9 +131,6 @@ class Lexer:
         elif c >= '0' and c <= '9':
             return self._scan_num()
 
-        elif c == '@':
-            return self._scan_attribute()
-
         elif c == '"':
             return self._scan_string()
 
@@ -232,64 +229,6 @@ class Lexer:
             )
 
         return Token(Token.LT_CHAR, value)
-
-    def _scan_attribute(self):
-        prefix = self._toss()
-        assert prefix == '@'
-
-        def end_id():
-            c = self._peek()
-            while (
-                c >= 'a' and c <= 'z' or
-                c >= 'A' and c <= 'Z' or
-                c >= '0' and c <= '9' or
-                c == '_'
-            ):
-                self._take()
-                c = self._peek()
-
-            return Token(Token.ATTR_ID, self._token)
-
-        def end_kw(id):
-            c = self._peek()
-            if (
-                c >= 'a' and c <= 'z' or
-                c >= 'A' and c <= 'Z' or
-                c >= '0' and c <= '9' or
-                c == '_'
-            ):
-                return end_id()
-
-            else:
-                return Token(id)
-
-
-        accept = self._accept
-
-        c = self._peek()
-
-        if accept('c'):
-            if accept('o'):
-                if accept('n'):
-                    if accept('s'):
-                        if accept('t'):
-                            if accept('r'):
-                                if accept('u'):
-                                    if accept('c'):
-                                        if accept('t'):
-                                            return end_kw(Token.OP_CONSTRUCT)
-        elif accept('d'):
-            if accept('e'):
-                if accept('s'):
-                    if accept('t'):
-                        if accept('r'):
-                            if accept('u'):
-                                if accept('c'):
-                                    if accept('t'):
-                                        return end_kw(Token.OP_DESTRUCT)
-
-
-        return end_id()
 
     def _scan_num(self):
         def _accept_dec_digits():
@@ -460,6 +399,9 @@ class Lexer:
                     return Token(Token.OP_SHR)
             else:
                 return Token('>')
+
+        elif _toss('@'):
+            return Token('@')
 
         else:
             raise UnexpectedChar(self._peek())

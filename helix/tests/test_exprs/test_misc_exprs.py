@@ -60,7 +60,7 @@ class MiscExprTests(unittest.TestCase):
             0,
             run_test(
                 """
-                a: 432 if true else 321
+                mut a: 432 if true else 321
 
                 if a == 321
                     return 1
@@ -89,7 +89,7 @@ class MiscExprTests(unittest.TestCase):
                     Lard @_lard
 
 
-                blargh: Blargh()
+                mut blargh: Blargh()
 
                 blargh.an_attr = 1
                 blargh._b123_b = 2

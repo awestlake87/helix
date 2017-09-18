@@ -3,7 +3,6 @@ import unittest
 from .utils import run_test
 
 class TestStructs(unittest.TestCase):
-
     def test_attr_funs(self):
         self.assertEqual(
             0,
@@ -12,11 +11,11 @@ class TestStructs(unittest.TestCase):
                 struct Object
                     int @a
 
-                    fun void @set_a(int! val)
+                    fun void @mut set_a(int! val)
                         @a = val
                         return
 
-                obj: Object()
+                mut obj: Object()
 
                 obj.a = 4
                 obj.set_a(12)

@@ -6,12 +6,10 @@ from ..exprs import gen_implicit_cast_ir, gen_expr_ir, get_concrete_type
 def gen_switch_code(ctx, statement):
     from .statements import gen_block_code
 
-    assert statement.scope is not None
-
     control_path = ctx.control_path.fork()
 
     with ctx.use_control_path(control_path):
-        with ctx.use_scope(statement.scope):
+        with ctx.use_scope(ctx.get_scope(statement)):
             value = gen_expr_ir(ctx, statement.value)
             concrete_type = get_concrete_type(value.type)
 

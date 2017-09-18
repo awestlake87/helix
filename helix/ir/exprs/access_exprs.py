@@ -1,12 +1,13 @@
 from ..types import *
 
+from ...ast import *
+
 def gen_dot_ir(ctx, expr):
-    from ...sym import DataAttrSym, AttrFunSym, SymbolSym
     from .exprs import gen_expr_ir
 
     lhs = gen_expr_ir(ctx, expr.lhs)
 
-    if type(expr.rhs) is SymbolSym:
+    if type(expr.rhs) is SymbolNode:
         return gen_access_ir(ctx, lhs, expr.rhs.id)
 
     else:
@@ -26,7 +27,8 @@ def gen_access_ir(ctx, lhs, rhs):
                     ctx.builder.gep(
                         lhs.get_llvm_ptr(),
                         [ ir.IntType(32)(0), ir.IntType(32)(symbol.index) ]
-                    )
+                    ),
+                    is_mut = lhs.is_mut
                 )
 
             elif type(symbol) is AttrFunSym:
